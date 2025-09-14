@@ -4,31 +4,91 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Imarika — Build Wealth Steady</title>
-  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-800">
+
   <!-- Navbar -->
-  <header class="navbar">
-    <h1>Imarika</h1>
+  <header class="bg-yellow-500 text-white shadow-md">
+    <div class="max-w-6xl mx-auto flex justify-between items-center p-4">
+      <h1 class="text-2xl font-bold">Imarika</h1>
+      <nav>
+        <ul class="flex gap-6 text-lg">
+          <li><a href="#about" class="hover:underline">About</a></li>
+          <li><a href="#services" class="hover:underline">Services</a></li>
+          <li><a href="#contact" class="hover:underline">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
   </header>
 
   <!-- Hero -->
-  <section class="hero">
-    <h2>Welcome to Imarika</h2>
-    <p>Build wealth the steady way. Transparent fees, flexible withdrawals, and human support.</p>
-    <a href="mailto:sales@imarika.net" class="btn">Contact Us</a>
+  <section class="bg-yellow-400 text-center text-white py-20">
+    <h2 class="text-4xl md:text-5xl font-bold mb-4">Build Wealth the Steady Way</h2>
+    <p class="text-lg mb-6 max-w-2xl mx-auto">
+      Transparent fees, flexible withdrawals, and dedicated human support.
+    </p>
+    <a href="#contact" class="bg-white text-yellow-600 font-semibold px-6 py-3 rounded-md shadow hover:bg-gray-100">
+      Get Started
+    </a>
+  </section>
+
+  <!-- About -->
+  <section id="about" class="max-w-5xl mx-auto py-16 px-6">
+    <h3 class="text-3xl font-bold text-center mb-8">About Us</h3>
+    <p class="text-lg text-center">
+      Imarika is your trusted partner in wealth-building. We believe in consistency,
+      transparency, and empowering our clients to grow sustainably with tools and support that truly make a difference.
+    </p>
+  </section>
+
+  <!-- Services -->
+  <section id="services" class="bg-gray-100 py-16 px-6">
+    <h3 class="text-3xl font-bold text-center mb-12">Our Services</h3>
+    <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg">
+        <h4 class="text-xl font-semibold mb-3">Investment Plans</h4>
+        <p>Steady, secure, and transparent plans tailored to your needs.</p>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg">
+        <h4 class="text-xl font-semibold mb-3">Consultation</h4>
+        <p>Expert guidance on wealth management and financial growth.</p>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg">
+        <h4 class="text-xl font-semibold mb-3">Customer Support</h4>
+        <p>We’re here to assist you at every step of your investment journey.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" class="max-w-4xl mx-auto py-16 px-6">
+    <h3 class="text-3xl font-bold text-center mb-8">Get in Touch</h3>
+    <p class="text-center mb-4">Email us at 
+      <a href="mailto:sales@imarika.net" class="text-yellow-600 font-semibold">sales@imarika.net</a>
+    </p>
+    <p class="text-center mb-4">Or reach us directly via WhatsApp.</p>
+    <div class="flex justify-center">
+      <a href="https://wa.me/254701017246" target="_blank" rel="noopener"
+         class="bg-green-500 text-white px-6 py-3 rounded-md shadow hover:bg-green-600">
+        💬 Chat on WhatsApp
+      </a>
+    </div>
   </section>
 
   <!-- Footer -->
-  <footer>
-    <p>&copy; 2025 Imarika — imarika.net</p>
+  <footer class="bg-gray-900 text-gray-300 text-center py-6">
+    <p>&copy; <span id="year"></span> Imarika — imarika.net</p>
   </footer>
 
-  <!-- WhatsApp Floating Button -->
-  <a href="https://wa.me/254701017246" class="whatsapp-float" target="_blank" rel="noopener">
+  <!-- Floating WhatsApp Button -->
+  <a href="https://wa.me/254701017246" target="_blank" rel="noopener"
+     class="fixed bottom-6 right-6 bg-green-500 text-white w-14 h-14 flex items-center justify-center rounded-full shadow-lg hover:bg-green-600">
     💬
   </a>
 
-  <script src="script.js"></script>
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
