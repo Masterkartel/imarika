@@ -160,8 +160,9 @@
           const $ = (id) => document.getElementById(id);
           $("stdCalc")?.addEventListener("click", () => {
             let amt = Number($("stdAmt").value || 0);
-            if (amt < 1000) amt = 1000;
-            if (amt > 70000) amt = 70000;
+            let note = "";
+            if (amt < 1000) { amt = 1000; note = "Adjusted to minimum (KES 1,000)."; }
+            if (amt > 70000) { amt = 70000; note = "Adjusted to maximum (KES 70,000)."; }
             const earnings = amt * 0.30; // 30% in 24h
             const total = amt + earnings;
             const out = $("stdOut");
@@ -171,6 +172,7 @@
               <div><strong>Return rate:</strong> 30% in 24 hours</div>
               <div><strong>Projected earnings:</strong> KES ${earnings.toFixed(2).toLocaleString()}</div>
               <div><strong>Projected total after 24 hours:</strong> KES ${total.toFixed(2).toLocaleString()}</div>
+              ${note ? `<div class="mt-2 text-red-600 text-xs">Warning: ${note}</div>` : ""}
             `;
           });
         })();
@@ -232,8 +234,9 @@
           const $ = (id) => document.getElementById(id);
           $("goldCalc")?.addEventListener("click", () => {
             let amt = Number($("goldAmt").value || 0);
-            if (amt < 70001) amt = 70001;
-            if (amt > 140000) amt = 140000;
+            let note = "";
+            if (amt < 70001) { amt = 70001; note = "Adjusted to minimum (KES 70,001)."; }
+            if (amt > 140000) { amt = 140000; note = "Adjusted to maximum (KES 140,000)."; }
             const earnings = amt * 0.50; // 50% in 24h
             const total = amt + earnings;
             const out = $("goldOut");
@@ -243,6 +246,7 @@
               <div><strong>Return rate:</strong> 50% in 24 hours</div>
               <div><strong>Projected earnings:</strong> KES ${earnings.toFixed(2).toLocaleString()}</div>
               <div><strong>Projected total after 24 hours:</strong> KES ${total.toFixed(2).toLocaleString()}</div>
+              ${note ? `<div class="mt-2 text-red-600 text-xs">Warning: ${note}</div>` : ""}
             `;
           });
         })();
@@ -304,7 +308,8 @@
           const $ = (id) => document.getElementById(id);
           $("platCalc")?.addEventListener("click", () => {
             let amt = Number($("platAmt").value || 0);
-            if (amt < 140000) amt = 140000;
+            let note = "";
+            if (amt < 140000) { amt = 140000; note = "Adjusted to minimum (KES 140,000)."; }
             const earnings = amt * 0.70; // 70% in 24h
             const total = amt + earnings;
             const out = $("platOut");
@@ -314,6 +319,7 @@
               <div><strong>Return rate:</strong> 70% in 24 hours</div>
               <div><strong>Projected earnings:</strong> KES ${earnings.toFixed(2).toLocaleString()}</div>
               <div><strong>Projected total after 24 hours:</strong> KES ${total.toFixed(2).toLocaleString()}</div>
+              ${note ? `<div class="mt-2 text-red-600 text-xs">Warning: ${note}</div>` : ""}
             `;
           });
         })();
@@ -352,40 +358,43 @@
         <div class="grid md:grid-cols-3 gap-6 mt-8 text-sm">
           <div class="rounded-2xl border bg-gray-50 p-5 shadow-sm">
             <h3 class="font-semibold text-lg">Example — Starter</h3>
-            <p class="mt-2 text-gray-700">Borrow <strong>KES 150,000</strong> for <strong>6 months</strong> at <strong>10% p.m.</strong></p>
+            <p class="mt-2 text-gray-700">Borrow <strong>KES 200,000</strong> for <strong>3 months</strong> at <strong>10% p.m.</strong></p>
             <ul class="mt-2 text-gray-700 space-y-1">
-              <li>• Total interest = 150,000 × 10% × 6 = <strong>90,000</strong></li>
-              <li>• Total repay = 150,000 + 90,000 = <strong>240,000</strong></li>
-              <li>• Monthly ≈ 240,000 ÷ 6 = <strong>40,000</strong></li>
+              <li>• Total interest = 200,000 × 10% × 3 = <strong>60,000</strong></li>
+              <li>• Total repay = 200,000 + 60,000 = <strong>260,000</strong></li>
+              <li>• Monthly ≈ 260,000 ÷ 3 = <strong>86,666.67</strong></li>
             </ul>
           </div>
           <div class="rounded-2xl border bg-gray-50 p-5 shadow-sm">
             <h3 class="font-semibold text-lg">Example — Business Boost</h3>
-            <p class="mt-2 text-gray-700">Borrow <strong>KES 300,000</strong> for <strong>6 months</strong> at <strong>5% p.m.</strong></p>
+            <p class="mt-2 text-gray-700">Borrow <strong>KES 500,000</strong> for <strong>6 months</strong> at <strong>5% p.m.</strong></p>
             <ul class="mt-2 text-gray-700 space-y-1">
-              <li>• Total interest = 300,000 × 5% × 6 = <strong>90,000</strong></li>
-              <li>• Total repay = 300,000 + 90,000 = <strong>390,000</strong></li>
-              <li>• Monthly ≈ 390,000 ÷ 6 = <strong>65,000</strong></li>
+              <li>• Total interest = 500,000 × 5% × 6 = <strong>150,000</strong></li>
+              <li>• Total repay = 500,000 + 150,000 = <strong>650,000</strong></li>
+              <li>• Monthly ≈ 650,000 ÷ 6 = <strong>108,333.33</strong></li>
             </ul>
           </div>
           <div class="rounded-2xl border bg-gray-50 p-5 shadow-sm">
             <h3 class="font-semibold text-lg">Example — Premium Advance</h3>
-            <p class="mt-2 text-gray-700">Borrow <strong>KES 500,000</strong> for <strong>6 months</strong> at <strong>0% p.m.</strong></p>
+            <p class="mt-2 text-gray-700">Borrow <strong>KES 1,500,000</strong> for <strong>12 months</strong> at <strong>0% p.m.</strong></p>
             <ul class="mt-2 text-gray-700 space-y-1">
               <li>• Total interest = <strong>0</strong></li>
-              <li>• Total repay = <strong>500,000</strong></li>
-              <li>• Monthly ≈ 500,000 ÷ 6 = <strong>83,333.33</strong></li>
+              <li>• Total repay = <strong>1,500,000</strong></li>
+              <li>• Monthly ≈ 1,500,000 ÷ 12 = <strong>125,000</strong></li>
             </ul>
           </div>
         </div>
 
-        <!-- Eligibility calculator (min invested 50,000) -->
+        <!-- Eligibility calculator (min invest 50k; max invest 1.5M) -->
         <div class="rounded-2xl border bg-white p-6 shadow-sm mt-10 max-w-3xl mx-auto">
           <h3 class="text-xl font-semibold text-center">Loan eligibility calculator</h3>
-          <p class="text-center text-gray-600 text-sm">Eligibility is 3× your invested amount, with a minimum loan of KES 150,000.</p>
+          <p class="text-center text-gray-600 text-sm">
+            Eligibility is <strong>3× your invested amount</strong>, min loan <strong>KES 150,000</strong>, max loan <strong>KES 4,500,000</strong>.<br>
+            Enter investment between <strong>KES 50,000</strong> and <strong>KES 1,500,000</strong>.
+          </p>
           <form id="loanForm" class="grid md:grid-cols-3 gap-3 mt-4 text-sm">
-            <label class="md:col-span-2">Invested amount (KES) — min 50,000
-              <input id="loanInvest" type="number" min="50000" value="50000"
+            <label class="md:col-span-2">Invested amount (KES)
+              <input id="loanInvest" type="number" min="50000" max="1500000" value="50000"
                      class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
             </label>
             <button type="button" id="loanCalc"
@@ -397,21 +406,22 @@
           <p class="mt-2 text-xs text-amber-700 text-center">Note: Calculator outputs are estimates; approval depends on verification & assessment.</p>
         </div>
 
-        <!-- Product cards with calculators -->
+        <!-- Product cards with calculators (new ranges & tenors) -->
         <div class="grid md:grid-cols-3 gap-6 mt-12">
 
           <!-- Starter -->
           <div class="rounded-2xl border bg-white p-6 shadow-sm">
             <h3 class="text-xl font-semibold">Starter</h3>
-            <p class="text-gray-700 text-sm">Range: <strong>KES 15,000 – 300,000</strong> • Rate: <strong>10% per month</strong></p>
-            <p class="text-xs text-gray-500 mt-1">Company-wide minimum loan is KES 150,000.</p>
+            <p class="text-gray-700 text-sm">
+              Range: <strong>KES 150,000 – 500,000</strong> • Rate: <strong>10% per month</strong> • Tenor: <strong>1–3 months</strong>
+            </p>
             <form id="starterForm" class="grid gap-3 mt-4 text-sm">
               <label>Amount (KES)
-                <input id="starterAmt" type="number" min="15000" max="300000" value="150000"
+                <input id="starterAmt" type="number" min="150000" max="500000" value="150000"
                        class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
               </label>
-              <label>Months
-                <input id="starterMonths" type="number" min="1" max="24" value="6"
+              <label>Months (1–3)
+                <input id="starterMonths" type="number" min="1" max="3" value="3"
                        class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
               </label>
               <button type="button" id="starterCalc"
@@ -426,15 +436,16 @@
           <!-- Business Boost -->
           <div class="rounded-2xl border bg-white p-6 shadow-sm">
             <h3 class="text-xl font-semibold">Business Boost</h3>
-            <p class="text-gray-700 text-sm">Range: <strong>KES 300,001 – 500,000</strong> • Rate: <strong>5% per month</strong></p>
-            <p class="text-xs text-gray-500 mt-1">Company-wide minimum loan is KES 150,000.</p>
+            <p class="text-gray-700 text-sm">
+              Range: <strong>KES 500,001 – 1,000,000</strong> • Rate: <strong>5% per month</strong> • Tenor: <strong>1–6 months</strong>
+            </p>
             <form id="boostForm" class="grid gap-3 mt-4 text-sm">
               <label>Amount (KES)
-                <input id="boostAmt" type="number" min="300001" max="500000" value="300001"
+                <input id="boostAmt" type="number" min="500001" max="1000000" value="500001"
                        class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
               </label>
-              <label>Months
-                <input id="boostMonths" type="number" min="1" max="24" value="6"
+              <label>Months (1–6)
+                <input id="boostMonths" type="number" min="1" max="6" value="6"
                        class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
               </label>
               <button type="button" id="boostCalc"
@@ -449,15 +460,16 @@
           <!-- Premium Advance -->
           <div class="rounded-2xl border bg-white p-6 shadow-sm">
             <h3 class="text-xl font-semibold">Premium Advance</h3>
-            <p class="text-gray-700 text-sm">Range: <strong>KES 500,001 – 1,000,000</strong> • Rate: <strong>0% per month</strong></p>
-            <p class="text-xs text-gray-500 mt-1">Company-wide minimum loan is KES 150,000.</p>
+            <p class="text-gray-700 text-sm">
+              Range: <strong>KES 1,000,001 – 4,500,000</strong> • Rate: <strong>0% per month</strong> • Tenor: <strong>1–12 months</strong>
+            </p>
             <form id="premiumForm" class="grid gap-3 mt-4 text-sm">
               <label>Amount (KES)
-                <input id="premiumAmt" type="number" min="500001" max="1000000" value="500001"
+                <input id="premiumAmt" type="number" min="1000001" max="4500000" value="1000001"
                        class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
               </label>
-              <label>Months
-                <input id="premiumMonths" type="number" min="1" max="24" value="6"
+              <label>Months (1–12)
+                <input id="premiumMonths" type="number" min="1" max="12" value="12"
                        class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
               </label>
               <button type="button" id="premiumCalc"
@@ -484,21 +496,25 @@
         (function(){
           const fmt = n => Number(n).toLocaleString();
 
-          // Eligibility (min invested 50k; eligibility = max(150k, 3x))
+          // Eligibility (min invest 50k, max invest 1.5M; eligibility = max(150k, min(4.5M, 3x)))
           const loanBtn = document.getElementById("loanCalc");
           const loanOut = document.getElementById("loanOut");
           loanBtn?.addEventListener("click", () => {
             let invested = Number(document.getElementById("loanInvest").value || 0);
-            if (invested < 50000) invested = 50000;
+            let note = "";
+            if (invested < 50000) { invested = 50000; note = "Adjusted to minimum investment (KES 50,000)."; }
+            if (invested > 1500000) { invested = 1500000; note = "Adjusted to maximum investment (KES 1,500,000)."; }
             const threeX = invested * 3;
             const minLoan = 150000;
-            const eligible = Math.max(minLoan, threeX);
+            const maxLoan = 4500000;
+            const eligible = Math.max(minLoan, Math.min(maxLoan, threeX));
             loanOut.classList.remove("hidden");
             loanOut.innerHTML = `
               <div><strong>Your investment:</strong> KES ${fmt(invested)}</div>
               <div><strong>3× of investment:</strong> KES ${fmt(threeX)}</div>
-              <div><strong>Minimum loan threshold:</strong> KES ${fmt(minLoan)}</div>
+              <div><strong>Minimum loan threshold:</strong> KES ${fmt(minLoan)} &nbsp; • &nbsp; <strong>Maximum loan:</strong> KES ${fmt(maxLoan)}</div>
               <div class="mt-1"><strong>Estimated eligible loan:</strong> <span class="text-green-700 font-semibold">KES ${fmt(eligible)}</span></div>
+              ${note ? `<div class="mt-2 text-red-600 text-xs">Warning: ${note}</div>` : ""}
             `;
           });
 
@@ -509,7 +525,7 @@
             const monthly = total / months;
             return { interest, total, monthly };
           }
-          function resultHTML(amount, months, ratePct, res){
+          function resultHTML(amount, months, ratePct, res, note){
             return `
               <div><strong>Amount:</strong> KES ${fmt(amount)}</div>
               <div><strong>Tenor:</strong> ${months} month(s)</div>
@@ -517,43 +533,53 @@
               <div><strong>Total interest:</strong> KES ${fmt(res.interest.toFixed(2))}</div>
               <div><strong>Total to repay:</strong> KES ${fmt(res.total.toFixed(2))}</div>
               <div><strong>Approx. monthly payment:</strong> KES ${fmt(res.monthly.toFixed(2))}</div>
+              ${note ? `<div class="mt-2 text-red-600 text-xs">Warning: ${note}</div>` : ""}
             `;
           }
 
-          // Starter: 10% p.m., 15,000–300,000
+          // Starter: 10% p.m., 150,000–500,000, tenor 1–3
           document.getElementById("starterCalc")?.addEventListener("click", () => {
             let amt = Number(document.getElementById("starterAmt").value || 0);
-            if (amt < 15000) amt = 15000;
-            if (amt > 300000) amt = 300000;
-            const months = Math.max(1, Math.min(24, Number(document.getElementById("starterMonths").value || 1)));
+            let months = Number(document.getElementById("starterMonths").value || 1);
+            let note = "";
+            if (amt < 150000) { amt = 150000; note = "Adjusted to minimum (KES 150,000)."; }
+            if (amt > 500000) { amt = 500000; note = "Adjusted to maximum (KES 500,000)."; }
+            if (months < 1) { months = 1; note = (note? note+" " : "") + "Tenor adjusted to min (1)."; }
+            if (months > 3) { months = 3; note = (note? note+" " : "") + "Tenor adjusted to max (3)."; }
             const res = flatCalc(amt, months, 0.10);
             const out = document.getElementById("starterOut");
             out.classList.remove("hidden");
-            out.innerHTML = resultHTML(amt, months, 10, res);
+            out.innerHTML = resultHTML(amt, months, 10, res, note);
           });
 
-          // Business Boost: 5% p.m., 300,001–500,000
+          // Business Boost: 5% p.m., 500,001–1,000,000, tenor 1–6
           document.getElementById("boostCalc")?.addEventListener("click", () => {
             let amt = Number(document.getElementById("boostAmt").value || 0);
-            if (amt < 300001) amt = 300001;
-            if (amt > 500000) amt = 500000;
-            const months = Math.max(1, Math.min(24, Number(document.getElementById("boostMonths").value || 1)));
+            let months = Number(document.getElementById("boostMonths").value || 1);
+            let note = "";
+            if (amt < 500001) { amt = 500001; note = "Adjusted to minimum (KES 500,001)."; }
+            if (amt > 1000000) { amt = 1000000; note = "Adjusted to maximum (KES 1,000,000)."; }
+            if (months < 1) { months = 1; note = (note? note+" " : "") + "Tenor adjusted to min (1)."; }
+            if (months > 6) { months = 6; note = (note? note+" " : "") + "Tenor adjusted to max (6)."; }
             const res = flatCalc(amt, months, 0.05);
             const out = document.getElementById("boostOut");
             out.classList.remove("hidden");
-            out.innerHTML = resultHTML(amt, months, 5, res);
+            out.innerHTML = resultHTML(amt, months, 5, res, note);
           });
 
-          // Premium Advance: 0% p.m., 500,001–1,000,000
+          // Premium Advance: 0% p.m., 1,000,001–4,500,000, tenor 1–12
           document.getElementById("premiumCalc")?.addEventListener("click", () => {
             let amt = Number(document.getElementById("premiumAmt").value || 0);
-            if (amt < 500001) amt = 500001;
-            if (amt > 1000000) amt = 1000000;
-            const months = Math.max(1, Math.min(24, Number(document.getElementById("premiumMonths").value || 1)));
+            let months = Number(document.getElementById("premiumMonths").value || 1);
+            let note = "";
+            if (amt < 1000001) { amt = 1000001; note = "Adjusted to minimum (KES 1,000,001)."; }
+            if (amt > 4500000) { amt = 4500000; note = "Adjusted to maximum (KES 4,500,000)."; }
+            if (months < 1) { months = 1; note = (note? note+" " : "") + "Tenor adjusted to min (1)."; }
+            if (months > 12) { months = 12; note = (note? note+" " : "") + "Tenor adjusted to max (12)."; }
             const res = flatCalc(amt, months, 0.00);
             const out = document.getElementById("premiumOut");
             out.classList.remove("hidden");
-            out.innerHTML = resultHTML(amt, months, 0, res);
+            out.innerHTML = resultHTML(amt, months, 0, res, note);
           });
         })();
       </script>
