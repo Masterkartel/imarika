@@ -3,29 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Imarika — Build Wealth the Steady Way</title>
-  <meta name="description" content="Imarika: simple, transparent investment plans and responsible working-capital loans.">
+  <title>Imarika — Build Wealth Steady</title>
+  <meta name="description" content="Imarika: simple, transparent investment plans and working-capital loans.">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: { gold: "#FFD447", dark: "#111827", blue: "#2563EB", green: "#16A34A", bg: "#F9FAFB" }
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    html{scroll-behavior:smooth}
-    .btn{ @apply inline-flex items-center justify-center rounded-2xl px-5 py-3 font-medium transition shadow; }
-    .btn-gold{ @apply bg-[color:var(--gold,#FFD447)] text-[color:var(--dark,#111827)] hover:opacity-90; }
-    .btn-outline{ @apply border border-gray-800 text-gray-900 hover:bg-gray-900 hover:text-white; }
-    .card{ @apply rounded-3xl border bg-white shadow-sm; }
-  </style>
 </head>
-<body class="bg-brand-bg text-gray-800">
+<body class="bg-gray-50 text-gray-800">
 
   <!-- Header -->
   <header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b">
@@ -41,130 +23,62 @@
         <a href="#referral" class="hover:text-gray-900 text-gray-600">Referral</a>
         <a href="#contact" class="hover:text-gray-900 text-gray-600">Contact</a>
       </nav>
-      <a href="#contact" class="btn btn-gold hidden sm:inline-flex">Talk to us</a>
+      <a href="#contact" class="hidden sm:inline-flex rounded-2xl px-5 py-3 font-medium bg-[#FFD447] text-gray-900 shadow">Talk to us</a>
     </div>
   </header>
 
   <!-- Hero -->
-  <section id="home" class="relative overflow-hidden">
-    <div class="absolute inset-0 bg-gradient-to-br from-yellow-50 via-white to-white"></div>
-    <div class="relative max-w-6xl mx-auto px-4 py-16 md:py-24 grid md:grid-cols-2 gap-10 items-center">
+  <section id="home" class="bg-gradient-to-br from-yellow-50 via-white to-white">
+    <div class="max-w-6xl mx-auto px-4 py-16 md:py-24 grid md:grid-cols-2 gap-10 items-center">
       <div>
-        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
-          Build wealth the <span class="text-brand.dark">steady</span> way with <span style="color:#FFD447">Imarika</span>
-        </h1>
-        <p class="mt-4 text-lg text-gray-700">
-          Simple, transparent investment plans and responsible working-capital loans. Clear fees, flexible withdrawals,
-          and human support when you need it.
-        </p>
-        <div class="mt-6 flex flex-wrap gap-3">
-          <a href="#plans" class="btn btn-gold">See Plans</a>
-          <a href="#loans" class="btn btn-outline">Learn about Loans</a>
+        <h1 class="text-4xl md:text-5xl font-extrabold">Build wealth steadily with <span style="color:#FFD447">Imarika</span></h1>
+        <p class="mt-4 text-lg text-gray-700">Transparent investment plans and working-capital loans. Flexible withdrawals and real human support.</p>
+        <div class="mt-6 flex gap-3">
+          <a href="#plans" class="inline-flex rounded-2xl px-5 py-3 font-medium bg-[#FFD447] text-gray-900 shadow">See Plans</a>
+          <a href="#loans" class="inline-flex rounded-2xl px-5 py-3 font-medium border border-gray-900 hover:bg-gray-900 hover:text-white">View Loans</a>
         </div>
-        <ul class="mt-6 grid grid-cols-2 gap-3 text-sm text-gray-700">
-          <li>✓ Regulatory-first approach</li>
-          <li>✓ M-Pesa, Bank & Card</li>
-          <li>✓ Diversified strategies</li>
-          <li>✓ Human support</li>
-        </ul>
-      </div>
-      <div class="card p-6 md:p-8">
-        <h2 class="text-xl font-semibold">Quick estimator</h2>
-        <p class="text-sm text-gray-600">Illustrative outcomes for different horizons.</p>
-        <form class="mt-5 grid gap-4">
-          <div class="grid grid-cols-2 gap-3">
-            <label class="text-sm">Amount (KES)
-              <input type="number" placeholder="10,000" class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
-            </label>
-            <label class="text-sm">Horizon
-              <select class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
-                <option>1 month</option><option>3 months</option><option>6 months</option><option>12 months</option>
-              </select>
-            </label>
-          </div>
-          <label class="text-sm">Strategy
-            <select class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
-              <option>Balanced</option><option>Income</option><option>Growth</option>
-            </select>
-          </label>
-          <button type="button" class="btn btn-gold">Estimate</button>
-        </form>
       </div>
     </div>
   </section>
 
   <!-- About -->
   <section id="about" class="max-w-6xl mx-auto px-4 py-16">
-    <div class="grid md:grid-cols-2 gap-10 items-start">
-      <div>
-        <h2 class="text-3xl md:text-4xl font-bold tracking-tight">About Imarika</h2>
-        <p class="mt-4 text-gray-700">
-          We focus on long-term, sustainable value creation. We diversify, manage risk, and keep costs low—so you can
-          pursue your goals with clarity and confidence.
-        </p>
-        <ul class="mt-6 grid gap-3 text-gray-700">
-          <li>✓ Regulatory-first in our operating markets</li>
-          <li>✓ Evidence-based strategies with disciplined risk controls</li>
-          <li>✓ Human support via phone, email, and WhatsApp</li>
-        </ul>
-      </div>
-      <div class="card p-6">
-        <h3 class="text-lg font-semibold">Key facts</h3>
-        <div class="grid gap-3 text-sm text-gray-700 mt-4">
-          <div class="flex justify-between border-b pb-2"><span>Minimum start</span><span>KES 1,000</span></div>
-          <div class="flex justify-between border-b pb-2"><span>Funding methods</span><span>M-Pesa, Bank, Card</span></div>
-          <div class="flex justify-between border-b pb-2"><span>Withdrawals</span><span>Flexible (T+1 business day)</span></div>
-          <div class="flex justify-between"><span>Support hours</span><span>Mon–Sat, 8am–7pm EAT</span></div>
-        </div>
-      </div>
-    </div>
+    <h2 class="text-3xl font-bold text-center">About Us</h2>
+    <p class="mt-4 text-lg text-center max-w-3xl mx-auto">We focus on long-term, sustainable value creation. Our strategies are diversified, transparent, and backed by support you can trust.</p>
   </section>
 
   <!-- Plans -->
   <section id="plans" class="bg-gray-50 border-y">
     <div class="max-w-6xl mx-auto px-4 py-16">
-      <div class="text-center max-w-2xl mx-auto">
-        <h2 class="text-3xl md:text-4xl font-bold tracking-tight">Investment Plans</h2>
-        <p class="mt-3 text-gray-700">
-          Pick a starting point—upgrade anytime. 
-          <strong class="text-green-600">Guaranteed returns</strong> available on select packages.
-        </p>
-      </div>
+      <h2 class="text-3xl font-bold text-center">Investment Plans</h2>
+      <p class="text-center mt-2 text-gray-700">Pick a starting point—upgrade anytime. <span class="text-green-600 font-semibold">Guaranteed returns</span> on Gold & Platinum packages.</p>
 
       <div class="mt-10 grid md:grid-cols-3 gap-6">
-        <!-- Standard -->
-        <div class="card p-6">
-          <h3 class="text-xl font-bold">Standard</h3>
-          <ul class="mt-4 space-y-2 text-sm text-gray-700">
-            <li>✓ KES 1,000 minimum</li>
+        <div class="rounded-3xl border bg-white p-6 shadow-sm">
+          <h3 class="text-xl font-semibold">Standard</h3>
+          <ul class="mt-3 text-sm space-y-1">
+            <li>✓ From KES 1,000</li>
             <li>✓ Flexible deposits & withdrawals</li>
-            <li>✓ Email & WhatsApp support</li>
+            <li>✓ Basic support</li>
           </ul>
-          <a href="#contact" class="btn btn-gold w-full mt-6">Choose Standard</a>
         </div>
-
-        <!-- Gold -->
-        <div class="card p-6">
-          <h3 class="text-xl font-bold">Gold</h3>
-          <ul class="mt-4 space-y-2 text-sm text-gray-700">
-            <li>✓ KES 10,000+ starting amount</li>
-            <li>✓ Balanced strategy & auto-rebalancing</li>
+        <div class="rounded-3xl border bg-white p-6 shadow-sm">
+          <h3 class="text-xl font-semibold">Gold</h3>
+          <ul class="mt-3 text-sm space-y-1">
+            <li>✓ From KES 10,000</li>
+            <li>✓ Diversified portfolio</li>
             <li>✓ Priority support</li>
             <li>✓ Guaranteed returns</li>
           </ul>
-          <a href="#contact" class="btn btn-gold w-full mt-6">Choose Gold</a>
         </div>
-
-        <!-- Platinum -->
-        <div class="card p-6">
-          <h3 class="text-xl font-bold">Platinum</h3>
-          <ul class="mt-4 space-y-2 text-sm text-gray-700">
-            <li>✓ KES 100,000+ starting amount</li>
-            <li>✓ Dedicated manager & custom reporting</li>
-            <li>✓ Early access features</li>
+        <div class="rounded-3xl border bg-white p-6 shadow-sm">
+          <h3 class="text-xl font-semibold">Platinum</h3>
+          <ul class="mt-3 text-sm space-y-1">
+            <li>✓ From KES 100,000</li>
+            <li>✓ Dedicated manager</li>
+            <li>✓ Custom reporting</li>
             <li>✓ Guaranteed returns</li>
           </ul>
-          <a href="#contact" class="btn btn-gold w-full mt-6">Choose Platinum</a>
         </div>
       </div>
     </div>
@@ -172,54 +86,106 @@
 
   <!-- Loans -->
   <section id="loans" class="max-w-6xl mx-auto px-4 py-16">
-    <div class="grid md:grid-cols-2 gap-10 items-center">
-      <div>
-        <h2 class="text-3xl md:text-4xl font-bold tracking-tight">Working-capital loans</h2>
-        <p class="mt-3 text-gray-700">Short-term business financing with clear pricing and no hidden fees.</p>
-        <ul class="mt-5 grid gap-2 text-gray-700 text-sm">
-          <li>✓ Transparent service fee / APR</li>
-          <li>✓ Daily or weekly repayment options</li>
-          <li>✓ Early repayment savings</li>
+    <h2 class="text-3xl font-bold text-center">Working-Capital Loans</h2>
+    <p class="text-center mt-2 text-gray-700">Fast, responsible financing with clear pricing, simple steps, and flexible repayments.</p>
+
+    <!-- Loan Products -->
+    <div class="grid md:grid-cols-3 gap-6 mt-10">
+      <div class="rounded-3xl border bg-white p-6 shadow-sm">
+        <h3 class="text-xl font-semibold">Starter Loan</h3>
+        <ul class="mt-3 text-sm space-y-1 text-gray-700">
+          <li>✓ KES 5,000 – 50,000</li>
+          <li>✓ Tenor: 1–3 months</li>
+          <li>✓ Flexible weekly repayments</li>
         </ul>
       </div>
-      <div class="card p-6">
-        <h3 class="text-lg font-semibold">Illustrative pricing</h3>
-        <p class="mt-3 text-sm text-gray-600">Examples only; not offers.</p>
+      <div class="rounded-3xl border bg-white p-6 shadow-sm">
+        <h3 class="text-xl font-semibold">Business Boost</h3>
+        <ul class="mt-3 text-sm space-y-1 text-gray-700">
+          <li>✓ KES 50,000 – 300,000</li>
+          <li>✓ Tenor: 3–6 months</li>
+          <li>✓ Weekly or monthly repayments</li>
+        </ul>
+      </div>
+      <div class="rounded-3xl border bg-white p-6 shadow-sm">
+        <h3 class="text-xl font-semibold">Premium Advance</h3>
+        <ul class="mt-3 text-sm space-y-1 text-gray-700">
+          <li>✓ KES 300,000 – 1,000,000</li>
+          <li>✓ Tenor: up to 12 months</li>
+          <li>✓ Tailored repayment plan</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Pricing Examples -->
+    <div class="grid md:grid-cols-2 gap-6 mt-12 text-sm text-gray-700">
+      <div class="rounded-2xl border p-5 bg-white">
+        <div class="text-xs text-gray-500">Amount</div><div class="font-semibold">KES 50,000</div>
+        <div class="text-xs text-gray-500 mt-2">Term</div><div class="font-semibold">3 months</div>
+        <div class="text-xs text-gray-500 mt-2">Approx. APR</div><div class="font-semibold">~24% p.a.</div>
+      </div>
+      <div class="rounded-2xl border p-5 bg-white">
+        <div class="text-xs text-gray-500">Amount</div><div class="font-semibold">KES 150,000</div>
+        <div class="text-xs text-gray-500 mt-2">Term</div><div class="font-semibold">6 months</div>
+        <div class="text-xs text-gray-500 mt-2">Approx. APR</div><div class="font-semibold">~21% p.a.</div>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <div class="mt-14">
+      <h3 class="text-2xl font-semibold">How it works</h3>
+      <ol class="mt-4 space-y-3 text-gray-700">
+        <li><strong>1) Apply:</strong> submit your details and requested amount.</li>
+        <li><strong>2) Verify:</strong> provide required documents for assessment.</li>
+        <li><strong>3) Offer:</strong> receive loan terms and repayment plan.</li>
+        <li><strong>4) Disbursement:</strong> funds sent once you accept the offer.</li>
+      </ol>
+    </div>
+
+    <!-- Eligibility -->
+    <div class="grid md:grid-cols-2 gap-8 mt-12">
+      <div>
+        <h3 class="text-2xl font-semibold">Eligibility</h3>
+        <ul class="mt-4 space-y-2 text-gray-700">
+          <li>• Valid ID & active phone number</li>
+          <li>• Proof of income or business activity</li>
+          <li>• Good repayment history</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="text-2xl font-semibold">Documents</h3>
+        <ul class="mt-4 space-y-2 text-gray-700">
+          <li>• National ID / Passport</li>
+          <li>• Bank / M-Pesa statements</li>
+          <li>• Business permit (if applicable)</li>
+        </ul>
       </div>
     </div>
   </section>
 
   <!-- Referral -->
-  <section id="referral" class="bg-gray-50 border-y">
-    <div class="max-w-6xl mx-auto px-4 py-16">
-      <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-center">Referral Program</h2>
-      <p class="mt-3 text-center text-gray-700">Invite friends and earn rewards when they join Imarika.</p>
-    </div>
+  <section id="referral" class="bg-gray-50 border-y py-16 px-4 text-center">
+    <h2 class="text-3xl font-bold">Referral Program</h2>
+    <p class="mt-2 text-gray-700">Invite friends and earn rewards when they join Imarika.</p>
   </section>
 
   <!-- Contact -->
   <section id="contact" class="max-w-6xl mx-auto px-4 py-16">
-    <div class="grid md:grid-cols-2 gap-10 items-center">
+    <h2 class="text-3xl font-bold text-center">Get in touch</h2>
+    <div class="grid md:grid-cols-2 gap-10 mt-8">
       <div>
-        <h2 class="text-3xl md:text-4xl font-bold tracking-tight">Get in touch</h2>
-        <ul class="mt-6 grid gap-3 text-gray-800 text-sm">
-          <li>✉️ <a class="underline" href="mailto:sales@imarika.net">sales@imarika.net</a></li>
-          <li>💬 <a class="underline" target="_blank" rel="noopener" href="https://wa.me/254701017246">WhatsApp: +254 701 017 246</a></li>
+        <ul class="space-y-3 text-gray-700">
+          <li>✉️ <a href="mailto:sales@imarika.net" class="underline">sales@imarika.net</a></li>
+          <li>💬 <a href="https://wa.me/254701017246" target="_blank" class="underline">WhatsApp: +254 701 017 246</a></li>
         </ul>
       </div>
-      <div class="card p-6">
+      <div class="rounded-3xl border bg-white p-6 shadow-sm">
         <h3 class="text-lg font-semibold">Send a message</h3>
         <form class="grid gap-3 mt-4">
-          <label class="text-sm">Full name
-            <input class="mt-1 w-full rounded-xl border px-3 py-2">
-          </label>
-          <label class="text-sm">Email or phone
-            <input class="mt-1 w-full rounded-xl border px-3 py-2">
-          </label>
-          <label class="text-sm">Message
-            <textarea class="mt-1 w-full rounded-xl border px-3 py-2 h-28"></textarea>
-          </label>
-          <button type="button" class="btn btn-gold">Send</button>
+          <input class="rounded-xl border px-3 py-2" placeholder="Your name">
+          <input class="rounded-xl border px-3 py-2" placeholder="Email or phone">
+          <textarea class="rounded-xl border px-3 py-2 h-28" placeholder="Message"></textarea>
+          <button type="button" class="rounded-2xl px-5 py-3 bg-[#FFD447] text-gray-900 shadow">Send</button>
         </form>
       </div>
     </div>
@@ -231,7 +197,7 @@
   </footer>
 
   <!-- Floating WhatsApp -->
-  <a href="https://wa.me/254701017246" target="_blank" rel="noopener"
+  <a href="https://wa.me/254701017246" target="_blank"
      class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg hover:bg-green-600">💬</a>
 
   <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
