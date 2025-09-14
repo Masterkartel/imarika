@@ -1,649 +1,380 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Imarika — Invest with Confidence</title>
-  <meta name="description" content="Imarika: trusted investment and finance solutions. Guaranteed growth and simple steps.">
+  <meta name="description" content="Imarika offers secure, transparent investment plans and working-capital loans with human support." />
 
-  <!-- Tailwind -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Icons -->
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="/favicon.png" sizes="32x32" />
+  <link rel="apple-touch-icon" href="/favicon.png" />
 
-  <!-- Favicon & app icons -->
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="alternate icon" href="/favicon.ico">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-  <meta name="theme-color" content="#F59E0B"/>
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Open Graph -->
-  <meta property="og:title" content="Imarika — Invest with Confidence">
-  <meta property="og:description" content="Guaranteed growth and simple steps.">
-  <meta property="og:image" content="/apple-touch-icon.png">
-  <meta property="og:type" content="website">
-
-  <style>.smooth{transition:all .2s ease}</style>
+  <style>
+    :root{
+      --bg:#ffffff; --text:#0f172a; --muted:#475569; --line:#e5e7eb; --card:#ffffff;
+      --brand:#f59e0b; --brand-soft:#fde68a; --ok:#16a34a; --danger:#ef4444;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--text);background:var(--bg)}
+    .container{max-width:1120px;margin:0 auto;padding:0 1rem}
+    a{text-decoration:none;color:inherit}
+    .btn{display:inline-flex;align-items:center;justify-content:center;padding:.8rem 1.1rem;border-radius:14px;font-weight:700;
+      background:var(--brand);color:#111827;cursor:pointer;transition:.2s}
+    .btn:hover{background:#fbbf24}
+    .btn-outline{background:#fff;border:1px solid var(--line);color:var(--text)}
+    .badge{padding:.15rem .5rem;border-radius:999px;background:#fef3c7;color:#78350f;font-weight:700;font-size:.75rem}
+    header{position:sticky;top:0;background:rgba(255,255,255,.95);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);z-index:20}
+    nav a{padding:.4rem .6rem;border-radius:10px} nav a:hover{background:#f8fafc}
+    section{padding:3.5rem 0}
+    .grid{display:grid;gap:1rem}
+    @media(min-width:768px){.grid-3{grid-template-columns:repeat(3,1fr)}.grid-2{grid-template-columns:repeat(2,1fr)}}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:1.25rem;box-shadow:0 8px 24px rgba(2,8,23,.04)}
+    h1,h2,h3{margin:.2rem 0 .6rem}
+    .muted{color:var(--muted)}
+    input,select,textarea{width:100%;padding:.8rem;border:1px solid var(--line);border-radius:14px}
+    .helper{font-size:.85rem;color:var(--muted)}
+    footer{border-top:1px solid var(--line);padding:2.5rem 0;color:#475569}
+    .wa-float{position:fixed;right:18px;bottom:18px;z-index:50}
+    .wa-btn{height:58px;width:58px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:#25D366;color:#fff}
+    details{border:1px solid var(--line);border-radius:14px;padding:1rem;background:#fff}
+    details+details{margin-top:.8rem}
+    .logo{height:32px;width:32px;border-radius:10px}
+  </style>
 </head>
-<body class="bg-white text-gray-900">
+<body>
 
-  <!-- Navbar -->
-  <header class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur border-b">
-    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-      <a href="#home" class="flex items-center gap-3">
-        <img src="/logo-imarika.svg" alt="Imarika" class="w-8 h-8 rounded-xl"/>
-        <span class="font-extrabold tracking-tight text-xl">Imarika</span>
+  <!-- Header -->
+  <header>
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;height:64px">
+      <a href="#home" style="display:flex;align-items:center;gap:.6rem">
+        <img src="/favicon.svg" class="logo" alt="Imarika logo">
+        <strong>Imarika</strong>
+        <span class="badge">Secure & Transparent</span>
       </a>
-      <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
-        <a href="#home" class="hover:text-yellow-600">Home</a>
-        <a href="#about" class="hover:text-yellow-600">About Us</a>
-        <a href="#plans" class="hover:text-yellow-600">Our Services</a>
-        <a href="#choose" class="hover:text-yellow-600">Why Choose Us</a>
-        <a href="#loans" class="hover:text-yellow-600">Loans</a>
-        <a href="#contact" class="hover:text-yellow-600">Contact</a>
-      </nav>
-      <a href="#contact" class="hidden sm:inline-flex px-4 py-2 rounded-xl bg-yellow-400 hover:bg-yellow-500 font-semibold text-sm smooth">Get Started</a>
+      <nav style="display:none" id="nav"></nav>
+      <a class="btn" href="https://wa.me/254701017246?text=Hi%20Imarika!%20I%27d%20like%20to%20get%20started.">Get Started</a>
     </div>
   </header>
 
-  <main id="home" class="pt-16">
-
-    <!-- Hero -->
-    <section class="bg-gradient-to-b from-yellow-50 to-white py-16 md:py-20 text-center">
-      <div class="max-w-3xl mx-auto px-4">
-        <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
-          Welcome to <span class="text-yellow-600">Imarika</span>
-        </h1>
-        <p class="mt-4 text-lg text-gray-700">
-          Transforming lives through secure, transparent investment solutions.
-          With guaranteed growth and human support, Imarika is the steady path to financial empowerment.
-        </p>
-        <div class="mt-6 flex justify-center gap-4">
-          <a href="#plans" class="px-6 py-3 rounded-xl font-semibold bg-yellow-400 text-gray-900 hover:bg-yellow-500 shadow smooth">Our Services</a>
-          <a href="#contact" class="px-6 py-3 rounded-xl font-semibold border hover:bg-gray-50 smooth">Contact Us</a>
-        </div>
+  <!-- Hero -->
+  <section id="home" style="padding:6rem 0 3.5rem;background:radial-gradient(1200px 500px at 70% -10%, #fff7ed 0%, transparent 60%)">
+    <div class="container">
+      <h1>Welcome to <span style="background:linear-gradient(90deg,#fde68a,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent">Imarika</span></h1>
+      <p class="muted">Secure and transparent investment opportunities with guaranteed growth and working-capital loans.</p>
+      <div style="margin-top:1rem">
+        <a class="btn" href="#plans">Our Services</a>
+        <a class="btn btn-outline" href="https://wa.me/254701017246?text=Hello%20Imarika%2C%20I%20need%20support.">Contact Us</a>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- About -->
-    <section id="about" class="py-16">
-      <div class="max-w-5xl mx-auto px-4 text-center">
-        <h2 class="text-3xl font-bold">About Us</h2>
-        <p class="mt-4 text-lg text-gray-700">
-          Imarika is a financial platform dedicated to secure and sustainable wealth creation.
-          We empower individuals and businesses to grow steadily with responsible strategies and clear communication.
-        </p>
-      </div>
-    </section>
+  <!-- About -->
+  <section id="about">
+    <div class="container">
+      <h2>About Us</h2>
+      <p class="muted">Imarika is dedicated to creating wealth responsibly through reliable investment plans and working-capital loans. We combine trust, human support, and technology to empower individuals and businesses.</p>
+    </div>
+  </section>
 
-    <!-- Plans overview -->
-    <section id="plans" class="bg-gray-50 border-y">
-      <div class="max-w-7xl mx-auto px-4 py-16">
-        <h2 class="text-3xl font-bold text-center">Investment Plans</h2>
-        <p class="text-center mt-2 text-gray-700">
-          Choose the plan that fits your journey. <span class="text-green-600 font-semibold">Guaranteed returns</span> on Gold & Platinum.
-        </p>
+  <!-- Investment Plans -->
+  <section id="plans" style="background:#fafafa">
+    <div class="container">
+      <h2>Our Investment Plans (24-hour Growth)</h2>
+      <p class="helper">Use the quick calculator to preview your payout. Earnings are credited after 24 hours.</p>
 
-        <div class="mt-10 grid md:grid-cols-3 gap-6">
-          <!-- Standard -->
-          <div class="rounded-3xl border bg-white p-6 shadow-sm">
-            <h3 class="text-xl font-semibold">Standard</h3>
-            <ul class="mt-3 text-sm space-y-1 text-gray-700">
-              <li>• From KES 1,000</li>
-              <li>• Up to KES 70,000</li>
-              <li>• 30% in 24 hours</li>
-              <li>• Flexible deposits & withdrawals</li>
-            </ul>
-            <a href="#standard" class="mt-4 inline-block text-yellow-600 font-semibold underline">Learn more →</a>
+      <div class="grid grid-3" style="margin-top:1rem">
+        <!-- Standard -->
+        <div class="card">
+          <h3>Standard Plan</h3>
+          <p class="muted">KES <strong>1,000 – 70,000</strong> · <strong>30%</strong> in 24h</p>
+          <p class="helper">Example: 10,000 → 13,000 in 24h</p>
+          <div class="grid" style="grid-template-columns:1fr auto;gap:.5rem">
+            <input id="stdAmt" type="number" min="1000" max="70000" placeholder="Amount (1,000 – 70,000)">
+            <button class="btn" onclick="calcInvestment('std')">Calculate</button>
           </div>
-
-          <!-- Gold -->
-          <div class="rounded-3xl border bg-white p-6 shadow-sm">
-            <h3 class="text-xl font-semibold">Gold</h3>
-            <ul class="mt-3 text-sm space-y-1 text-gray-700">
-              <li>• KES 70,001 – 140,000</li>
-              <li>• <strong>50% in 24 hours</strong></li>
-              <li>• Enhanced portfolio & priority support</li>
-            </ul>
-            <a href="#gold" class="mt-4 inline-block text-yellow-600 font-semibold underline">Learn more →</a>
-          </div>
-
-          <!-- Platinum -->
-          <div class="rounded-3xl border bg-white p-6 shadow-sm">
-            <h3 class="text-xl font-semibold">Platinum</h3>
-            <ul class="mt-3 text-sm space-y-1 text-gray-700">
-              <li>• KES 140,000 and above</li>
-              <li>• <strong>70% in 24 hours</strong></li>
-              <li>• Dedicated manager & custom reporting</li>
-            </ul>
-            <a href="#platinum" class="mt-4 inline-block text-yellow-600 font-semibold underline">Learn more →</a>
+          <p id="stdOut" class="helper"></p>
+          <div style="margin-top:.5rem">
+            <a class="btn" href="https://wa.me/254701017246?text=Hello%20Imarika%2C%20I%27m%20interested%20in%20the%20Standard%20Plan%20(30%%20in%2024h).">Apply Now</a>
           </div>
         </div>
-      </div>
-    </section>
 
-    <!-- ================= STANDARD PLAN ================= -->
-    <section id="standard" class="bg-white py-20">
-      <div class="max-w-7xl mx-auto px-4">
-        <div class="text-center">
-          <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight">Standard Plan</h2>
-          <p class="mt-3 text-lg text-gray-700">
-            KES <strong>1,000</strong> to <strong>70,000</strong>. Fixed <strong>30% in 24 hours</strong>. Flexible deposits & withdrawals.
-          </p>
-          <p class="mt-2 text-sm text-gray-600">
-            Example: invest <strong>KES 10,000</strong> → earn <strong>KES 3,000</strong> → total <strong>KES 13,000</strong> in 24h.
-          </p>
+        <!-- Gold -->
+        <div class="card">
+          <h3>Gold Plan</h3>
+          <p class="muted">KES <strong>70,001 – 140,000</strong> · <strong>50%</strong> in 24h</p>
+          <p class="helper">Example: 100,000 → 150,000 in 24h</p>
+          <div class="grid" style="grid-template-columns:1fr auto;gap:.5rem">
+            <input id="goldAmt" type="number" min="70001" max="140000" placeholder="Amount (70,001 – 140,000)">
+            <button class="btn" onclick="calcInvestment('gold')">Calculate</button>
+          </div>
+          <p id="goldOut" class="helper"></p>
+          <div style="margin-top:.5rem">
+            <a class="btn" href="https://wa.me/254701017246?text=Hello%20Imarika%2C%20I%27m%20interested%20in%20the%20Gold%20Plan%20(50%%20in%2024h).">Upgrade to Gold</a>
+          </div>
         </div>
 
-        <div class="grid md:grid-cols-2 gap-8 mt-12">
-          <!-- Steps -->
-          <div class="rounded-2xl border bg-gray-50 p-6 shadow-sm">
-            <h3 class="text-xl font-semibold">How it works (step by step)</h3>
-            <ol class="mt-4 space-y-3 text-gray-800">
-              <li><strong>1)</strong> Choose your amount (KES 1,000 – 70,000).</li>
-              <li><strong>2)</strong> Create profile & verify ID.</li>
-              <li><strong>3)</strong> Fund via M-Pesa, bank, or card.</li>
-              <li><strong>4)</strong> Earnings post after 24 hours at a fixed 30%.</li>
-              <li><strong>5)</strong> Withdraw (T+1 business day) or compound.</li>
-            </ol>
-
-            <div class="mt-6">
-              <a href="#contact" class="inline-flex items-center justify-center rounded-xl px-5 py-3 font-semibold bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500">
-                Apply Now
-              </a>
-            </div>
+        <!-- Platinum -->
+        <div class="card">
+          <h3>Platinum Plan</h3>
+          <p class="muted">KES <strong>140,001+</strong> · <strong>70%</strong> in 24h</p>
+          <p class="helper">Example: 150,000 → 255,000 in 24h</p>
+          <div class="grid" style="grid-template-columns:1fr auto;gap:.5rem">
+            <input id="platAmt" type="number" min="140001" placeholder="Amount (140,001 and above)">
+            <button class="btn" onclick="calcInvestment('plat')">Calculate</button>
           </div>
-
-          <!-- Calculator -->
-          <div class="rounded-2xl border bg-white p-6 shadow-sm">
-            <h3 class="text-xl font-semibold">Quick estimator — 30% in 24 hours</h3>
-            <form id="stdForm" class="grid gap-3 mt-4 text-sm">
-              <label>Amount (KES)
-                <input id="stdAmt" type="number" min="1000" max="70000" value="10000"
-                       class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
-              </label>
-              <button type="button" id="stdCalc"
-                class="mt-1 inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-semibold bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500">
-                Calculate
-              </button>
-            </form>
-            <div id="stdOut" class="mt-4 rounded-xl bg-gray-50 border p-4 text-sm text-gray-800 hidden"></div>
-            <p class="mt-2 text-xs text-amber-700">Note: Calculator outputs are estimates for illustration only.</p>
+          <p id="platOut" class="helper"></p>
+          <div style="margin-top:.5rem">
+            <a class="btn" href="https://wa.me/254701017246?text=Hello%20Imarika%2C%20I%27m%20interested%20in%20the%20Platinum%20Plan%20(70%%20in%2024h).">Talk to a Manager</a>
           </div>
         </div>
       </div>
 
-      <script>
-        (function(){
-          const $ = (id) => document.getElementById(id);
-          $("stdCalc")?.addEventListener("click", () => {
-            let amt = Number($("stdAmt").value || 0);
-            let note = "";
-            if (amt < 1000) { amt = 1000; note = "Adjusted to minimum (KES 1,000)."; }
-            if (amt > 70000) { amt = 70000; note = "Adjusted to maximum (KES 70,000)."; }
-            const earnings = amt * 0.30;
-            const total = amt + earnings;
-            const out = $("stdOut");
-            out.classList.remove("hidden");
-            out.innerHTML = `
-              <div><strong>Deposit:</strong> KES ${amt.toLocaleString()}</div>
-              <div><strong>Return rate:</strong> 30% in 24 hours</div>
-              <div><strong>Projected earnings:</strong> KES ${earnings.toFixed(2).toLocaleString()}</div>
-              <div><strong>Projected total after 24 hours:</strong> KES ${total.toFixed(2).toLocaleString()}</div>
-              ${note ? `<div class="mt-2 text-red-600 text-xs">Warning: ${note}</div>` : ""}
-            `;
-          });
-        })();
-      </script>
-    </section>
-    <!-- ============== /STANDARD PLAN =================== -->
+      <div class="card" style="margin-top:1rem;background:#fffbeb;border:1px dashed #fde68a">
+        <strong>Tip:</strong> Loan eligibility is up to <strong>3× your invested amount</strong> (e.g., invest 600,000 → eligible up to 1,800,000), subject to verification and product range.
+      </div>
+    </div>
+  </section>
 
-    <!-- =================== GOLD PLAN =================== -->
-    <section id="gold" class="bg-gray-50 py-20 border-t">
-      <div class="max-w-7xl mx-auto px-4">
-        <div class="text-center">
-          <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight">Gold Plan</h2>
-          <p class="mt-3 text-lg text-gray-700">
-            KES <strong>70,001 – 140,000</strong>. Fixed <strong>50% in 24 hours</strong>. Enhanced portfolio & priority support.
-          </p>
-          <p class="mt-2 text-sm text-gray-600">
-            Example: invest <strong>KES 80,000</strong> → earn <strong>KES 40,000</strong> → total <strong>KES 120,000</strong> in 24h.
-          </p>
+  <!-- Why Choose Us -->
+  <section id="choose">
+    <div class="container">
+      <h2>Why Choose Imarika?</h2>
+      <div class="grid grid-3" style="margin-top:1rem">
+        <div class="card"><strong>✅ Transparent</strong><p class="muted">Clear terms & visible fees.</p></div>
+        <div class="card"><strong>✅ Guaranteed</strong><p class="muted">Fixed 24-hour returns per plan.</p></div>
+        <div class="card"><strong>✅ Human Support</strong><p class="muted">WhatsApp & email support.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Loans -->
+  <section id="loans" style="background:#fafafa">
+    <div class="container">
+      <h2>Working-Capital Loans</h2>
+      <p class="muted">Minimum loan amount is <strong>KES 150,000</strong>. Eligibility is up to <strong>3× your invested amount</strong>. Rates & tenors by product:</p>
+
+      <div class="grid grid-3" style="margin-top:1rem">
+        <!-- Starter -->
+        <div class="card">
+          <h3>Starter</h3>
+          <p class="muted">Range: <strong>150,000 – 500,000</strong> · Tenor: <strong>1–3</strong> months · Interest: <strong>10% p.m.</strong></p>
+          <div class="grid" style="grid-template-columns:1fr auto;gap:.5rem">
+            <input id="loanS_amt" type="number" min="150000" max="500000" placeholder="Amount (150,000 – 500,000)">
+            <select id="loanS_mon"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+            <button class="btn" onclick="calcLoan('S')">Calculate</button>
+          </div>
+          <p id="loanS_out" class="helper"></p>
+          <div style="margin-top:.5rem">
+            <a class="btn" href="https://wa.me/254701017246?text=Hello%20Imarika%2C%20I%20want%20a%20Starter%20loan.">Apply for Starter</a>
+          </div>
         </div>
 
-        <div class="grid md:grid-cols-2 gap-8 mt-12">
-          <!-- Steps -->
-          <div class="rounded-2xl border bg-white p-6 shadow-sm">
-            <h3 class="text-xl font-semibold">How it works</h3>
-            <ol class="mt-4 space-y-3 text-gray-800">
-              <li><strong>1)</strong> Deposit within KES 70,001 – 140,000.</li>
-              <li><strong>2)</strong> Quick KYC & funding.</li>
-              <li><strong>3)</strong> Fixed 50% posts after 24 hours.</li>
-              <li><strong>4)</strong> Withdraw or compound; priority support.</li>
-            </ol>
-            <div class="mt-6">
-              <a href="#contact" class="inline-flex items-center justify-center rounded-xl px-5 py-3 font-semibold bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500">
-                Upgrade to Gold
-              </a>
-            </div>
+        <!-- Business Boost -->
+        <div class="card">
+          <h3>Business Boost</h3>
+          <p class="muted">Range: <strong>500,001 – 1,000,000</strong> · Tenor: <strong>1–6</strong> months · Interest: <strong>5% p.m.</strong></p>
+          <div class="grid" style="grid-template-columns:1fr auto;gap:.5rem">
+            <input id="loanB_amt" type="number" min="500001" max="1000000" placeholder="Amount (500,001 – 1,000,000)">
+            <select id="loanB_mon">
+              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+            </select>
+            <button class="btn" onclick="calcLoan('B')">Calculate</button>
           </div>
+          <p id="loanB_out" class="helper"></p>
+          <div style="margin-top:.5rem">
+            <a class="btn" href="https://wa.me/254701017246?text=Hello%20Imarika%2C%20I%20want%20a%20Business%20Boost%20loan.">Apply for Business Boost</a>
+          </div>
+        </div>
 
-          <!-- Calculator -->
-          <div class="rounded-2xl border bg-white p-6 shadow-sm">
-            <h3 class="text-xl font-semibold">Quick estimator — 50% in 24 hours</h3>
-            <form id="goldForm" class="grid gap-3 mt-4 text-sm">
-              <label>Amount (KES)
-                <input id="goldAmt" type="number" min="70001" max="140000" value="80000"
-                       class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
-              </label>
-              <button type="button" id="goldCalc"
-                class="mt-1 inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-semibold bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500">
-                Calculate
-              </button>
-            </form>
-            <div id="goldOut" class="mt-4 rounded-xl bg-gray-50 border p-4 text-sm text-gray-800 hidden"></div>
-            <p class="mt-2 text-xs text-amber-700">Note: Calculator outputs are estimates for illustration only.</p>
+        <!-- Premium Advance -->
+        <div class="card">
+          <h3>Premium Advance</h3>
+          <p class="muted">Range: <strong>1,000,001 – 4,500,000</strong> · Tenor: <strong>1–12</strong> months · Interest: <strong>0% p.m.</strong></p>
+          <div class="grid" style="grid-template-columns:1fr auto;gap:.5rem">
+            <input id="loanP_amt" type="number" min="1000001" max="4500000" placeholder="Amount (1,000,001 – 4,500,000)">
+            <select id="loanP_mon">
+              <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option>
+              <option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option>
+            </select>
+            <button class="btn" onclick="calcLoan('P')">Calculate</button>
+          </div>
+          <p id="loanP_out" class="helper"></p>
+          <div style="margin-top:.5rem">
+            <a class="btn" href="https://wa.me/254701017246?text=Hello%20Imarika%2C%20I%20want%20a%20Premium%20Advance%20loan.">Apply for Premium Advance</a>
           </div>
         </div>
       </div>
 
-      <script>
-        (function(){
-          const $ = (id) => document.getElementById(id);
-          $("goldCalc")?.addEventListener("click", () => {
-            let amt = Number($("goldAmt").value || 0);
-            let note = "";
-            if (amt < 70001) { amt = 70001; note = "Adjusted to minimum (KES 70,001)."; }
-            if (amt > 140000) { amt = 140000; note = "Adjusted to maximum (KES 140,000)."; }
-            const earnings = amt * 0.50;
-            const total = amt + earnings;
-            const out = $("goldOut");
-            out.classList.remove("hidden");
-            out.innerHTML = `
-              <div><strong>Deposit:</strong> KES ${amt.toLocaleString()}</div>
-              <div><strong>Return rate:</strong> 50% in 24 hours</div>
-              <div><strong>Projected earnings:</strong> KES ${earnings.toFixed(2).toLocaleString()}</div>
-              <div><strong>Projected total after 24 hours:</strong> KES ${total.toFixed(2).toLocaleString()}</div>
-              ${note ? `<div class="mt-2 text-red-600 text-xs">Warning: ${note}</div>` : ""}
-            `;
-          });
-        })();
-      </script>
-    </section>
-    <!-- ================= /GOLD PLAN ==================== -->
-
-    <!-- ================= PLATINUM PLAN ================= -->
-    <section id="platinum" class="bg-white py-20 border-t">
-      <div class="max-w-7xl mx-auto px-4">
-        <div class="text-center">
-          <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight">Platinum Plan</h2>
-          <p class="mt-3 text-lg text-gray-700">
-            KES <strong>140,000+</strong>. Fixed <strong>70% in 24 hours</strong>. Dedicated manager & custom reporting.
-          </p>
-          <p class="mt-2 text-sm text-gray-600">
-            Example: invest <strong>KES 200,000</strong> → earn <strong>KES 140,000</strong> → total <strong>KES 340,000</strong> in 24h.
-          </p>
-        </div>
-
-        <div class="grid md:grid-cols-2 gap-8 mt-12">
-          <!-- Steps -->
-          <div class="rounded-2xl border bg-gray-50 p-6 shadow-sm">
-            <h3 class="text-xl font-semibold">How it works</h3>
-            <ol class="mt-4 space-y-3 text-gray-800">
-              <li><strong>1)</strong> Deposit KES 140,000 and above.</li>
-              <li><strong>2)</strong> Priority onboarding & verification.</li>
-              <li><strong>3)</strong> Fixed 70% posts after 24 hours.</li>
-              <li><strong>4)</strong> Withdraw or compound; dedicated manager support.</li>
-            </ol>
-            <div class="mt-6">
-              <a href="#contact" class="inline-flex items-center justify-center rounded-xl px-5 py-3 font-semibold bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500">
-                Talk to a Manager
-              </a>
-            </div>
-          </div>
-
-          <!-- Calculator -->
-          <div class="rounded-2xl border bg-white p-6 shadow-sm">
-            <h3 class="text-xl font-semibold">Quick estimator — 70% in 24 hours</h3>
-            <form id="platForm" class="grid gap-3 mt-4 text-sm">
-              <label>Amount (KES)
-                <input id="platAmt" type="number" min="140000" value="200000"
-                       class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
-              </label>
-              <button type="button" id="platCalc"
-                class="mt-1 inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-semibold bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500">
-                Calculate
-              </button>
-            </form>
-            <div id="platOut" class="mt-4 rounded-xl bg-gray-50 border p-4 text-sm text-gray-800 hidden"></div>
-            <p class="mt-2 text-xs text-amber-700">Note: Calculator outputs are estimates for illustration only.</p>
-          </div>
-        </div>
+      <div class="card" style="margin-top:1rem;background:#fffbeb;border:1px dashed #fde68a">
+        <strong>Example:</strong> If you’ve invested 600,000, your maximum loan eligibility is <strong>1,800,000 (3×)</strong>, subject to the product range and verification.
       </div>
 
-      <script>
-        (function(){
-          const $ = (id) => document.getElementById(id);
-          $("platCalc")?.addEventListener("click", () => {
-            let amt = Number($("platAmt").value || 0);
-            let note = "";
-            if (amt < 140000) { amt = 140000; note = "Adjusted to minimum (KES 140,000)."; }
-            const earnings = amt * 0.70;
-            const total = amt + earnings;
-            const out = $("platOut");
-            out.classList.remove("hidden");
-            out.innerHTML = `
-              <div><strong>Deposit:</strong> KES ${amt.toLocaleString()}</div>
-              <div><strong>Return rate:</strong> 70% in 24 hours</div>
-              <div><strong>Projected earnings:</strong> KES ${earnings.toFixed(2).toLocaleString()}</div>
-              <div><strong>Projected total after 24 hours:</strong> KES ${total.toFixed(2).toLocaleString()}</div>
-              ${note ? `<div class="mt-2 text-red-600 text-xs">Warning: ${note}</div>` : ""}
-            `;
-          });
-        })();
-      </script>
-    </section>
-    <!-- =============== /PLATINUM PLAN ================== -->
-
-    <!-- Why Choose Us -->
-    <section id="choose" class="py-20 bg-gray-50">
-      <div class="max-w-5xl mx-auto px-4 text-center">
-        <h2 class="text-3xl font-bold">Why Choose Imarika?</h2>
-        <ul class="mt-6 grid md:grid-cols-2 gap-4 text-left text-gray-700">
-          <li>✅ Trusted and transparent processes</li>
-          <li>✅ Guaranteed growth and returns</li>
-          <li>✅ Easy access via M-Pesa, bank, and card payments</li>
-          <li>✅ Human customer support</li>
-        </ul>
-        <div class="mt-6 bg-yellow-50 p-6 rounded-xl inline-block text-left">
-          <h3 class="font-semibold mb-1">Our Promise</h3>
-          <p>Steady growth, reliability, and secure opportunities — with real human help.</p>
-        </div>
+      <div style="margin-top:1rem">
+        <a class="btn" href="https://wa.me/254701017246?text=Hello%20Imarika%2C%20I%27d%20like%20to%20apply%20for%20a%20working-capital%20loan.">Apply for a Loan</a>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Loans -->
-    <section id="loans" class="py-20 bg-white">
-      <div class="max-w-7xl mx-auto px-4">
-        <h2 class="text-3xl font-bold text-center">Working-Capital Loans</h2>
-        <p class="mt-2 text-center text-gray-700">
-          Works like shares in a SACCO: your investment determines your loan limit.
-          <strong>Eligible up to 3× your invested amount</strong>, with a <strong>minimum loan of KES 150,000</strong>.<br>
-          Interest per product: <strong>Starter 10% p.m.</strong>, <strong>Business Boost 5% p.m.</strong>, <strong>Premium Advance 0% p.m.</strong>
-        </p>
-
-        <!-- Quick examples -->
-        <div class="grid md:grid-cols-3 gap-6 mt-8 text-sm">
-          <div class="rounded-2xl border bg-gray-50 p-5 shadow-sm">
-            <h3 class="font-semibold text-lg">Example — Starter</h3>
-            <p class="mt-2 text-gray-700">Borrow <strong>KES 200,000</strong> for <strong>3 months</strong> at <strong>10% p.m.</strong></p>
-            <ul class="mt-2 text-gray-700 space-y-1">
-              <li>• Total interest = 200,000 × 10% × 3 = <strong>60,000</strong></li>
-              <li>• Total repay = 200,000 + 60,000 = <strong>260,000</strong></li>
-              <li>• Monthly ≈ 260,000 ÷ 3 = <strong>86,666.67</strong></li>
-            </ul>
-          </div>
-          <div class="rounded-2xl border bg-gray-50 p-5 shadow-sm">
-            <h3 class="font-semibold text-lg">Example — Business Boost</h3>
-            <p class="mt-2 text-gray-700">Borrow <strong>KES 500,000</strong> for <strong>6 months</strong> at <strong>5% p.m.</strong></p>
-            <ul class="mt-2 text-gray-700 space-y-1">
-              <li>• Total interest = 500,000 × 5% × 6 = <strong>150,000</strong></li>
-              <li>• Total repay = 500,000 + 150,000 = <strong>650,000</strong></li>
-              <li>• Monthly ≈ 650,000 ÷ 6 = <strong>108,333.33</strong></li>
-            </ul>
-          </div>
-          <div class="rounded-2xl border bg-gray-50 p-5 shadow-sm">
-            <h3 class="font-semibold text-lg">Example — Premium Advance</h3>
-            <p class="mt-2 text-gray-700">Borrow <strong>KES 1,500,000</strong> for <strong>12 months</strong> at <strong>0% p.m.</strong></p>
-            <ul class="mt-2 text-gray-700 space-y-1">
-              <li>• Total interest = <strong>0</strong></li>
-              <li>• Total repay = <strong>1,500,000</strong></li>
-              <li>• Monthly ≈ 1,500,000 ÷ 12 = <strong>125,000</strong></li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- Eligibility calculator (min invest 50k; max invest 1.5M) -->
-        <div class="rounded-2xl border bg-white p-6 shadow-sm mt-10 max-w-3xl mx-auto">
-          <h3 class="text-xl font-semibold text-center">Loan eligibility calculator</h3>
-          <p class="text-center text-gray-600 text-sm">
-            Eligibility is <strong>3× your invested amount</strong>, min loan <strong>KES 150,000</strong>, max loan <strong>KES 4,500,000</strong>.<br>
-            Enter investment between <strong>KES 50,000</strong> and <strong>KES 1,500,000</strong>.
-          </p>
-          <form id="loanForm" class="grid md:grid-cols-3 gap-3 mt-4 text-sm">
-            <label class="md:col-span-2">Invested amount (KES)
-              <input id="loanInvest" type="number" min="50000" max="1500000" value="50000"
-                     class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
-            </label>
-            <button type="button" id="loanCalc"
-              class="mt-1 inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-semibold bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500">
-              Calculate loan limit
-            </button>
-          </form>
-          <div id="loanOut" class="mt-4 rounded-xl bg-gray-50 border p-4 text-sm text-gray-800 hidden"></div>
-          <p class="mt-2 text-xs text-amber-700 text-center">Note: Calculator outputs are estimates; approval depends on verification & assessment.</p>
-        </div>
-
-        <!-- Product cards with calculators (ranges & tenors) -->
-        <div class="grid md:grid-cols-3 gap-6 mt-12">
-
-          <!-- Starter -->
-          <div class="rounded-2xl border bg-white p-6 shadow-sm">
-            <h3 class="text-xl font-semibold">Starter</h3>
-            <p class="text-gray-700 text-sm">
-              Range: <strong>KES 150,000 – 500,000</strong> • Rate: <strong>10% per month</strong> • Tenor: <strong>1–3 months</strong>
-            </p>
-            <form id="starterForm" class="grid gap-3 mt-4 text-sm">
-              <label>Amount (KES)
-                <input id="starterAmt" type="number" min="150000" max="500000" value="150000"
-                       class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
-              </label>
-              <label>Months (1–3)
-                <input id="starterMonths" type="number" min="1" max="3" value="3"
-                       class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
-              </label>
-              <button type="button" id="starterCalc"
-                class="inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-semibold bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500">
-                Calculate payment
-              </button>
-            </form>
-            <div id="starterOut" class="mt-4 rounded-xl bg-gray-50 border p-4 text-sm text-gray-800 hidden"></div>
-            <p class="mt-2 text-xs text-amber-700">Note: Estimates only. Please repay on time to avoid penalties.</p>
-          </div>
-
-          <!-- Business Boost -->
-          <div class="rounded-2xl border bg-white p-6 shadow-sm">
-            <h3 class="text-xl font-semibold">Business Boost</h3>
-            <p class="text-gray-700 text-sm">
-              Range: <strong>KES 500,001 – 1,000,000</strong> • Rate: <strong>5% per month</strong> • Tenor: <strong>1–6 months</strong>
-            </p>
-            <form id="boostForm" class="grid gap-3 mt-4 text-sm">
-              <label>Amount (KES)
-                <input id="boostAmt" type="number" min="500001" max="1000000" value="500001"
-                       class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
-              </label>
-              <label>Months (1–6)
-                <input id="boostMonths" type="number" min="1" max="6" value="6"
-                       class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
-              </label>
-              <button type="button" id="boostCalc"
-                class="inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-semibold bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500">
-                Calculate payment
-              </button>
-            </form>
-            <div id="boostOut" class="mt-4 rounded-xl bg-gray-50 border p-4 text-sm text-gray-800 hidden"></div>
-            <p class="mt-2 text-xs text-amber-700">Note: Estimates only. Please repay on time to avoid penalties.</p>
-          </div>
-
-          <!-- Premium Advance -->
-          <div class="rounded-2xl border bg-white p-6 shadow-sm">
-            <h3 class="text-xl font-semibold">Premium Advance</h3>
-            <p class="text-gray-700 text-sm">
-              Range: <strong>KES 1,000,001 – 4,500,000</strong> • Rate: <strong>0% per month</strong> • Tenor: <strong>1–12 months</strong>
-            </p>
-            <form id="premiumForm" class="grid gap-3 mt-4 text-sm">
-              <label>Amount (KES)
-                <input id="premiumAmt" type="number" min="1000001" max="4500000" value="1000001"
-                       class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
-              </label>
-              <label>Months (1–12)
-                <input id="premiumMonths" type="number" min="1" max="12" value="12"
-                       class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
-              </label>
-              <button type="button" id="premiumCalc"
-                class="inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-semibold bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500">
-                Calculate payment
-              </button>
-            </form>
-            <div id="premiumOut" class="mt-4 rounded-xl bg-gray-50 border p-4 text-sm text-gray-800 hidden"></div>
-            <p class="mt-2 text-xs text-amber-700">Note: Estimates only. Please repay on time to avoid penalties.</p>
-          </div>
-        </div>
-
-        <div class="text-center mt-8 text-xs text-gray-600">
-          Figures are for guidance only and may differ after verification, fees, or schedule selection. Always repay on time to maintain eligibility and good standing.
-        </div>
-
-        <div class="text-center mt-10">
-          <a href="#contact" class="px-6 py-3 rounded-xl bg-yellow-400 text-gray-900 font-semibold shadow hover:bg-yellow-500">Apply for a Loan</a>
-        </div>
+  <!-- Compare Plans -->
+  <section id="compare">
+    <div class="container">
+      <h2>Compare Plans</h2>
+      <div style="overflow-x:auto;margin-top:1rem">
+        <table border="1" cellspacing="0" cellpadding="10" style="width:100%;text-align:center;border-collapse:collapse">
+          <thead style="background:#fef3c7">
+            <tr><th>Plan</th><th>Range (KES)</th><th>Return</th><th>Example</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Standard</td><td>1,000 – 70,000</td><td>30% in 24h</td><td>10,000 → 13,000</td></tr>
+            <tr><td>Gold</td><td>70,001 – 140,000</td><td>50% in 24h</td><td>100,000 → 150,000</td></tr>
+            <tr><td>Platinum</td><td>140,001+</td><td>70% in 24h</td><td>150,000 → 255,000</td></tr>
+            <tr><td>Loans</td><td>150,000 – 4,500,000</td><td>Up to 3× invested</td><td>600,000 → 1,800,000</td></tr>
+          </tbody>
+        </table>
       </div>
+    </div>
+  </section>
 
-      <!-- Scripts for Loans calculators -->
-      <script>
-        (function(){
-          const fmt = n => Number(n).toLocaleString();
+  <!-- FAQ -->
+  <section id="faq" style="background:#fafafa">
+    <div class="container">
+      <h2>Frequently Asked Questions</h2>
+      <details><summary><strong>When do I earn returns?</strong></summary><p>All investment returns post within 24 hours.</p></details>
+      <details><summary><strong>Who is eligible for loans?</strong></summary><p>All active investors. Loan amounts are up to 3× your invested amount, subject to verification and product limits.</p></details>
+      <details><summary><strong>How do I apply?</strong></summary><p>Click “Apply” or “Get Started” — it redirects you to WhatsApp and our team will guide you.</p></details>
+      <details><summary><strong>Is my money safe?</strong></summary><p>We provide transparent terms and clear contracts for every client.</p></details>
+    </div>
+  </section>
 
-          // Eligibility (min invest 50k, max invest 1.5M; eligibility = max(150k, min(4.5M, 3x)))
-          const loanBtn = document.getElementById("loanCalc");
-          const loanOut = document.getElementById("loanOut");
-          loanBtn?.addEventListener("click", () => {
-            let invested = Number(document.getElementById("loanInvest").value || 0);
-            let note = "";
-            if (invested < 50000) { invested = 50000; note = "Adjusted to minimum investment (KES 50,000)."; }
-            if (invested > 1500000) { invested = 1500000; note = "Adjusted to maximum investment (KES 1,500,000)."; }
-            const threeX = invested * 3;
-            const minLoan = 150000;
-            const maxLoan = 4500000;
-            const eligible = Math.max(minLoan, Math.min(maxLoan, threeX));
-            loanOut.classList.remove("hidden");
-            loanOut.innerHTML = `
-              <div><strong>Your investment:</strong> KES ${fmt(invested)}</div>
-              <div><strong>3× of investment:</strong> KES ${fmt(threeX)}</div>
-              <div><strong>Minimum loan threshold:</strong> KES ${fmt(minLoan)} &nbsp; • &nbsp; <strong>Maximum loan:</strong> KES ${fmt(maxLoan)}</div>
-              <div class="mt-1"><strong>Estimated eligible loan:</strong> <span class="text-green-700 font-semibold">KES ${fmt(eligible)}</span></div>
-              ${note ? `<div class="mt-2 text-red-600 text-xs">Warning: ${note}</div>` : ""}
-            `;
-          });
-
-          // Generic flat-interest calculator
-          function flatCalc(amount, months, ratePm) {
-            const interest = amount * ratePm * months;
-            const total = amount + interest;
-            const monthly = total / months;
-            return { interest, total, monthly };
-          }
-          function resultHTML(amount, months, ratePct, res, note){
-            return `
-              <div><strong>Amount:</strong> KES ${fmt(amount)}</div>
-              <div><strong>Tenor:</strong> ${months} month(s)</div>
-              <div><strong>Rate:</strong> ${ratePct}% per month (flat)</div>
-              <div><strong>Total interest:</strong> KES ${fmt(res.interest.toFixed(2))}</div>
-              <div><strong>Total to repay:</strong> KES ${fmt(res.total.toFixed(2))}</div>
-              <div><strong>Approx. monthly payment:</strong> KES ${fmt(res.monthly.toFixed(2))}</div>
-              ${note ? `<div class="mt-2 text-red-600 text-xs">Warning: ${note}</div>` : ""}
-            `;
-          }
-
-          // Starter: 10% p.m., 150,000–500,000, tenor 1–3
-          document.getElementById("starterCalc")?.addEventListener("click", () => {
-            let amt = Number(document.getElementById("starterAmt").value || 0);
-            let months = Number(document.getElementById("starterMonths").value || 1);
-            let note = "";
-            if (amt < 150000) { amt = 150000; note = "Adjusted to minimum (KES 150,000)."; }
-            if (amt > 500000) { amt = 500000; note = "Adjusted to maximum (KES 500,000)."; }
-            if (months < 1) { months = 1; note = (note? note+" " : "") + "Tenor adjusted to min (1)."; }
-            if (months > 3) { months = 3; note = (note? note+" " : "") + "Tenor adjusted to max (3)."; }
-            const res = flatCalc(amt, months, 0.10);
-            const out = document.getElementById("starterOut");
-            out.classList.remove("hidden");
-            out.innerHTML = resultHTML(amt, months, 10, res, note);
-          });
-
-          // Business Boost: 5% p.m., 500,001–1,000,000, tenor 1–6
-          document.getElementById("boostCalc")?.addEventListener("click", () => {
-            let amt = Number(document.getElementById("boostAmt").value || 0);
-            let months = Number(document.getElementById("boostMonths").value || 1);
-            let note = "";
-            if (amt < 500001) { amt = 500001; note = "Adjusted to minimum (KES 500,001)."; }
-            if (amt > 1000000) { amt = 1000000; note = "Adjusted to maximum (KES 1,000,000)."; }
-            if (months < 1) { months = 1; note = (note? note+" " : "") + "Tenor adjusted to min (1)."; }
-            if (months > 6) { months = 6; note = (note? note+" " : "") + "Tenor adjusted to max (6)."; }
-            const res = flatCalc(amt, months, 0.05);
-            const out = document.getElementById("boostOut");
-            out.classList.remove("hidden");
-            out.innerHTML = resultHTML(amt, months, 5, res, note);
-          });
-
-          // Premium Advance: 0% p.m., 1,000,001–4,500,000, tenor 1–12
-          document.getElementById("premiumCalc")?.addEventListener("click", () => {
-            let amt = Number(document.getElementById("premiumAmt").value || 0);
-            let months = Number(document.getElementById("premiumMonths").value || 1);
-            let note = "";
-            if (amt < 1000001) { amt = 1000001; note = "Adjusted to minimum (KES 1,000,001)."; }
-            if (amt > 4500000) { amt = 4500000; note = "Adjusted to maximum (KES 4,500,000)."; }
-            if (months < 1) { months = 1; note = (note? note+" " : "") + "Tenor adjusted to min (1)."; }
-            if (months > 12) { months = 12; note = (note? note+" " : "") + "Tenor adjusted to max (12)."; }
-            const res = flatCalc(amt, months, 0.00);
-            const out = document.getElementById("premiumOut");
-            out.classList.remove("hidden");
-            out.innerHTML = resultHTML(amt, months, 0, res, note);
-          });
-        })();
-      </script>
-    </section>
-
-    <!-- Contact -->
-    <section id="contact" class="py-20 bg-gray-50">
-      <div class="max-w-7xl mx-auto px-4">
-        <h2 class="text-3xl font-bold text-center">Get in Touch</h2>
-        <div class="grid md:grid-cols-2 gap-10 mt-12">
-          <div>
-            <p class="text-lg text-gray-700 mb-4">Reach us directly:</p>
-            <ul class="space-y-3 text-gray-700">
-              <li>✉️ <a href="mailto:sales@imarika.net" class="underline">sales@imarika.net</a></li>
-              <li class="flex items-center gap-2">
-                <!-- WhatsApp icon -->
-                <svg aria-hidden="true" viewBox="0 0 24 24" class="w-5 h-5 text-green-500" fill="currentColor">
-                  <path d="M20.52 3.48A11.94 11.94 0 0 0 12.06 0C5.52 0 .2 5.32.2 11.86c0 2.08.55 4.08 1.58 5.86L0 24l6.43-1.67a11.82 11.82 0 0 0 5.63 1.43h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.14-3.41-8.42zM12.06 21.3h-.01a9.5 9.5 0 0 1-4.85-1.31l-.35-.2-3.82.99 1.02-3.73-.23-.38a9.46 9.46 0 0 1-1.45-5.01c0-5.23 4.26-9.49 9.51-9.49 2.54 0 4.93.99 6.72 2.78a9.43 9.43 0 0 1 2.78 6.71c0 5.23-4.26 9.49-9.52 9.49zm5.47-7.14c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.66.15s-.76.97-.92 1.17c-.17.2-.34.22-.63.07-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.34.45-.51.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.53-.07-.15-.66-1.6-.91-2.18-.24-.58-.48-.5-.66-.51l-.56-.01c-.2 0-.53.08-.8.37-.27.3-1.05 1.02-1.05 2.49s1.08 2.89 1.24 3.09c.15.2 2.12 3.22 5.14 4.52.72.31 1.28.5 1.72.64.72.23 1.38.2 1.9.12.58-.09 1.77-.72 2.02-1.41.25-.69.25-1.28.17-1.41-.08-.13-.28-.21-.58-.36z"/>
-                </svg>
-                <a href="https://wa.me/254701017246" target="_blank" class="underline">WhatsApp: +254 701 017 246</a>
-              </li>
-            </ul>
-          </div>
-          <form class="bg-white p-6 rounded-2xl shadow grid gap-4">
-            <input class="rounded-xl border px-3 py-2" placeholder="Your Name">
-            <input class="rounded-xl border px-3 py-2" placeholder="Email or Phone">
-            <textarea class="rounded-xl border px-3 py-2 h-28" placeholder="Message"></textarea>
-            <button type="button" class="px-6 py-3 rounded-xl bg-yellow-400 text-gray-900 font-semibold shadow hover:bg-yellow-500 smooth">Send</button>
-          </form>
-        </div>
+  <!-- Testimonials -->
+  <section id="testimonials">
+    <div class="container">
+      <h2>What Our Clients Say</h2>
+      <div class="grid grid-3" style="margin-top:1rem">
+        <div class="card"><p>⭐️⭐️⭐️⭐️⭐️</p><p>“Gold Plan returns landed in 24h — fast and clear.”</p><p><em>— Mary K.</em></p></div>
+        <div class="card"><p>⭐️⭐️⭐️⭐️⭐️</p><p>“Loan helped me expand my shop with manageable monthly payments.”</p><p><em>— David O.</em></p></div>
+        <div class="card"><p>⭐️⭐️⭐️⭐️⭐️</p><p>“Friendly support on WhatsApp; the process was simple.”</p><p><em>— Sarah N.</em></p></div>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
 
-  <!-- Footer -->
-  <footer class="py-10 text-center text-gray-600">
-    © <span id="year"></span> Imarika — imarika.net
+  <!-- Contact -->
+  <section id="contact" style="background:#fafafa">
+    <div class="container">
+      <h2>Get in Touch</h2>
+      <div class="grid grid-2" style="margin-top:1rem">
+        <div class="card">
+          <p>✉️ <a href="mailto:sales@imarika.net">sales@imarika.net</a></p>
+          <p>📞 +254 701 017 246</p>
+          <p>💬 <a href="https://wa.me/254701017246">Chat on WhatsApp</a></p>
+          <p>🌐 <a href="https://imarika.net" target="_blank">imarika.net</a></p>
+        </div>
+        <form action="mailto:sales@imarika.net" method="POST" enctype="text/plain" class="card" onsubmit="return confirmEmailForm()">
+          <input id="cName" name="Name" placeholder="Your Name" required>
+          <input id="cContact" name="Contact" placeholder="Email or Phone" required>
+          <textarea id="cMsg" name="Message" placeholder="Message" rows="5" required></textarea>
+          <button type="submit" class="btn">Send</button>
+          <p class="helper">This opens your email app to send to <strong>sales@imarika.net</strong>. Prefer WhatsApp? <a href="https://wa.me/254701017246?text=Hello%20Imarika%2C%20I%27d%20like%20some%20help.">Click here</a>.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:.6rem">
+        <img src="/favicon.svg" class="logo" alt="">
+        <span>© <span id="y"></span> Imarika — <a class="muted" href="https://imarika.net">imarika.net</a></span>
+      </div>
+      <div><a class="muted" href="#plans">Plans</a> · <a class="muted" href="#loans">Loans</a> · <a class="muted" href="#contact">Contact</a></div>
+    </div>
   </footer>
 
   <!-- Floating WhatsApp -->
-  <a href="https://wa.me/254701017246" target="_blank" rel="noopener"
-     class="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-green-500 text-white flex items-center justify-center shadow-lg hover:bg-green-600 smooth"
-     aria-label="Chat on WhatsApp">
-    <svg aria-hidden="true" viewBox="0 0 24 24" class="w-7 h-7" fill="currentColor">
-      <path d="M20.52 3.48A11.94 11.94 0 0 0 12.06 0C5.52 0 .2 5.32.2 11.86c0 2.08.55 4.08 1.58 5.86L0 24l6.43-1.67a11.82 11.82 0 0 0 5.63 1.43h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.14-3.41-8.42zM12.06 21.3h-.01a9.5 9.5 0 0 1-4.85-1.31l-.35-.2-3.82.99 1.02-3.73-.23-.38a9.46 9.46 0 0 1-1.45-5.01c0-5.23 4.26-9.49 9.51-9.49 2.54 0 4.93.99 6.72 2.78a9.43 9.43 0 0 1 2.78 6.71c0 5.23-4.26 9.49-9.52 9.49zm5.47-7.14c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.66.15s-.76.97-.92 1.17c-.17.2-.34.22-.63.07-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.34.45-.51.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.53-.07-.15-.66-1.6-.91-2.18-.24-.58-.48-.5-.66-.51l-.56-.01c-.2 0-.53.08-.8.37-.27.3-1.05 1.02-1.05 2.49s1.08 2.89 1.24 3.09c.15.2 2.12 3.22 5.14 4.52.72.31 1.28.5 1.72.64.72.23 1.38.2 1.9.12.58-.09 1.77-.72 2.02-1.41.25-.69.25-1.28.17-1.41-.08-.13-.28-.21-.58-.36z"/>
-    </svg>
-  </a>
+  <div class="wa-float">
+    <a class="wa-btn" href="https://wa.me/254701017246?text=Hello%20Imarika!">
+      <svg viewBox="0 0 32 32" width="26" height="26" fill="currentColor" aria-hidden="true">
+        <path d="M19.11 17.27c-.32-.16-1.83-.9-2.11-1.01-.28-.11-.48-.16-.68.16-.2.32-.78 1.01-.96 1.22-.18.2-.36.23-.68.08-.32-.16-1.34-.49-2.55-1.56-.94-.84-1.57-1.88-1.76-2.2-.18-.32-.02-.49.14-.65.14-.14.32-.36.48-.54.16-.18.2-.3.3-.5.1-.2.05-.38-.03-.54-.08-.16-.68-1.64-.93-2.24-.25-.6-.5-.5-.68-.5-.18 0-.38-.02-.58-.02-.2 0-.54.08-.82.38-.28.3-1.08 1.06-1.08 2.57 0 1.52 1.11 2.98 1.26 3.18.16.2 2.19 3.35 5.31 4.69.74.32 1.32.51 1.77.66.74.23 1.41.2 1.94.12.59-.09 1.83-.75 2.09-1.48.26-.73.26-1.35.18-1.48-.08-.13-.3-.2-.62-.36zM16 2.67c-7.34 0-13.33 5.99-13.33 13.33 0 2.35.62 4.54 1.71 6.44L2.67 29.33l7.06-1.85c1.83 1 3.92 1.57 6.17 1.57 7.34 0 13.33-5.99 13.33-13.33S23.34 2.67 16 2.67z"></path>
+      </svg>
+    </a>
+  </div>
 
-  <script>document.getElementById("year").textContent = new Date().getFullYear();</script>
+  <script>
+    // Year in footer
+    document.getElementById('y').textContent = new Date().getFullYear();
+
+    // Helpers
+    const fmt = (n) => Number(n).toLocaleString('en-KE');
+
+    // Investment calculators (24h)
+    function calcInvestment(plan){
+      const cfg = {
+        std:  { id:'stdAmt',  out:'stdOut',  min:1000,   max:70000,  pct:30 },
+        gold: { id:'goldAmt', out:'goldOut', min:70001,  max:140000, pct:50 },
+        plat: { id:'platAmt', out:'platOut', min:140001, max:Infinity, pct:70 }
+      }[plan];
+
+      const amtEl = document.getElementById(cfg.id);
+      const outEl = document.getElementById(cfg.out);
+      let amt = Number(amtEl.value || 0);
+
+      if(!amt){ outEl.innerHTML = '<span class="helper" style="color:var(--danger)">Enter amount.</span>'; return; }
+      if(amt < cfg.min){ outEl.innerHTML = `<span class="helper" style="color:var(--danger)">Minimum is KES ${fmt(cfg.min)}.</span>`; return; }
+      if(isFinite(cfg.max) && amt > cfg.max){ outEl.innerHTML = `<span class="helper" style="color:var(--danger)">Maximum is KES ${fmt(cfg.max)}.</span>`; return; }
+
+      const earnings = Math.round(amt * (cfg.pct/100));
+      const total = amt + earnings;
+      outEl.innerHTML = `<span class="helper" style="color:var(--ok)">Projected earnings in 24h:</span> <strong>KES ${fmt(earnings)}</strong><br>Total payout: <strong>KES ${fmt(total)}</strong>`;
+    }
+
+    // Loan calculators (flat monthly interest)
+    function calcLoan(tier){
+      const map = {
+        S: { amt:'loanS_amt', mon:'loanS_mon', out:'loanS_out', min:150000, max:500000,  rate:0.10 },
+        B: { amt:'loanB_amt', mon:'loanB_mon', out:'loanB_out', min:500001, max:1000000, rate:0.05 },
+        P: { amt:'loanP_amt', mon:'loanP_mon', out:'loanP_out', min:1000001, max:4500000, rate:0.00 }
+      }[tier];
+
+      const amtEl = document.getElementById(map.amt);
+      const monEl = document.getElementById(map.mon);
+      const outEl = document.getElementById(map.out);
+
+      let amt = Number(amtEl.value || 0);
+      let months = Number(monEl.value || 1);
+
+      if(!amt){ outEl.innerHTML = '<span class="helper" style="color:var(--danger)">Enter amount.</span>'; return; }
+      if(amt < map.min){ outEl.innerHTML = `<span class="helper" style="color:var(--danger)">Minimum is KES ${fmt(map.min)}.</span>`; return; }
+      if(amt > map.max){ outEl.innerHTML = `<span class="helper" style="color:var(--danger)">Maximum is KES ${fmt(map.max)}.</span>`; return; }
+
+      // Tenor guardrails by product
+      const tenorLimits = { S:{min:1,max:3}, B:{min:1,max:6}, P:{min:1,max:12} }[tier];
+      if(months < tenorLimits.min) months = tenorLimits.min;
+      if(months > tenorLimits.max) months = tenorLimits.max;
+
+      const interest = Math.round(amt * map.rate * months);  // flat simple interest
+      const total = amt + interest;
+      const monthly = Math.ceil(total / months);
+
+      outEl.innerHTML = `
+        Principal: <strong>KES ${fmt(amt)}</strong><br>
+        Interest (${(map.rate*100)}% × ${months} mo): <strong>KES ${fmt(interest)}</strong><br>
+        Total to repay: <strong>KES ${fmt(total)}</strong> &nbsp; • &nbsp; Monthly: <strong>KES ${fmt(monthly)}</strong>
+      `;
+    }
+
+    // Confirm mailto form has basics filled
+    function confirmEmailForm(){
+      const n = (document.getElementById('cName').value||'').trim();
+      const m = (document.getElementById('cMsg').value||'').trim();
+      if(!n || !m){ alert('Please fill your Name and Message.'); return false; }
+      return true;
+    }
+  </script>
 </body>
 </html>
