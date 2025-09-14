@@ -72,9 +72,9 @@
             <h3 class="text-xl font-semibold">Standard</h3>
             <ul class="mt-3 text-sm space-y-1 text-gray-700">
               <li>• From KES 1,000</li>
-              <li>• <strong>Up to KES 70,000</strong></li>
+              <li>• Up to KES 70,000</li>
+              <li>• 30% in 24 hours</li>
               <li>• Flexible deposits & withdrawals</li>
-              <li>• Basic support</li>
             </ul>
             <a href="#standard" class="mt-4 inline-block text-yellow-600 font-semibold underline">Learn more →</a>
           </div>
@@ -83,9 +83,9 @@
           <div class="rounded-3xl border bg-white p-6 shadow-sm">
             <h3 class="text-xl font-semibold">Gold</h3>
             <ul class="mt-3 text-sm space-y-1 text-gray-700">
-              <li>• <strong>KES 70,001 – 140,000</strong></li>
+              <li>• KES 70,001 – 140,000</li>
+              <li>• <strong>50% in 24 hours</strong></li>
               <li>• Enhanced portfolio & priority support</li>
-              <li>• Guaranteed returns</li>
             </ul>
             <a href="#gold" class="mt-4 inline-block text-yellow-600 font-semibold underline">Learn more →</a>
           </div>
@@ -94,9 +94,9 @@
           <div class="rounded-3xl border bg-white p-6 shadow-sm">
             <h3 class="text-xl font-semibold">Platinum</h3>
             <ul class="mt-3 text-sm space-y-1 text-gray-700">
-              <li>• <strong>KES 140,000 and above</strong></li>
+              <li>• KES 140,000 and above</li>
+              <li>• <strong>70% in 24 hours</strong></li>
               <li>• Dedicated manager & custom reporting</li>
-              <li>• Guaranteed returns</li>
             </ul>
             <a href="#platinum" class="mt-4 inline-block text-yellow-600 font-semibold underline">Learn more →</a>
           </div>
@@ -110,8 +110,10 @@
         <div class="text-center">
           <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight">Standard Plan</h2>
           <p class="mt-3 text-lg text-gray-700">
-            Start building steadily from <strong>KES 1,000</strong> up to <strong>KES 70,000</strong>.
-            Fixed <strong>30% in 24 hours</strong>. Flexible deposits & withdrawals, with human support.
+            KES <strong>1,000</strong> to <strong>70,000</strong>. Fixed <strong>30% in 24 hours</strong>. Flexible deposits & withdrawals.
+          </p>
+          <p class="mt-2 text-sm text-gray-600">
+            Example: invest <strong>KES 10,000</strong> → earn <strong>KES 3,000</strong> → total <strong>KES 13,000</strong> in 24h.
           </p>
         </div>
 
@@ -121,12 +123,10 @@
             <h3 class="text-xl font-semibold">How it works (step by step)</h3>
             <ol class="mt-4 space-y-3 text-gray-800">
               <li><strong>1)</strong> Choose your amount (KES 1,000 – 70,000).</li>
-              <li><strong>2)</strong> Create your profile & verify ID.</li>
+              <li><strong>2)</strong> Create profile & verify ID.</li>
               <li><strong>3)</strong> Fund via M-Pesa, bank, or card.</li>
               <li><strong>4)</strong> Earnings post after 24 hours at a fixed 30%.</li>
-              <li><strong>5)</strong> Withdraw to M-Pesa/bank (T+1 business day) or compound.</li>
-              <li><strong>6)</strong> Track deposits, earnings & payouts anytime.</li>
-              <li><strong>7)</strong> Need help? WhatsApp +254 701 017 246 or email sales@imarika.net.</li>
+              <li><strong>5)</strong> Withdraw (T+1 business day) or compound.</li>
             </ol>
 
             <div class="mt-6">
@@ -137,21 +137,19 @@
           </div>
 
           <!-- Calculator -->
-          <div class="space-y-6">
-            <div class="rounded-2xl border bg-white p-6 shadow-sm">
-              <h3 class="text-xl font-semibold">Quick estimator (30% in 24 hours)</h3>
-              <form id="stdForm" class="grid gap-3 mt-4 text-sm">
-                <label>Amount (KES)
-                  <input id="stdAmt" type="number" min="1000" max="70000" value="10000"
-                         class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
-                </label>
-                <button type="button" id="stdCalc"
-                  class="mt-1 inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-semibold bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500">
-                  Calculate
-                </button>
-              </form>
-              <div id="stdOut" class="mt-4 rounded-xl bg-gray-50 border p-4 text-sm text-gray-800 hidden"></div>
-            </div>
+          <div class="rounded-2xl border bg-white p-6 shadow-sm">
+            <h3 class="text-xl font-semibold">Quick estimator — 30% in 24 hours</h3>
+            <form id="stdForm" class="grid gap-3 mt-4 text-sm">
+              <label>Amount (KES)
+                <input id="stdAmt" type="number" min="1000" max="70000" value="10000"
+                       class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
+              </label>
+              <button type="button" id="stdCalc"
+                class="mt-1 inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-semibold bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500">
+                Calculate
+              </button>
+            </form>
+            <div id="stdOut" class="mt-4 rounded-xl bg-gray-50 border p-4 text-sm text-gray-800 hidden"></div>
           </div>
         </div>
       </div>
@@ -185,7 +183,10 @@
         <div class="text-center">
           <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight">Gold Plan</h2>
           <p class="mt-3 text-lg text-gray-700">
-            <strong>KES 70,001 – 140,000</strong>. Enhanced portfolio, priority support, and fixed <strong>30% in 24 hours</strong>.
+            KES <strong>70,001 – 140,000</strong>. Fixed <strong>50% in 24 hours</strong>. Enhanced portfolio & priority support.
+          </p>
+          <p class="mt-2 text-sm text-gray-600">
+            Example: invest <strong>KES 80,000</strong> → earn <strong>KES 40,000</strong> → total <strong>KES 120,000</strong> in 24h.
           </p>
         </div>
 
@@ -194,10 +195,10 @@
           <div class="rounded-2xl border bg-white p-6 shadow-sm">
             <h3 class="text-xl font-semibold">How it works</h3>
             <ol class="mt-4 space-y-3 text-gray-800">
-              <li><strong>1)</strong> Choose your deposit within KES 70,001 – 140,000.</li>
+              <li><strong>1)</strong> Deposit within KES 70,001 – 140,000.</li>
               <li><strong>2)</strong> Quick KYC & funding.</li>
-              <li><strong>3)</strong> Fixed 30% posts after 24 hours.</li>
-              <li><strong>4)</strong> Withdraw or compound; priority support available.</li>
+              <li><strong>3)</strong> Fixed 50% posts after 24 hours.</li>
+              <li><strong>4)</strong> Withdraw or compound; priority support.</li>
             </ol>
             <div class="mt-6">
               <a href="#contact" class="inline-flex items-center justify-center rounded-xl px-5 py-3 font-semibold bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500">
@@ -207,21 +208,19 @@
           </div>
 
           <!-- Calculator -->
-          <div class="space-y-6">
-            <div class="rounded-2xl border bg-white p-6 shadow-sm">
-              <h3 class="text-xl font-semibold">Quick estimator (30% in 24 hours)</h3>
-              <form id="goldForm" class="grid gap-3 mt-4 text-sm">
-                <label>Amount (KES)
-                  <input id="goldAmt" type="number" min="70001" max="140000" value="75000"
-                         class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
-                </label>
-                <button type="button" id="goldCalc"
-                  class="mt-1 inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-semibold bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500">
-                  Calculate
-                </button>
-              </form>
-              <div id="goldOut" class="mt-4 rounded-xl bg-gray-50 border p-4 text-sm text-gray-800 hidden"></div>
-            </div>
+          <div class="rounded-2xl border bg-white p-6 shadow-sm">
+            <h3 class="text-xl font-semibold">Quick estimator — 50% in 24 hours</h3>
+            <form id="goldForm" class="grid gap-3 mt-4 text-sm">
+              <label>Amount (KES)
+                <input id="goldAmt" type="number" min="70001" max="140000" value="80000"
+                       class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
+              </label>
+              <button type="button" id="goldCalc"
+                class="mt-1 inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-semibold bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500">
+                Calculate
+              </button>
+            </form>
+            <div id="goldOut" class="mt-4 rounded-xl bg-gray-50 border p-4 text-sm text-gray-800 hidden"></div>
           </div>
         </div>
       </div>
@@ -233,13 +232,13 @@
             let amt = Number($("goldAmt").value || 0);
             if (amt < 70001) amt = 70001;
             if (amt > 140000) amt = 140000;
-            const earnings = amt * 0.30;
+            const earnings = amt * 0.50; // 50% in 24h
             const total = amt + earnings;
             const out = $("goldOut");
             out.classList.remove("hidden");
             out.innerHTML = `
               <div><strong>Deposit:</strong> KES ${amt.toLocaleString()}</div>
-              <div><strong>Return rate:</strong> 30% in 24 hours</div>
+              <div><strong>Return rate:</strong> 50% in 24 hours</div>
               <div><strong>Projected earnings:</strong> KES ${earnings.toFixed(2).toLocaleString()}</div>
               <div><strong>Projected total after 24 hours:</strong> KES ${total.toFixed(2).toLocaleString()}</div>
             `;
@@ -254,6 +253,12 @@
       <div class="max-w-7xl mx-auto px-4">
         <div class="text-center">
           <h2 class="text-3xl md:text-4xl font-extrabold tracking-tight">Platinum Plan</h2>
+          <p class="mt-3 text-lg text-gray-700">
+            KES <strong>140,000+</strong>. Fixed <strong>70% in 24 hours</strong>. Dedicated manager & custom reporting.
+          </p>
+          <p class="mt-2 text-sm text-gray-600">
+            Example: invest <strong>KES 200,000</strong> → earn <strong>KES 140,000</strong> → total <strong>KES 340,000</strong> in 24h.
+          </p>
         </div>
 
         <div class="grid md:grid-cols-2 gap-8 mt-12">
@@ -261,10 +266,10 @@
           <div class="rounded-2xl border bg-gray-50 p-6 shadow-sm">
             <h3 class="text-xl font-semibold">How it works</h3>
             <ol class="mt-4 space-y-3 text-gray-800">
-              <li><strong>1)</strong> Choose your deposit (KES 140,000 and above).</li>
+              <li><strong>1)</strong> Deposit KES 140,000 and above.</li>
               <li><strong>2)</strong> Priority onboarding & verification.</li>
-              <li><strong>3)</strong> Fixed 30% posts after 24 hours.</li>
-              <li><strong>4)</strong> Monthly service, custom reports, dedicated manager.</li>
+              <li><strong>3)</strong> Fixed 70% posts after 24 hours.</li>
+              <li><strong>4)</strong> Withdraw or compound; dedicated manager support.</li>
             </ol>
             <div class="mt-6">
               <a href="#contact" class="inline-flex items-center justify-center rounded-xl px-5 py-3 font-semibold bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500">
@@ -274,21 +279,19 @@
           </div>
 
           <!-- Calculator -->
-          <div class="space-y-6">
-            <div class="rounded-2xl border bg-white p-6 shadow-sm">
-              <h3 class="text-xl font-semibold">Quick estimator (30% in 24 hours)</h3>
-              <form id="platForm" class="grid gap-3 mt-4 text-sm">
-                <label>Amount (KES)
-                  <input id="platAmt" type="number" min="140000" value="150000"
-                         class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
-                </label>
-                <button type="button" id="platCalc"
-                  class="mt-1 inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-semibold bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500">
-                  Calculate
-                </button>
-              </form>
-              <div id="platOut" class="mt-4 rounded-xl bg-gray-50 border p-4 text-sm text-gray-800 hidden"></div>
-            </div>
+          <div class="rounded-2xl border bg-white p-6 shadow-sm">
+            <h3 class="text-xl font-semibold">Quick estimator — 70% in 24 hours</h3>
+            <form id="platForm" class="grid gap-3 mt-4 text-sm">
+              <label>Amount (KES)
+                <input id="platAmt" type="number" min="140000" value="200000"
+                       class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
+              </label>
+              <button type="button" id="platCalc"
+                class="mt-1 inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-semibold bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500">
+                Calculate
+              </button>
+            </form>
+            <div id="platOut" class="mt-4 rounded-xl bg-gray-50 border p-4 text-sm text-gray-800 hidden"></div>
           </div>
         </div>
       </div>
@@ -299,13 +302,13 @@
           $("platCalc")?.addEventListener("click", () => {
             let amt = Number($("platAmt").value || 0);
             if (amt < 140000) amt = 140000;
-            const earnings = amt * 0.30;
+            const earnings = amt * 0.70; // 70% in 24h
             const total = amt + earnings;
             const out = $("platOut");
             out.classList.remove("hidden");
             out.innerHTML = `
               <div><strong>Deposit:</strong> KES ${amt.toLocaleString()}</div>
-              <div><strong>Return rate:</strong> 30% in 24 hours</div>
+              <div><strong>Return rate:</strong> 70% in 24 hours</div>
               <div><strong>Projected earnings:</strong> KES ${earnings.toFixed(2).toLocaleString()}</div>
               <div><strong>Projected total after 24 hours:</strong> KES ${total.toFixed(2).toLocaleString()}</div>
             `;
@@ -336,9 +339,41 @@
     <section id="loans" class="py-20 bg-white">
       <div class="max-w-7xl mx-auto px-4">
         <h2 class="text-3xl font-bold text-center">Working-Capital Loans</h2>
-        <p class="mt-2 text-center text-gray-700">Fast, responsible financing with clear pricing, simple steps, and flexible repayments.</p>
+        <p class="mt-2 text-center text-gray-700">
+          Works like shares in a SACCO: your investment determines your loan limit.
+          <strong>Eligible up to 3× your invested amount</strong>, with a <strong>minimum loan of KES 150,000</strong>.
+        </p>
 
-        <div class="grid md:grid-cols-3 gap-6 mt-10">
+        <!-- Loan Example -->
+        <div class="mt-8 grid md:grid-cols-2 gap-6">
+          <div class="rounded-2xl border bg-gray-50 p-6 shadow-sm">
+            <h3 class="text-xl font-semibold">Example</h3>
+            <p class="mt-3 text-gray-700">
+              If you invest <strong>KES 80,000</strong>, your 3× eligibility is <strong>KES 240,000</strong>.  
+              Since the minimum loan is <strong>KES 150,000</strong>, you can borrow up to <strong>KES 240,000</strong> (subject to assessment).
+            </p>
+          </div>
+
+          <!-- Loan Calculator -->
+          <div class="rounded-2xl border bg-white p-6 shadow-sm">
+            <h3 class="text-xl font-semibold">Loan eligibility calculator</h3>
+            <form id="loanForm" class="grid gap-3 mt-4 text-sm">
+              <label>Invested amount (KES)
+                <input id="loanInvest" type="number" min="0" value="80000"
+                       class="mt-1 w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-4 focus:ring-yellow-100">
+              </label>
+              <button type="button" id="loanCalc"
+                class="mt-1 inline-flex items-center justify-center rounded-xl px-5 py-2.5 font-semibold bg-yellow-400 text-gray-900 shadow hover:bg-yellow-500">
+                Calculate loan limit
+              </button>
+            </form>
+            <div id="loanOut" class="mt-4 rounded-xl bg-gray-50 border p-4 text-sm text-gray-800 hidden"></div>
+            <p class="mt-2 text-xs text-gray-500">Note: final loan approval depends on verification and assessment.</p>
+          </div>
+        </div>
+
+        <!-- Loan Products (unchanged visuals) -->
+        <div class="grid md:grid-cols-3 gap-6 mt-12">
           <div class="rounded-2xl border bg-white p-6 shadow-sm">
             <h3 class="text-xl font-semibold">Starter Loan</h3>
             <ul class="mt-3 text-sm text-gray-700 space-y-1">
@@ -365,15 +400,14 @@
           </div>
         </div>
 
-        <!-- Eligibility (updated) -->
+        <!-- Eligibility summary -->
         <div class="grid md:grid-cols-2 gap-10 mt-12">
           <div>
             <h3 class="text-2xl font-semibold mt-8">Eligibility</h3>
             <ul class="mt-4 space-y-2 text-gray-700">
-              <li>• <strong>Standard:</strong> <span class="text-green-600 font-semibold">No eligibility</span></li>
-              <li>• Gold & Platinum: Valid ID & active phone number</li>
-              <li>• Gold & Platinum: Proof of income or business activity</li>
-              <li>• Gold & Platinum: Good recent repayment history</li>
+              <li>• Loan limit: up to <strong>3× invested amount</strong></li>
+              <li>• <strong>Minimum loan:</strong> KES 150,000</li>
+              <li>• Basic KYC (ID, active phone, statements)</li>
             </ul>
           </div>
           <div>
@@ -390,6 +424,26 @@
           <a href="#contact" class="px-6 py-3 rounded-xl bg-yellow-400 text-gray-900 font-semibold shadow hover:bg-yellow-500">Apply for a Loan</a>
         </div>
       </div>
+
+      <script>
+        (function(){
+          const $ = (id) => document.getElementById(id);
+          $("loanCalc")?.addEventListener("click", () => {
+            const invested = Math.max(0, Number($("loanInvest").value || 0));
+            const threeX = invested * 3;
+            const minLoan = 150000;
+            const eligible = Math.max(minLoan, threeX);
+            const out = $("loanOut");
+            out.classList.remove("hidden");
+            out.innerHTML = `
+              <div><strong>Your investment:</strong> KES ${invested.toLocaleString()}</div>
+              <div><strong>3× of investment:</strong> KES ${threeX.toLocaleString()}</div>
+              <div><strong>Minimum loan threshold:</strong> KES ${minLoan.toLocaleString()}</div>
+              <div class="mt-1"><strong>Estimated eligible loan:</strong> <span class="text-green-700 font-semibold">KES ${eligible.toLocaleString()}</span></div>
+            `;
+          });
+        })();
+      </script>
     </section>
 
     <!-- Contact -->
