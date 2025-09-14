@@ -28,7 +28,7 @@
     @media (max-width:600px){.container{padding:0 .9rem}}
 
     /* Buttons */
-    .btn{display:inline-flex;align-items:center;justify-content:center;padding:.85rem 1.1rem;border-radius:14px;font-weight:700;
+    .btn{display:inline-flex;align-items:center;justify-content:center;padding:.85rem 1.1rem;border-radius:999px;font-weight:700;
       background:var(--brand);color:#111827;cursor:pointer;border:0;box-shadow:0 10px 30px rgba(245,158,11,.25);transition:.2s}
     .btn:hover{transform:translateY(-1px);background:#fbbf24}
     .btn-outline{background:#fff;border:1px solid var(--line);color:var(--text);box-shadow:none}
@@ -43,10 +43,11 @@
     .logo{height:32px;width:32px;border-radius:10px;flex:0 0 auto}
     .badge{padding:.18rem .6rem;border-radius:999px;background:#fef3c7;color:#78350f;font-weight:700;font-size:.75rem;white-space:nowrap}
     @media(max-width:420px){.badge{font-size:.7rem;padding:.12rem .5rem}}
-    nav a{padding:.4rem .6rem;border-radius:10px;display:inline-flex;align-items:center;line-height:1}
-    nav a:hover{background:#f8fafc}
-    .hamburger{display:none;border:1px solid var(--line);background:#fff;border-radius:10px;padding:.5rem}
-    @media (max-width: 900px){ nav.desktop{display:none} .hamburger{display:block} }
+    /* Hide desktop nav entirely; use the mobile drawer everywhere */
+    nav.desktop{display:none!important}
+    /* Hamburger always visible */
+    .hamburger{display:inline-flex;border:1px solid var(--line);background:#fff;border-radius:999px;padding:.55rem}
+    .hamburger:hover{background:#f8fafc}
 
     /* Sections & cards */
     section{padding:3.2rem 0}
@@ -133,25 +134,16 @@
         <span class="badge">Secure & Transparent</span>
       </a>
 
-      <nav class="desktop" style="display:flex;gap:.4rem;flex-wrap:wrap;align-items:center">
-        <a href="#home">Home</a>
-        <a href="#plans">Our Investments</a>
-        <a href="#loans">Working-Capital</a>
-        <a href="#compare">Compare Plans</a>
-        <a href="#choose">Why Us</a>
-        <a href="#about">About</a>
-        <a href="#testimonials">Clients</a>
-        <a href="#faq">FAQ</a>
-        <a href="#contact">Contact</a>
-      </nav>
-
-      <button class="hamburger" aria-label="Menu" id="menuBtn">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="#334155" stroke-width="2" stroke-linecap="round"/></svg>
-      </button>
-
-      <a class="btn" href="https://wa.me/254701017246?text=Hi%20Imarika!%20I%27d%20like%20to%20get%20started.">Get Started</a>
+      <!-- Right cluster: menu + pill CTA -->
+      <div style="display:flex;align-items:center;gap:.6rem">
+        <button class="hamburger" aria-label="Menu" id="menuBtn">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="#334155" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <a class="btn" href="https://wa.me/254701017246?text=Hi%20Imarika!%20I%27d%20like%20to%20get%20started.">Get Started</a>
+      </div>
     </div>
-    <!-- Mobile dropdown -->
+
+    <!-- Mobile dropdown (used for all sizes) -->
     <div id="mobileNav">
       <div class="container">
         <a href="#home" class="mnav">Home</a>
@@ -177,7 +169,6 @@
         <a class="btn" href="#plans">Our Services</a>
         <a class="btn btn-outline" href="https://wa.me/254701017246?text=Hello%20Imarika%2C%20I%20need%20support.">Contact Us</a>
         <a class="btn btn-wa" href="https://wa.me/254701017246?text=Hi%20Imarika!%20I%27d%20like%20to%20get%20started." style="color:#fff">
-          <!-- WhatsApp bubble icon (preferred …36z path) -->
           <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="margin-right:.45rem">
             <path d="M20.52 3.48A11.94 11.94 0 0 0 12.06 0C5.52 0 .2 5.32.2 11.86c0 2.08.55 4.08 1.58 5.86L0 24l6.43-1.67a11.82 11.82 0 0 0 5.63 1.43h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.14-3.41-8.42zM12.06 21.3h-.01a9.5 9.5 0 0 1-4.85-1.31l-.35-.2-3.82.99 1.02-3.73-.23-.38a9.46 9.46 0 0 1-1.45-5.01c0-5.23 4.26-9.49 9.51-9.49 2.54 0 4.93.99 6.72 2.78a9.43 9.43 0 0 1 2.78 6.71c0 5.23-4.26 9.49-9.52 9.49zm5.47-7.14c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.66.15s-.76.97-.92 1.17c-.17.2-.34.22-.63.07-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.34.45-.51.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.53-.07-.15-.66-1.6-.91-2.18-.24-.58-.48-.5-.66-.51l-.56-.01c-.2 0-.53.08-.8.37-.27.3-1.05 1.02-1.05 2.49s1.08 2.89 1.24 3.09c.15.2 2.12 3.22 5.14 4.52.72.31 1.28.5 1.72.64.72.23 1.38.2 1.9.12.58-.09 1.77-.72 2.02-1.41.25-.69.25-1.28.17-1.41-.08-.13-.28-.21-.58-.36z"/>
           </svg>
@@ -187,7 +178,7 @@
     </div>
   </section>
 
-  <!-- Our Investments (Plans) -->
+  <!-- Our Investments -->
   <section id="plans" style="background:#fafafa">
     <div class="container">
       <h2>Our Investments (24-hour Growth)</h2>
@@ -199,7 +190,6 @@
       </p>
 
       <div class="grid grid-3" style="margin-top:1rem">
-        <!-- Standard -->
         <div class="card">
           <h3>Standard Plan</h3>
           <p class="muted">KES <strong>1,000 – 70,000</strong> · <strong>30%</strong> in 24h</p>
@@ -212,7 +202,6 @@
           <a class="btn btn-full" href="https://wa.me/254701017246?text=Hello%20Imarika%2C%20I%27m%20interested%20in%20the%20Standard%20Plan%20(30%%20in%2024h).">Apply Now</a>
         </div>
 
-        <!-- Gold -->
         <div class="card">
           <h3>Gold Plan</h3>
           <p class="muted">KES <strong>70,001 – 140,000</strong> · <strong>50%</strong> in 24h</p>
@@ -225,7 +214,6 @@
           <a class="btn btn-full" href="https://wa.me/254701017246?text=Hello%20Imarika%2C%20I%27m%20interested%20in%20the%20Gold%20Plan%20(50%%20in%2024h).">Upgrade to Gold</a>
         </div>
 
-        <!-- Platinum -->
         <div class="card">
           <h3>Platinum Plan</h3>
           <p class="muted">KES <strong>140,001+</strong> · <strong>70%</strong> in 24h</p>
@@ -258,7 +246,6 @@
       <p class="muted">Minimum loan amount is <strong>KES 150,000</strong>. Eligibility is up to <strong>3× your invested amount</strong>. Rates & tenors by product:</p>
 
       <div class="grid grid-3" style="margin-top:1rem">
-        <!-- Starter -->
         <div class="card">
           <h3>Starter</h3>
           <p class="muted">Range: <strong>150,000 – 500,000</strong> · Tenor: <strong>1–3</strong> months · Interest: <strong>10% p.m.</strong></p>
@@ -271,7 +258,6 @@
           <a class="btn btn-full" href="https://wa.me/254701017246?text=Hello%20Imarika%2C%20I%20want%20a%20Starter%20loan.">Apply for Starter</a>
         </div>
 
-        <!-- Business Boost -->
         <div class="card">
           <h3>Business Boost</h3>
           <p class="muted">Range: <strong>500,001 – 1,000,000</strong> · Tenor: <strong>1–6</strong> months · Interest: <strong>5% p.m.</strong></p>
@@ -287,7 +273,6 @@
           <a class="btn btn-full" href="https://wa.me/254701017246?text=Hello%20Imarika%2C%20I%20want%20a%20Business%20Boost%20loan.">Apply for Business Boost</a>
         </div>
 
-        <!-- Premium Advance -->
         <div class="card">
           <h3>Premium Advance</h3>
           <p class="muted">Range: <strong>1,000,001 – 4,500,000</strong> · Tenor: <strong>1–12</strong> months · Interest: <strong>0% p.m.</strong></p>
@@ -387,7 +372,7 @@
     </div>
   </section>
 
-  <!-- What Our Clients Say -->
+  <!-- Testimonials -->
   <section id="testimonials">
     <div class="container">
       <h2>What Our Clients Say</h2>
@@ -415,7 +400,7 @@
     </div>
   </section>
 
-  <!-- Get in Touch -->
+  <!-- Contact -->
   <section id="contact">
     <div class="container">
       <h2>Get in Touch</h2>
@@ -425,7 +410,6 @@
             <li>✉️ <a class="muted" href="mailto:sales@imarika.net">sales@imarika.net</a></li>
             <li>📞 +254 701 017 246</li>
             <li style="display:flex;align-items:center;gap:.5rem">
-              <!-- WhatsApp inline (green) -->
               <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="#25D366" style="flex-shrink:0">
                 <path d="M20.52 3.48A11.94 11.94 0 0 0 12.06 0C5.52 0 .2 5.32.2 11.86c0 2.08.55 4.08 1.58 5.86L0 24l6.43-1.67a11.82 11.82 0 0 0 5.63 1.43h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.14-3.41-8.42zM12.06 21.3h-.01a9.5 9.5 0 0 1-4.85-1.31l-.35-.2-3.82.99 1.02-3.73-.23-.38a9.46 9.46 0 0 1-1.45-5.01c0-5.23 4.26-9.49 9.51-9.49 2.54 0 4.93.99 6.72 2.78a9.43 9.43 0 0 1 2.78 6.71c0 5.23-4.26 9.49-9.52 9.49zm5.47-7.14c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.66.15s-.76.97-.92 1.17c-.17.2-.34.22-.63.07-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.34.45-.51.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.53-.07-.15-.66-1.6-.91-2.18-.24-.58-.48-.5-.66-.51l-.56-.01c-.2 0-.53.08-.8.37-.27.3-1.05 1.02-1.05 2.49s1.08 2.89 1.24 3.09c.15.2 2.12 3.22 5.14 4.52.72.31 1.28.5 1.72.64.72.23 1.38.2 1.9.12.58-.09 1.77-.72 2.02-1.41.25-.69.25-1.28.17-1.41-.08-.13-.28-.21-.58-.36z"/>
               </svg>
@@ -435,7 +419,6 @@
           </ul>
         </div>
 
-        <!-- Mailto contact -->
         <form action="mailto:sales@imarika.net" method="POST" enctype="text/plain" class="card" onsubmit="return confirmEmailForm()">
           <input id="cName" name="Name" placeholder="Your Name" required>
           <input id="cContact" name="Contact" placeholder="Email or Phone" required>
@@ -455,10 +438,8 @@
       </div>
       <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
         <span class="muted">Payments:&nbsp;</span>
-        <!-- M-Pesa 3× bigger (60px) -->
         <img src="/mpesa.png" alt="M-Pesa" style="height:60px;width:auto;vertical-align:middle">
         <span class="muted">·</span>
-        <!-- Bank icon ONLY here -->
         <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#334155" d="M3 10.5 12 5l9 5.5v7A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z"/><path fill="#94a3b8" d="M12 7.2 5 11v6.5h14V11z"/></svg>
         <strong>Bank Transfer</strong>
       </div>
@@ -468,7 +449,6 @@
   <!-- Floating WhatsApp -->
   <div class="wa-float">
     <a class="wa-btn" href="https://wa.me/254701017246?text=Hello%20Imarika!" aria-label="Chat on WhatsApp" style="color:#fff">
-      <!-- WhatsApp bubble icon (preferred …36z path) -->
       <svg aria-hidden="true" viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
         <path d="M20.52 3.48A11.94 11.94 0 0 0 12.06 0C5.52 0 .2 5.32.2 11.86c0 2.08.55 4.08 1.58 5.86L0 24l6.43-1.67a11.82 11.82 0 0 0 5.63 1.43h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.14-3.41-8.42zM12.06 21.3h-.01a9.5 9.5 0 0 1-4.85-1.31l-.35-.2-3.82.99 1.02-3.73-.23-.38a9.46 9.46 0 0 1-1.45-5.01c0-5.23 4.26-9.49 9.51-9.49 2.54 0 4.93.99 6.72 2.78a9.43 9.43 0 0 1 2.78 6.71c0 5.23-4.26 9.49-9.52 9.49zm5.47-7.14c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.66.15s-.76.97-.92 1.17c-.17.2-.34.22-.63.07-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.34.45-.51.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.53-.07-.15-.66-1.6-.91-2.18-.24-.58-.48-.5-.66-.51l-.56-.01c-.2 0-.53.08-.8.37-.27.3-1.05 1.02-1.05 2.49s1.08 2.89 1.24 3.09c.15.2 2.12 3.22 5.14 4.52.72.31 1.28.5 1.72.64.72.23 1.38.2 1.9.12.58-.09 1.77-.72 2.02-1.41.25-.69.25-1.28.17-1.41-.08-.13-.28-.21-.58-.36z"/>
       </svg>
@@ -487,10 +467,8 @@
   </div>
 
   <script>
-    // Footer year
     const y = document.getElementById('y'); if (y) y.textContent = new Date().getFullYear();
 
-    // --- Mobile menu: toggle + close on item tap, outside click, scroll, and Esc ---
     const menuBtn  = document.getElementById('menuBtn');
     const mobileNav = document.getElementById('mobileNav');
     const headerEl = document.querySelector('header');
@@ -504,32 +482,20 @@
         e.stopPropagation();
         isOpen() ? closeNav() : openNav();
       });
-
-      // Close when a nav item is tapped
-      document.querySelectorAll('#mobileNav .mnav').forEach(a=>{
-        a.addEventListener('click', closeNav);
-      });
-
-      // Close when clicking outside the header/nav
+      document.querySelectorAll('#mobileNav .mnav').forEach(a=>a.addEventListener('click', closeNav));
       document.addEventListener('click', (e)=>{
         if (!isOpen()) return;
         const withinHeader = headerEl && headerEl.contains(e.target);
         const withinNav = mobileNav.contains(e.target);
         if (!withinHeader && !withinNav) closeNav();
       });
-
-      // Close on scroll & on resize to desktop
       window.addEventListener('scroll', ()=> { if (isOpen()) closeNav(); }, {passive:true});
-      window.addEventListener('resize', ()=> { if (window.innerWidth > 900) closeNav(); });
-
-      // Close on Esc
+      window.addEventListener('resize', ()=> { if (window.innerWidth > 0 && isOpen()) closeNav(); });
       document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape' && isOpen()) closeNav(); });
     }
 
-    // Helpers
     const fmt = (n) => Number(n).toLocaleString('en-KE');
 
-    // Investment calculators (24h)
     function calcInvestment(plan){
       const cfg = {
         std:  { id:'stdAmt',  out:'stdOut',  min:1000,   max:70000,  pct:30 },
@@ -550,7 +516,6 @@
       outEl.innerHTML = `<span class="helper" style="color:var(--ok)">Projected earnings in 24h:</span> <strong>KES ${fmt(earnings)}</strong><br>Total payout: <strong>KES ${fmt(total)}</strong>`;
     }
 
-    // Loan calculators (flat monthly interest)
     function calcLoan(tier){
       const map = {
         S: { amt:'loanS_amt', mon:'loanS_mon', out:'loanS_out', min:150000, max:500000,  rate:0.10 },
@@ -569,12 +534,11 @@
       if(amt < map.min){ outEl.innerHTML = `<span class="helper" style="color:var(--danger)">Minimum is KES ${fmt(map.min)}.</span>`; return; }
       if(amt > map.max){ outEl.innerHTML = `<span class="helper" style="color:var(--danger)">Maximum is KES ${fmt(map.max)}.</span>`; return; }
 
-      // Tenor guardrails
       const tenorLimits = { S:{min:1,max:3}, B:{min:1,max:6}, P:{min:1,max:12} }[tier];
       if(months < tenorLimits.min) months = tenorLimits.min;
       if(months > tenorLimits.max) months = tenorLimits.max;
 
-      const interest = Math.round(amt * map.rate * months);  // simple flat interest
+      const interest = Math.round(amt * map.rate * months);
       const total = amt + interest;
       const monthly = Math.ceil(total / months);
 
@@ -585,7 +549,6 @@
       `;
     }
 
-    // Confirm mailto form has basics filled
     function confirmEmailForm(){
       const n = (document.getElementById('cName').value||'').trim();
       const m = (document.getElementById('cMsg').value||'').trim();
