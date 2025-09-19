@@ -1,19 +1,24 @@
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    // simple JSON helper
+    const json = (data, status = 200) =>
+      new Response(JSON.stringify(data), {
+        status,
+        headers: { "content-type": "application/json" },
+      });
+
     if (url.pathname === "/api/health") {
       try {
+        // prove the D1 binding works
         const row = await env.DB.prepare("SELECT 1 AS ok").first();
-        return new Response(JSON.stringify({ ok: true, d1: !!row }), {
-          headers: { "content-type": "application/json" },
-        });
+        return json({ ok: true, d1: !!row });
       } catch (e) {
-        return new Response(JSON.stringify({ ok: false, error: String(e) }), {
-          status: 500,
-          headers: { "content-type": "application/json" },
-        });
+        return json({ ok: false, error: String(e) }, 500);
       }
     }
+
     return new Response("Not found", { status: 404 });
-  }
+  },
 };
