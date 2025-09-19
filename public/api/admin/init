@@ -10,33 +10,53 @@ export default {
     if (url.pathname !== "/api/admin/init")
       return json({ ok: false, error: "Not found" }, 404);
 
-    // secret (remember: # must be encoded as %23 in the URL)
+    // --- protect with secret (remember # must be encoded as %23) ---
     const given = url.searchParams.get("secret") || "";
     const expected = env.ADMIN_INIT_SECRET || "Oury2933#";
     if (given !== expected) return json({ ok: false, error: "Forbidden" }, 403);
 
+    // D1 binding (named DB in your Worker bindings)
     const db = env.DB || env.imarika;
 
-    // --- single-line, minimal SQL ---
-    const SQL_USERS =
-      "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, phone TEXT UNIQUE NOT NULL, full_name TEXT, id_number TEXT, pass_hash TEXT, role TEXT DEFAULT 'user', created_at INTEGER DEFAULT (strftime('%s','now')));";
+    // Build SQL with join() so we’re certain it’s a single clean line
+    const USERS_SQL = [
+      "CREATE TABLE IF NOT EXISTS users (",
+      "id INTEGER PRIMARY KEY,",
+      "phone TEXT UNIQUE NOT NULL,",
+      "full_name TEXT,",
+      "id_number TEXT,",
+      "pass_hash TEXT,",
+      "role TEXT DEFAULT 'user',",
+      "created_at INTEGER DEFAULT (strftime('%s','now'))",
+      ");",
+    ].join(" ");
 
-    const SQL_TX =
-      "CREATE TABLE IF NOT EXISTS tx (id TEXT PRIMARY KEY, user_phone TEXT, type TEXT, detail TEXT, amount INTEGER, status TEXT, ts INTEGER);";
+    const TX_SQL = [
+      "CREATE TABLE IF NOT EXISTS tx (",
+      "id TEXT PRIMARY KEY,",
+      "user_phone TEXT,",
+      "type TEXT,",
+      "detail TEXT,",
+      "amount INTEGER,",
+      "status TEXT,",
+      "ts INTEGER",
+      ");",
+    ].join(" ");
 
-    const SQL_TX_IDX =
+    const TX_IDX_SQL =
       "CREATE INDEX IF NOT EXISTS idx_tx_phone_ts ON tx(user_phone, ts DESC);";
 
     try {
-      // run each statement separately using exec()
-      await db.exec(SQL_USERS);
-      await db.exec(SQL_TX);
-      await db.exec(SQL_TX_IDX);
+      // run schema (each statement separately)
+      await db.exec(USERS_SQL);
+      await db.exec(TX_SQL);
+      await db.exec(TX_IDX_SQL);
 
-      // seed/update admin
+      // seed/update admin user
       const phone = env.ADMIN_PHONE || "0715151010";
       const pass = env.ADMIN_PASS || "Oury2933#";
       const salt = env.PASS_SALT || "imarika-salt";
+
       const data = new TextEncoder().encode(`${salt}:${pass}`);
       const digest = await crypto.subtle.digest("SHA-256", data);
       const passHash = [...new Uint8Array(digest)]
@@ -52,8 +72,17 @@ export default {
 
       return json({ ok: true, message: "Schema ready, admin seeded.", phone });
     } catch (e) {
-      console.error("init error:", e);
-      return json({ ok: false, error: String(e) }, 500);
+      // surface details to logs and response so we can see exactly what D1 says
+      console.error("INIT ERROR:", e);
+      return json(
+        {
+          ok: false,
+          error: String(e),
+          users_sql_len: USERS_SQL.length,
+          tx_sql_len: TX_SQL.length,
+        },
+        500
+      );
     }
   },
 };
