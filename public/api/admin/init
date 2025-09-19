@@ -1,95 +1,80 @@
 export default {
   async fetch(request, env) {
-    const url = new URL(request.url);
-    const json = (data, status = 200) =>
-      new Response(JSON.stringify(data), {
-        status,
+    const json = (d, s = 200) =>
+      new Response(JSON.stringify(d), {
+        status: s,
         headers: { "content-type": "application/json" },
       });
 
+    const url = new URL(request.url);
     if (url.pathname !== "/api/admin/init") {
       return json({ ok: false, error: "Not found" }, 404);
     }
 
-    // --- protect with init secret
-    const expected = (env.ADMIN_INIT_SECRET || "").trim();
+    // Secret check (remember to URL-encode '#' as %23 when calling)
     const given = url.searchParams.get("secret") || "";
-    if (!expected || given !== expected) {
-      return json({ ok: false, error: "Forbidden" }, 403);
-    }
+    const expected = env.ADMIN_INIT_SECRET || "Oury2933#";
+    if (given !== expected) return json({ ok: false, error: "Forbidden" }, 403);
 
-    // Use the correct D1 binding no matter which label you chose in the UI
     const db = env.DB || env.imarika;
-    if (!db) return json({ ok: false, error: "D1 binding not found (DB/imarika)" }, 500);
 
-    // Helper: run a single statement safely
-    const run = async (sql) => { await db.prepare(sql).run(); };
+    // Run each statement separately (no multi-line parsing issues)
+    const stmts = [
+      `CREATE TABLE IF NOT EXISTS users (
+         id INTEGER PRIMARY KEY AUTOINCREMENT,
+         phone TEXT UNIQUE NOT NULL,
+         full_name TEXT,
+         id_number TEXT,
+         pass_hash TEXT,
+         role TEXT DEFAULT 'user',
+         created_at INTEGER DEFAULT (strftime('%s','now'))
+       );`,
+      `CREATE TABLE IF NOT EXISTS tx (
+         id TEXT PRIMARY KEY,
+         user_phone TEXT,
+         type TEXT,
+         detail TEXT,
+         amount INTEGER,
+         status TEXT,
+         ts INTEGER
+       );`,
+      `CREATE INDEX IF NOT EXISTS idx_tx_phone_ts ON tx(user_phone, ts DESC);`,
+    ];
 
     try {
-      // NOTE: no quoted identifiers; single-line; each executed via prepare().run()
-      await run(
-        "CREATE TABLE IF NOT EXISTS users (" +
-          "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-          "phone TEXT UNIQUE, " +
-          "full_name TEXT, " +         // renamed from \"full\" to avoid quoting
-          "idn TEXT, " +
-          "account TEXT UNIQUE, " +
-          "pass_hash TEXT, " +
-          "wallet INTEGER DEFAULT 0, " +
-          "invested INTEGER DEFAULT 0, " +
-          "created_at INTEGER" +
-        ")"
-      );
+      for (const sql of stmts) {
+        await db.prepare(sql).run();
+      }
 
-      await run(
-        "CREATE TABLE IF NOT EXISTS tx (" +
-          "id TEXT PRIMARY KEY, " +
-          "ts INTEGER, " +
-          "phone TEXT, " +
-          "type TEXT, " +
-          "detail TEXT, " +
-          "amount INTEGER, " +
-          "status TEXT" +
-        ")"
-      );
+      // Seed / update admin user
+      const phone = env.ADMIN_PHONE || "0715151010";
+      const pass = env.ADMIN_PASS || "Oury2933#";
+      const salt = env.PASS_SALT || "imarika-salt";
 
-      await run("CREATE INDEX IF NOT EXISTS idx_tx_phone_ts ON tx(phone, ts DESC)");
+      const data = new TextEncoder().encode(`${salt}:${pass}`);
+      const digest = await crypto.subtle.digest("SHA-256", data);
+      const passHash = [...new Uint8Array(digest)]
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+
+      await db
+        .prepare(
+          `INSERT INTO users (phone, full_name, id_number, pass_hash, role)
+           VALUES (?, ?, ?, ?, 'admin')
+           ON CONFLICT(phone) DO UPDATE SET pass_hash=excluded.pass_hash, role='admin'`
+        )
+        .bind(phone, "Imarika Admin", "ADMIN", passHash)
+        .run();
+
+      return json({
+        ok: true,
+        message: "Schema ensured & admin seeded/updated.",
+        phone,
+      });
     } catch (e) {
+      // surfaces full SQL error in logs and response
+      console.error("init error:", e);
       return json({ ok: false, error: String(e) }, 500);
     }
-
-    // Hash helper
-    const sha256hex = async (text) => {
-      const buf = new TextEncoder().encode(text);
-      const hash = await crypto.subtle.digest("SHA-256", buf);
-      return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, "0")).join("");
-    };
-
-    // Seed / update admin
-    const adminPhone   = (env.ADMIN_PHONE || "0715151010").trim();
-    const adminPass    = env.ADMIN_PASS || "Oury2933#";
-    const salt         = env.PASS_SALT || "imarika-salt";
-    const passHash     = await sha256hex(salt + adminPass);
-    const adminAccount = "IMK-ADMIN";
-
-    await db.prepare(
-      "INSERT INTO users (phone, full_name, idn, account, pass_hash, wallet, invested, created_at) " +
-      "VALUES (?1, 'System Admin', '', ?2, ?3, 0, 0, ?4) " +
-      "ON CONFLICT(phone) DO UPDATE SET pass_hash=excluded.pass_hash, account=excluded.account"
-    ).bind(adminPhone, adminAccount, passHash, Date.now()).run();
-
-    const uCount = await db.prepare("SELECT COUNT(*) AS n FROM users").first();
-    const tCount = await db.prepare("SELECT COUNT(*) AS n FROM tx").first();
-    const admin  = await db.prepare("SELECT phone, account, wallet, invested FROM users WHERE phone=?1")
-                           .bind(adminPhone).first();
-
-    return json({
-      ok: true,
-      message: "Schema ensured & admin seeded/updated.",
-      users: uCount?.n ?? 0,
-      tx: tCount?.n ?? 0,
-      admin,
-      time: Date.now()
-    });
-  }
+  },
 };
