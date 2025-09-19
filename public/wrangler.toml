@@ -2,18 +2,15 @@ name = "imarika-api"
 main = "src/worker.js"
 compatibility_date = "2024-10-01"
 
-# D1 (SQL) database binding
 [[d1_databases]]
-binding = "IMARIKA_DB"
-database_name = "imarika-db"
-database_id = "REPLACE_ON_CREATE"
+binding = "DB"                          # <-- matches your snippet
+database_name = "imarika"
+database_id = "27e54d46-8ff9-4791-8396-3feac7bf6ff4"
 
-# dev server for local testing
+# serve the API at https://www.imarika.net/api/*
+routes = [
+  { pattern = "www.imarika.net/api/*", zone_name = "imarika.net" }
+]
+
 [dev]
 port = 8787
-
-# (optional) when you’re ready to route in prod:
-# routes = [
-#   { pattern = "imarika.net/api/*", zone_name = "imarika.net" }
-# ]
-
