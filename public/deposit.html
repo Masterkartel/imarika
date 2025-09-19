@@ -20,7 +20,7 @@
     .muted{color:var(--muted)}
 
     /* Heading */
-    h1{font-size:clamp(1.6rem,4vw,2.4rem);margin:.3rem 0 1rem;display:flex;align-items:center}
+    h1{font-size:clamp(1.6rem,4vw,2.4rem);margin:.3rem 0 1rem;display:flex;align-items:center;gap:.6em}
     .mpesa{
       height:3.15em; /* 3x previous 1.05em */
       width:auto; vertical-align:middle;
@@ -52,17 +52,34 @@
     @keyframes rise{from{opacity:0;transform:translateY(10px)}}
 
     .section-title{font-size:1rem;margin:.25rem 0 .6rem;font-weight:800}
-    .field{display:grid;grid-template-columns:150px 1fr;gap:.6rem;align-items:center;padding:.5rem 0}
+
+    /* Field rows */
+    .field{
+      display:grid;
+      grid-template-columns:150px 1fr;
+      gap:.6rem;
+      align-items:center;
+      padding:.5rem 0;
+    }
     .label{font-weight:800;color:#0f172a}
-    .inline{display:flex;align-items:center;gap:.45rem}
+
+    /* Value + copy icon row */
+    .inline{
+      display:flex;align-items:center;gap:.45rem;min-width:0; /* allow flex children to shrink */
+    }
     .value{
+      flex:1;min-width:0; /* key for small screens */
       font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
-      background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:.55rem .7rem;min-width:220px
+      background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:.55rem .7rem;
+      min-width:220px; /* desktop default */
+      overflow:auto;white-space:nowrap; /* prevent broken wraps; allow scroll if needed */
+      -webkit-overflow-scrolling:touch;
     }
     input.value{font-family:inherit}
 
     /* Icon-only copy buttons (two-window symbol) */
     .iconcopy{
+      flex:0 0 auto; /* don't shrink on mobile */
       display:inline-flex;align-items:center;justify-content:center;
       padding:.45rem;border-radius:10px;border:1px solid #e2e8f0;background:#fff;cursor:pointer;
       box-shadow:0 8px 20px rgba(2,8,23,.05); transition:transform .15s, border-color .15s, background .15s;
@@ -73,12 +90,23 @@
     .hint{background:#f8fafc;border:1px dashed #e2e8f0;border-radius:12px;padding:1rem;animation:rise .5s .24s ease both}
     .badge{padding:.18rem .6rem;border-radius:999px;background:#fef3c7;color:#78350f;font-weight:800}
 
-    .row{display:flex;align-items:center;justify-content:space-between}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap}
     .btn{
       display:inline-flex;align-items:center;gap:.5rem;background:var(--brand);color:#111827;
       border:0;border-radius:12px;padding:.65rem .9rem;font-weight:800;box-shadow:0 10px 28px rgba(245,158,11,.28)
     }
     .btn:hover{filter:brightness(1.03);transform:translateY(-1px)}
+
+    /* ---------- Responsive fixes for small screens ---------- */
+    @media (max-width: 640px){
+      .field{grid-template-columns:1fr}
+      .label{padding-bottom:.2rem}
+      .value{min-width:0;width:100%}        /* take full width */
+      .inline{gap:.4rem}
+      .iconcopy{padding:.5rem}             /* slightly larger tap area */
+      h1{gap:.4em}
+      .mpesa{height:2.6em}                 /* scale heading logo a bit on very small screens */
+    }
   </style>
 </head>
 <body>
