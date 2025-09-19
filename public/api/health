@@ -1,0 +1,19 @@
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    if (url.pathname === "/api/health") {
+      try {
+        const row = await env.DB.prepare("SELECT 1 AS ok").first();
+        return new Response(JSON.stringify({ ok: true, d1: !!row }), {
+          headers: { "content-type": "application/json" },
+        });
+      } catch (e) {
+        return new Response(JSON.stringify({ ok: false, error: String(e) }), {
+          status: 500,
+          headers: { "content-type": "application/json" },
+        });
+      }
+    }
+    return new Response("Not found", { status: 404 });
+  }
+};
