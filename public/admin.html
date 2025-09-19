@@ -5,7 +5,7 @@
 <link rel="icon" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#fff;--text:#0f172a;--muted:#475569;--line:#e5e7eb;--brand:#f59e0b}
+  :root{--bg:#fff;--text:#0f172a;--muted:#475569;--line:#e5e7eb;--brand:#f59e0b;--ring:rgba(245,158,11,.35)}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
   .container{max-width:920px;margin:32px auto;padding:0 16px}
@@ -15,21 +15,29 @@
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .btn{background:var(--brand);border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(245,158,11,.25)}
   .btn-outline{background:#fff;border:1px solid var(--line)}
+  .btn-danger{background:#ef4444;color:#fff}
   .muted{color:var(--muted)}
   input{width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;outline:none}
-  input:focus{box-shadow:0 0 0 4px rgba(245,158,11,.35)}
+  input:focus{box-shadow:0 0 0 4px var(--ring)}
   .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
   .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
   a.back{display:inline-flex;align-items:center;gap:8px}
+  .badge{padding:.18rem .55rem;border-radius:999px;background:#fef3c7;color:#78350f;font-weight:800}
+  .hint{min-height:20px}
 </style>
 
 <body>
   <div class="container">
     <div class="topbar">
       <a class="back" href="/"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#0f172a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</a>
-      <strong>Imarika Admin</strong>
+      <div style="display:flex;align-items:center;gap:8px">
+        <strong>Imarika Admin</strong>
+        <span class="badge">Demo</span>
+        <button id="signout" class="btn btn-outline" title="End admin session">Sign out</button>
+      </div>
     </div>
 
+    <!-- FIND / CREATE -->
     <div class="card">
       <div class="row">
         <h2 style="margin:.2rem 0">Find Account</h2>
@@ -37,62 +45,105 @@
           <input id="qPhone" placeholder="Phone (07/01… 10 digits)" inputmode="tel">
           <input id="qAcct" class="mono" placeholder="Account (e.g., IMK-ABCD-1234)">
         </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
           <button class="btn" id="searchBtn">Search</button>
           <button class="btn btn-outline" id="newBtn">Create New</button>
-          <span class="muted" id="hint"></span>
+          <button class="btn btn-outline" id="loadCurrent">Load Current Browser User</button>
+          <span class="muted hint" id="hint"></span>
         </div>
       </div>
     </div>
 
+    <!-- EDIT -->
     <div id="editCard" class="card" style="display:none">
       <div class="row">
         <h3>Account</h3>
         <div class="grid2">
-          <div><div class="muted">Name</div><div id="eName"></div></div>
-          <div><div class="muted">Phone</div><div id="ePhone" class="mono"></div></div>
-          <div><div class="muted">ID Number</div><div id="eId" class="mono"></div></div>
-          <div><div class="muted">Account #</div><div id="eAcct" class="mono"></div></div>
+          <div>
+            <div class="muted">Full Name</div>
+            <input id="eName" placeholder="e.g., Jane Wanjiku" />
+          </div>
+          <div>
+            <div class="muted">Phone</div>
+            <input id="ePhone" class="mono" disabled />
+          </div>
+          <div>
+            <div class="muted">ID Number</div>
+            <input id="eId" class="mono" placeholder="ID/Passport" />
+          </div>
+          <div>
+            <div class="muted">Account #</div>
+            <input id="eAcct" class="mono" disabled />
+          </div>
         </div>
 
         <h3 style="margin-top:10px">Balances</h3>
         <div class="grid2">
-          <div><div class="muted">Wallet Balance (KES)</div><input id="eWallet" type="number" placeholder="0"></div>
-          <div><div class="muted">Investments (Shares) (KES)</div><input id="eInvest" type="number" placeholder="0"></div>
+          <div>
+            <div class="muted">Wallet Balance (KES)</div>
+            <input id="eWallet" type="number" placeholder="0">
+          </div>
+          <div>
+            <div class="muted">Investments (Shares) (KES)</div>
+            <input id="eInvest" type="number" placeholder="0">
+          </div>
         </div>
 
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+        <!-- Quick actions -->
+        <div class="card" style="margin:8px 0 0">
+          <div class="row">
+            <strong>Quick Actions</strong>
+            <div class="grid2">
+              <input id="qaAmount" type="number" placeholder="Amount (KES)">
+              <input id="qaNote" placeholder="Note (appears in history)">
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn"        id="qaCreditW">Credit Wallet</button>
+              <button class="btn btn-outline" id="qaDebitW">Debit Wallet</button>
+              <button class="btn"        id="qaCreditS">Credit Shares</button>
+              <button class="btn btn-outline" id="qaDebitS">Debit Shares</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
           <button class="btn" id="saveBtn">Save</button>
           <button class="btn btn-outline" id="closeBtn">Close</button>
-          <span class="muted" id="saveHint"></span>
+          <span class="muted hint" id="saveHint"></span>
         </div>
       </div>
     </div>
 
-    <p class="muted">Note: This demo admin writes to the browser’s <strong>localStorage</strong>. For production, we’ll move to a secure database and real authentication.</p>
+    <p class="muted">Note: This demo admin writes to the browser’s <strong>localStorage</strong> and uses a temporary test key. For production we’ll move to a secure backend & auth.</p>
   </div>
 
   <script>
-    // --- Simple gate (demo only). Change this!
+    /* ---------------- Gate: test keys (demo only) ---------------- */
+    const DEMO_KEYS = [
+      "IMARIKA-TEST-ADMIN-001",
+      "IMARIKA-TEST-ADMIN-002",
+      "IMARIKA-TEST-ADMIN-003"
+    ];
     (function gate(){
       const ok = sessionStorage.getItem('imarika_admin_ok');
       if(ok==='1') return;
-      const pass = prompt('Admin passphrase (demo):');
-      if(pass !== 'imarika-admin'){ alert('Access denied'); location.href='/'; }
-      else sessionStorage.setItem('imarika_admin_ok','1');
+      const urlKey = new URLSearchParams(location.search).get('key');
+      const tryKey = (k)=> DEMO_KEYS.includes(String(k||'').trim());
+      if(urlKey && tryKey(urlKey)){ sessionStorage.setItem('imarika_admin_ok','1'); return; }
+      const pass = prompt('Enter Admin test key:');
+      if(!tryKey(pass)){ alert('Access denied'); location.href='/'; return; }
+      sessionStorage.setItem('imarika_admin_ok','1');
     })();
+    document.getElementById('signout').onclick = ()=>{ sessionStorage.removeItem('imarika_admin_ok'); location.href='/'; };
 
-    // helpers
+    /* ---------------- Helpers & storage ---------------- */
     const fmt = n => Number(n).toLocaleString('en-KE');
     const phoneOk = p => /^0(7|1)\d{8}$/.test(String(p||'').trim());
     const acctNum = () => 'IMK-' + Math.random().toString(36).slice(2,6).toUpperCase() + '-' + Math.floor(Math.random()*9000+1000);
 
-    // storage helpers (support single-user key or multi-user map)
     function getUsersMap(){
-      // preferred multi-user store
       let m = {};
       try { m = JSON.parse(localStorage.getItem('imarika_users')||'{}') } catch {}
-      // migrate single user if present
       try {
         const u = JSON.parse(localStorage.getItem('imarika_user')||'null');
         if(u && u.phone && !m[u.phone]) { m[u.phone] = u; localStorage.setItem('imarika_users', JSON.stringify(m)); }
@@ -100,30 +151,29 @@
       return m;
     }
     function saveUsersMap(m){ localStorage.setItem('imarika_users', JSON.stringify(m)); }
-    function findByPhone(phone){
-      const m = getUsersMap();
-      return m[phone] || null;
-    }
-    function findByAcct(acct){
-      const m = getUsersMap();
-      for(const k in m){ if(m[k].account === acct) return m[k]; }
-      return null;
-    }
+    function findByPhone(phone){ const m = getUsersMap(); return m[phone] || null; }
+    function findByAcct(acct){ const m = getUsersMap(); for(const k in m){ if(m[k].account === acct) return m[k]; } return null; }
     function upsertUser(u){
-      const m = getUsersMap();
-      m[u.phone] = u;
-      saveUsersMap(m);
-      // if the “current” user matches, update that too so dashboard reflects instantly
-      try {
-        const cu = JSON.parse(localStorage.getItem('imarika_user')||'null');
-        if(cu && cu.phone === u.phone){ localStorage.setItem('imarika_user', JSON.stringify(u)); }
-      } catch {}
+      const m = getUsersMap(); m[u.phone] = u; saveUsersMap(m);
+      // mirror to current-browser user if same
+      try { const cu = JSON.parse(localStorage.getItem('imarika_user')||'null'); if(cu && cu.phone === u.phone){ localStorage.setItem('imarika_user', JSON.stringify(u)); } } catch {}
     }
 
-    // ui refs
+    // TX store used by dashboard (global array in this browser)
+    const TX_KEY='imarika_tx';
+    const getTx = () => { try { return JSON.parse(localStorage.getItem(TX_KEY)||'[]'); } catch { return []; } };
+    const saveTx = list => localStorage.setItem(TX_KEY, JSON.stringify(list));
+    function addTxFor(phone, tx){
+      const list = getTx();
+      list.unshift({ ...tx, phone }); // keep phone for clarity
+      saveTx(list);
+    }
+
+    /* ---------------- UI refs ---------------- */
     const qPhone = document.getElementById('qPhone');
     const qAcct  = document.getElementById('qAcct');
     const hint   = document.getElementById('hint');
+
     const editCard = document.getElementById('editCard');
     const eName = document.getElementById('eName');
     const ePhone= document.getElementById('ePhone');
@@ -133,7 +183,27 @@
     const eInvest = document.getElementById('eInvest');
     const saveHint= document.getElementById('saveHint');
 
+    const qaAmount = document.getElementById('qaAmount');
+    const qaNote   = document.getElementById('qaNote');
+    const qaCreditW= document.getElementById('qaCreditW');
+    const qaDebitW = document.getElementById('qaDebitW');
+    const qaCreditS= document.getElementById('qaCreditS');
+    const qaDebitS = document.getElementById('qaDebitS');
+
     let current = null;
+
+    /* ---------------- Search / Create / Load ---------------- */
+    function loadUser(u){
+      current = JSON.parse(JSON.stringify(u));
+      eName.value  = u.full || '';
+      ePhone.value = u.phone;
+      eId.value    = u.idn || '';
+      eAcct.value  = u.account;
+      eWallet.value = u.wallet || 0;
+      eInvest.value = u.invested || 0;
+      qaAmount.value = ''; qaNote.value='';
+      editCard.style.display = 'block';
+    }
 
     document.getElementById('searchBtn').addEventListener('click', ()=>{
       saveHint.textContent = '';
@@ -158,31 +228,56 @@
       hint.textContent = 'New account created.';
     });
 
-    function loadUser(u){
-      current = JSON.parse(JSON.stringify(u));
-      eName.textContent  = u.full || '(no name)';
-      ePhone.textContent = u.phone;
-      eId.textContent    = u.idn || '(none)';
-      eAcct.textContent  = u.account;
-      eWallet.value = u.wallet || 0;
-      eInvest.value = u.invested || 0;
-      editCard.style.display = 'block';
-    }
+    document.getElementById('loadCurrent').addEventListener('click', ()=>{
+      try {
+        const cu = JSON.parse(localStorage.getItem('imarika_user')||'null');
+        if(!cu){ hint.textContent='No current browser user found.'; return; }
+        loadUser(cu);
+        hint.textContent='Loaded current browser user.';
+      } catch { hint.textContent='Unable to load current user.'; }
+    });
 
+    /* ---------------- Save & Close ---------------- */
     document.getElementById('saveBtn').addEventListener('click', ()=>{
       if(!current) return;
-      const wallet = Number(eWallet.value||0);
-      const invested = Number(eInvest.value||0);
-      current.wallet = wallet;
-      current.invested = invested;
+      current.full = eName.value.trim();
+      current.idn  = eId.value.trim();
+      current.wallet   = Number(eWallet.value||0);
+      current.invested = Number(eInvest.value||0);
       upsertUser(current);
-      saveHint.textContent = 'Saved. Wallet: KES ' + fmt(wallet) + ' • Shares: KES ' + fmt(invested);
+      saveHint.textContent = 'Saved. Wallet: KES ' + fmt(current.wallet) + ' • Shares: KES ' + fmt(current.invested);
     });
 
     document.getElementById('closeBtn').addEventListener('click', ()=>{
       editCard.style.display = 'none';
       saveHint.textContent = '';
     });
+
+    /* ---------------- Quick Actions (with TX log) ---------------- */
+    function qaApply(kind){
+      if(!current){ saveHint.textContent='Load an account first.'; return; }
+      const amt = Number(qaAmount.value||0);
+      if(!amt || amt<=0){ saveHint.textContent='Enter a positive amount.'; return; }
+      const note = (qaNote.value||'').trim();
+
+      let txType = '', delta = 0;
+      if(kind==='cw'){ current.wallet += amt;   txType='Admin Credit Wallet';  delta=+amt; }
+      if(kind==='dw'){ current.wallet -= amt;   txType='Admin Debit Wallet';   delta=-amt; }
+      if(kind==='cs'){ current.invested += amt; txType='Admin Credit Shares';  delta=+amt; }
+      if(kind==='ds'){ current.invested -= amt; txType='Admin Debit Shares';   delta=-amt; }
+
+      upsertUser(current);
+      addTxFor(current.phone, { ts:Date.now(), type:txType, detail:note||'-', amount:delta, status:'OK' });
+
+      eWallet.value = current.wallet;
+      eInvest.value = current.invested;
+      saveHint.textContent = `${txType} • KES ${fmt(Math.abs(amt))} • Done`;
+      qaAmount.value=''; // clear
+    }
+    qaCreditW.onclick=()=>qaApply('cw');
+    qaDebitW.onclick =()=>qaApply('dw');
+    qaCreditS.onclick=()=>qaApply('cs');
+    qaDebitS.onclick =()=>qaApply('ds');
   </script>
 </body>
 </html>
