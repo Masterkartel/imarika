@@ -27,6 +27,9 @@
   .badge{padding:.18rem .5rem;border-radius:999px;background:#fef3c7;color:#78350f;font-weight:800}
   /* favicon image in header */
   .logo{height:24px;width:24px;border-radius:6px}
+
+  /* Footer */
+  footer{border-top:1px solid var(--line);padding:2.2rem 0;color:#475569;margin-top:2rem}
 </style>
 
 <body>
@@ -55,7 +58,7 @@
       <div style="overflow:auto">
         <table id="usersTable">
           <thead><tr><th>Name</th><th>Phone</th><th>Account</th><th style="text-align:right">Wallet</th><th style="text-align:right">Shares</th><th>Actions</th></tr></thead>
-          <tbody><tr><td colspan="6" class="muted" style="text-align:center">No users yet.</td></tr></tbody>
+        <tbody><tr><td colspan="6" class="muted" style="text-align:center">No users yet.</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -116,11 +119,29 @@
         </table>
       </div>
     </div>
-
-    <p class="muted">Note: Demo admin uses <strong>localStorage</strong>. For production we’ll move to a secure backend.</p>
   </div>
 
+  <!-- Footer -->
+  <footer>
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:.6rem">
+        <img src="/favicon.svg" class="logo" alt="">
+        <span>© <span id="y"></span> Imarika — <a class="muted" href="https://imarika.net">imarika.net</a></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+        <span class="muted">Payments Accepted:&nbsp;</span>
+        <img src="/mpesa.png" alt="M-Pesa" style="height:60px;width:auto;vertical-align:middle">
+        <span class="muted">·</span>
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#334155" d="M3 10.5 12 5l9 5.5v7A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z"/><path fill="#94a3b8" d="M12 7.2 5 11v6.5h14V11z"/></svg>
+        <strong>Bank Transfer</strong>
+      </div>
+    </div>
+  </footer>
+
   <script>
+    // Footer year
+    const y = document.getElementById('y'); if (y) y.textContent = new Date().getFullYear();
+
     // --- Simple gate (demo only)
     (function gate(){
       const ok = sessionStorage.getItem('imarika_admin_ok');
@@ -183,7 +204,6 @@
         </tr>
       `).join('') : `<tr><td colspan="6" class="muted" style="text-align:center">No users yet.</td></tr>`;
 
-      // bind edit buttons
       usersTableBody.querySelectorAll('button[data-edit]').forEach(btn=>{
         btn.onclick = ()=> { const u=findByPhone(btn.dataset.edit); if(u) loadUser(u); };
       });
