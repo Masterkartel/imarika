@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Imarika Admin</title>
+<link rel="icon" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#fff;--text:#0f172a;--muted:#475569;--line:#e5e7eb;--brand:#f59e0b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  .container{max-width:920px;margin:32px auto;padding:0 16px}
+  h1{display:flex;align-items:center;gap:10px;font-size:clamp(1.6rem,3vw,2rem)}
+  .card{border:1px solid var(--line);border-radius:16px;padding:16px;margin:14px 0;background:#fff;box-shadow:0 10px 30px rgba(2,8,23,.06)}
+  .row{display:grid;gap:10px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .btn{background:var(--brand);border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(245,158,11,.25)}
+  .btn-outline{background:#fff;border:1px solid var(--line)}
+  .muted{color:var(--muted)}
+  input{width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;outline:none}
+  input:focus{box-shadow:0 0 0 4px rgba(245,158,11,.35)}
+  .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  a.back{display:inline-flex;align-items:center;gap:8px}
+</style>
+
+<body>
+  <div class="container">
+    <div class="topbar">
+      <a class="back" href="/"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#0f172a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</a>
+      <strong>Imarika Admin</strong>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <h2 style="margin:.2rem 0">Find Account</h2>
+        <div class="grid2">
+          <input id="qPhone" placeholder="Phone (07/01… 10 digits)" inputmode="tel">
+          <input id="qAcct" class="mono" placeholder="Account (e.g., IMK-ABCD-1234)">
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn" id="searchBtn">Search</button>
+          <button class="btn btn-outline" id="newBtn">Create New</button>
+          <span class="muted" id="hint"></span>
+        </div>
+      </div>
+    </div>
+
+    <div id="editCard" class="card" style="display:none">
+      <div class="row">
+        <h3>Account</h3>
+        <div class="grid2">
+          <div><div class="muted">Name</div><div id="eName"></div></div>
+          <div><div class="muted">Phone</div><div id="ePhone" class="mono"></div></div>
+          <div><div class="muted">ID Number</div><div id="eId" class="mono"></div></div>
+          <div><div class="muted">Account #</div><div id="eAcct" class="mono"></div></div>
+        </div>
+
+        <h3 style="margin-top:10px">Balances</h3>
+        <div class="grid2">
+          <div><div class="muted">Wallet Balance (KES)</div><input id="eWallet" type="number" placeholder="0"></div>
+          <div><div class="muted">Investments (Shares) (KES)</div><input id="eInvest" type="number" placeholder="0"></div>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+          <button class="btn" id="saveBtn">Save</button>
+          <button class="btn btn-outline" id="closeBtn">Close</button>
+          <span class="muted" id="saveHint"></span>
+        </div>
+      </div>
+    </div>
+
+    <p class="muted">Note: This demo admin writes to the browser’s <strong>localStorage</strong>. For production, we’ll move to a secure database and real authentication.</p>
+  </div>
+
+  <script>
+    // --- Simple gate (demo only). Change this!
+    (function gate(){
+      const ok = sessionStorage.getItem('imarika_admin_ok');
+      if(ok==='1') return;
+      const pass = prompt('Admin passphrase (demo):');
+      if(pass !== 'imarika-admin'){ alert('Access denied'); location.href='/'; }
+      else sessionStorage.setItem('imarika_admin_ok','1');
+    })();
+
+    // helpers
+    const fmt = n => Number(n).toLocaleString('en-KE');
+    const phoneOk = p => /^0(7|1)\d{8}$/.test(String(p||'').trim());
+    const acctNum = () => 'IMK-' + Math.random().toString(36).slice(2,6).toUpperCase() + '-' + Math.floor(Math.random()*9000+1000);
+
+    // storage helpers (support single-user key or multi-user map)
+    function getUsersMap(){
+      // preferred multi-user store
+      let m = {};
+      try { m = JSON.parse(localStorage.getItem('imarika_users')||'{}') } catch {}
+      // migrate single user if present
+      try {
+        const u = JSON.parse(localStorage.getItem('imarika_user')||'null');
+        if(u && u.phone && !m[u.phone]) { m[u.phone] = u; localStorage.setItem('imarika_users', JSON.stringify(m)); }
+      } catch {}
+      return m;
+    }
+    function saveUsersMap(m){ localStorage.setItem('imarika_users', JSON.stringify(m)); }
+    function findByPhone(phone){
+      const m = getUsersMap();
+      return m[phone] || null;
+    }
+    function findByAcct(acct){
+      const m = getUsersMap();
+      for(const k in m){ if(m[k].account === acct) return m[k]; }
+      return null;
+    }
+    function upsertUser(u){
+      const m = getUsersMap();
+      m[u.phone] = u;
+      saveUsersMap(m);
+      // if the “current” user matches, update that too so dashboard reflects instantly
+      try {
+        const cu = JSON.parse(localStorage.getItem('imarika_user')||'null');
+        if(cu && cu.phone === u.phone){ localStorage.setItem('imarika_user', JSON.stringify(u)); }
+      } catch {}
+    }
+
+    // ui refs
+    const qPhone = document.getElementById('qPhone');
+    const qAcct  = document.getElementById('qAcct');
+    const hint   = document.getElementById('hint');
+    const editCard = document.getElementById('editCard');
+    const eName = document.getElementById('eName');
+    const ePhone= document.getElementById('ePhone');
+    const eId   = document.getElementById('eId');
+    const eAcct = document.getElementById('eAcct');
+    const eWallet = document.getElementById('eWallet');
+    const eInvest = document.getElementById('eInvest');
+    const saveHint= document.getElementById('saveHint');
+
+    let current = null;
+
+    document.getElementById('searchBtn').addEventListener('click', ()=>{
+      saveHint.textContent = '';
+      hint.textContent = '';
+      let u = null;
+      const p = qPhone.value.trim();
+      const a = qAcct.value.trim();
+      if(p && phoneOk(p)) u = findByPhone(p);
+      if(!u && a) u = findByAcct(a);
+      if(!u){ hint.textContent = 'Not found. You can create it with “Create New”.'; editCard.style.display='none'; return; }
+      loadUser(u);
+    });
+
+    document.getElementById('newBtn').addEventListener('click', ()=>{
+      saveHint.textContent = '';
+      hint.textContent = '';
+      const p = qPhone.value.trim();
+      if(!phoneOk(p)){ hint.textContent='Enter a valid phone to create new.'; return; }
+      const u = { full:'', idn:'', phone:p, passHash:'', account:acctNum(), wallet:0, invested:0, createdAt:Date.now() };
+      upsertUser(u);
+      loadUser(u);
+      hint.textContent = 'New account created.';
+    });
+
+    function loadUser(u){
+      current = JSON.parse(JSON.stringify(u));
+      eName.textContent  = u.full || '(no name)';
+      ePhone.textContent = u.phone;
+      eId.textContent    = u.idn || '(none)';
+      eAcct.textContent  = u.account;
+      eWallet.value = u.wallet || 0;
+      eInvest.value = u.invested || 0;
+      editCard.style.display = 'block';
+    }
+
+    document.getElementById('saveBtn').addEventListener('click', ()=>{
+      if(!current) return;
+      const wallet = Number(eWallet.value||0);
+      const invested = Number(eInvest.value||0);
+      current.wallet = wallet;
+      current.invested = invested;
+      upsertUser(current);
+      saveHint.textContent = 'Saved. Wallet: KES ' + fmt(wallet) + ' • Shares: KES ' + fmt(invested);
+    });
+
+    document.getElementById('closeBtn').addEventListener('click', ()=>{
+      editCard.style.display = 'none';
+      saveHint.textContent = '';
+    });
+  </script>
+</body>
+</html>
