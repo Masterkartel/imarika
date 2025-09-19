@@ -7,50 +7,36 @@ export default {
       });
 
     const url = new URL(request.url);
-    if (url.pathname !== "/api/admin/init") {
+    if (url.pathname !== "/api/admin/init")
       return json({ ok: false, error: "Not found" }, 404);
-    }
 
-    // Secret check (remember to URL-encode '#' as %23 when calling)
+    // secret (remember: # must be encoded as %23 in the URL)
     const given = url.searchParams.get("secret") || "";
     const expected = env.ADMIN_INIT_SECRET || "Oury2933#";
     if (given !== expected) return json({ ok: false, error: "Forbidden" }, 403);
 
     const db = env.DB || env.imarika;
 
-    // Run each statement separately (no multi-line parsing issues)
-    const stmts = [
-      `CREATE TABLE IF NOT EXISTS users (
-         id INTEGER PRIMARY KEY AUTOINCREMENT,
-         phone TEXT UNIQUE NOT NULL,
-         full_name TEXT,
-         id_number TEXT,
-         pass_hash TEXT,
-         role TEXT DEFAULT 'user',
-         created_at INTEGER DEFAULT (strftime('%s','now'))
-       );`,
-      `CREATE TABLE IF NOT EXISTS tx (
-         id TEXT PRIMARY KEY,
-         user_phone TEXT,
-         type TEXT,
-         detail TEXT,
-         amount INTEGER,
-         status TEXT,
-         ts INTEGER
-       );`,
-      `CREATE INDEX IF NOT EXISTS idx_tx_phone_ts ON tx(user_phone, ts DESC);`,
-    ];
+    // --- single-line, minimal SQL ---
+    const SQL_USERS =
+      "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, phone TEXT UNIQUE NOT NULL, full_name TEXT, id_number TEXT, pass_hash TEXT, role TEXT DEFAULT 'user', created_at INTEGER DEFAULT (strftime('%s','now')));";
+
+    const SQL_TX =
+      "CREATE TABLE IF NOT EXISTS tx (id TEXT PRIMARY KEY, user_phone TEXT, type TEXT, detail TEXT, amount INTEGER, status TEXT, ts INTEGER);";
+
+    const SQL_TX_IDX =
+      "CREATE INDEX IF NOT EXISTS idx_tx_phone_ts ON tx(user_phone, ts DESC);";
 
     try {
-      for (const sql of stmts) {
-        await db.prepare(sql).run();
-      }
+      // run each statement separately using exec()
+      await db.exec(SQL_USERS);
+      await db.exec(SQL_TX);
+      await db.exec(SQL_TX_IDX);
 
-      // Seed / update admin user
+      // seed/update admin
       const phone = env.ADMIN_PHONE || "0715151010";
       const pass = env.ADMIN_PASS || "Oury2933#";
       const salt = env.PASS_SALT || "imarika-salt";
-
       const data = new TextEncoder().encode(`${salt}:${pass}`);
       const digest = await crypto.subtle.digest("SHA-256", data);
       const passHash = [...new Uint8Array(digest)]
@@ -59,20 +45,13 @@ export default {
 
       await db
         .prepare(
-          `INSERT INTO users (phone, full_name, id_number, pass_hash, role)
-           VALUES (?, ?, ?, ?, 'admin')
-           ON CONFLICT(phone) DO UPDATE SET pass_hash=excluded.pass_hash, role='admin'`
+          "INSERT INTO users (phone, full_name, id_number, pass_hash, role) VALUES (?, ?, ?, ?, 'admin') ON CONFLICT(phone) DO UPDATE SET pass_hash=excluded.pass_hash, role='admin'"
         )
         .bind(phone, "Imarika Admin", "ADMIN", passHash)
         .run();
 
-      return json({
-        ok: true,
-        message: "Schema ensured & admin seeded/updated.",
-        phone,
-      });
+      return json({ ok: true, message: "Schema ready, admin seeded.", phone });
     } catch (e) {
-      // surfaces full SQL error in logs and response
       console.error("init error:", e);
       return json({ ok: false, error: String(e) }, 500);
     }
