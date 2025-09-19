@@ -25,13 +25,18 @@
   th,td{border:1px solid var(--line);padding:.6rem .7rem}
   th{background:#fff7ed}
   .badge{padding:.18rem .5rem;border-radius:999px;background:#fef3c7;color:#78350f;font-weight:800}
+  /* favicon image in header */
+  .logo{height:24px;width:24px;border-radius:6px}
 </style>
 
 <body>
   <div class="container">
     <div class="topbar">
       <a class="back" href="/"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#0f172a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</a>
-      <strong>Imarika Admin</strong>
+      <div style="display:flex;align-items:center;gap:8px">
+        <img src="/favicon.svg" class="logo" alt="">
+        <strong>Imarika Admin</strong>
+      </div>
     </div>
 
     <!-- Users List -->
@@ -235,7 +240,6 @@
       eWallet.value = u.wallet || 0;
       eInvest.value = u.invested || 0;
       editCard.style.display = 'block';
-      // focus wallet for quick edits
       setTimeout(()=> eWallet.focus(), 10);
     }
 
@@ -276,7 +280,6 @@
         </tr>
       `).join('') : `<tr><td colspan="6" class="muted" style="text-align:center">No pending items.</td></tr>`;
 
-      // bind buttons
       pendTableBody.querySelectorAll('button[data-approve]').forEach(b=> b.onclick = ()=> approveTx(b.dataset.approve));
       pendTableBody.querySelectorAll('button[data-reject]').forEach(b=> b.onclick = ()=> rejectTx(b.dataset.reject));
     }
@@ -286,7 +289,7 @@
       const idx = list.findIndex(t=>t.id===id);
       if(idx<0) return null;
       list[idx].status = newStatus;
-      saveGlobalTx(list);
+      localStorage.setItem(GLOBAL_TX_KEY, JSON.stringify(list));
       return list[idx];
     }
 
@@ -298,7 +301,6 @@
           if(t.type==='Deposit'){
             u.wallet = (u.wallet||0) + Math.abs(t.amount);
           }
-          // Withdrawal already deducted at request time in dashboard
           upsertUser(u);
         }
       }
@@ -311,21 +313,17 @@
         const u = findByPhone(t.phone);
         if(u){
           if(t.type==='Withdrawal'){
-            // refund since we deducted on request
             u.wallet = (u.wallet||0) + Math.abs(t.amount);
           }
-          // Deposit reject: no change
           upsertUser(u);
         }
       }
       renderPending();
     }
 
-    // initial render
     renderUsers();
     renderPending();
 
-    // listen for storage changes (if multiple admin tabs)
     window.addEventListener('storage', (e)=>{
       if(e.key==='imarika_users') renderUsers();
       if(e.key===GLOBAL_TX_KEY) renderPending();
