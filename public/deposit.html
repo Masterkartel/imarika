@@ -7,74 +7,98 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="/favicon.png" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
   <style>
     :root{
       --bg:#ffffff; --text:#0f172a; --muted:#475569; --line:#e5e7eb; --card:#ffffff;
-      --brand:#f59e0b; --brand-soft:#fde68a; --ok:#16a34a;
+      --brand:#f59e0b; --brand-soft:#fde68a;
     }
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
     a{color:inherit;text-decoration:none}
     .container{max-width:880px;margin:0 auto;padding:1rem 1rem 2rem}
     .muted{color:var(--muted)}
-    h1{font-size:clamp(1.45rem,4vw,2.2rem);margin:.3rem 0 1rem;display:flex;align-items:baseline;gap:.4rem}
-    .mpesa{height:1em; width:auto; vertical-align:-.12em; transform:translateY(.05em)}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:1rem;box-shadow:0 12px 30px rgba(2,8,23,.06);animation:rise .5s ease both}
+
+    /* Heading */
+    h1{font-size:clamp(1.6rem,4vw,2.4rem);margin:.3rem 0 1rem;display:flex;align-items:center;gap:.5rem}
+    .mpesa{height:1.05em; width:auto; vertical-align:middle; transform:translateY(.06em)}
+    .gold-glow{
+      position:relative;
+      background:linear-gradient(90deg,#fde68a,#f59e0b,#fbbf24,#f59e0b,#fde68a);
+      background-size:200% 100%;
+      -webkit-background-clip:text;background-clip:text;color:transparent;
+      text-shadow:0 0 10px rgba(245,158,11,.28);
+      animation:goldflow 4s linear infinite;
+    }
+    @keyframes goldflow{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+
+    /* Cards & UI */
+    .card{
+      background:var(--card);border:1px solid var(--line);border-radius:16px;padding:1rem;
+      box-shadow:0 12px 30px rgba(2,8,23,.06);
+      animation:rise .5s ease both;
+      transition:transform .18s ease, box-shadow .18s ease;
+    }
+    .card:hover{transform:translateY(-2px);box-shadow:0 18px 42px rgba(2,8,23,.12)}
     .card + .card{margin-top:1rem}
-    @keyframes rise{from{opacity:0;transform:translateY(8px)}}
-    .section-title{font-size:1rem;margin:.25rem 0 .6rem}
-    .field{display:grid;grid-template-columns:140px 1fr;gap:.6rem;align-items:center;padding:.45rem 0}
+    .card:nth-of-type(1){animation-delay:.02s}
+    .card:nth-of-type(2){animation-delay:.10s}
+    .card:nth-of-type(3){animation-delay:.18s}
+    @keyframes rise{from{opacity:0;transform:translateY(10px)}}
+
+    .section-title{font-size:1rem;margin:.25rem 0 .6rem;font-weight:800}
+    .field{display:grid;grid-template-columns:150px 1fr;gap:.6rem;align-items:center;padding:.5rem 0}
     .label{font-weight:800;color:#0f172a}
     .inline{display:flex;align-items:center;gap:.45rem}
-    .value{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
-      background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:.55rem .7rem;min-width:220px}
-    .iconcopy{display:inline-flex;align-items:center;justify-content:center;
+    .value{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:.55rem .7rem;min-width:220px
+    }
+
+    /* Icon-only copy buttons (two-window symbol) */
+    .iconcopy{
+      display:inline-flex;align-items:center;justify-content:center;
       padding:.45rem;border-radius:10px;border:1px solid #e2e8f0;background:#fff;cursor:pointer;
-      box-shadow:0 8px 20px rgba(2,8,23,.05)}
+      box-shadow:0 8px 20px rgba(2,8,23,.05); transition:transform .15s, border-color .15s, background .15s;
+    }
     .iconcopy:hover{background:#fff7ed;border-color:#fcd34d;transform:translateY(-1px)}
     .iconcopy svg{height:18px;width:18px;stroke:#111827}
-    .iconcopy strong{font-weight:800;margin-left:.35rem}
-    .hint{background:#f8fafc;border:1px dashed #e2e8f0;border-radius:12px;padding:1rem;animation:rise .6s .06s ease both}
-    .btn{display:inline-flex;align-items:center;gap:.5rem;background:var(--brand);color:#111827;
-      border:0;border-radius:12px;padding:.65rem .9rem;font-weight:800;box-shadow:0 10px 28px rgba(245,158,11,.28)}
-    .btn:hover{filter:brightness(1.03);transform:translateY(-1px)}
-    .row{display:flex;align-items:center;justify-content:space-between}
+
+    .hint{background:#f8fafc;border:1px dashed #e2e8f0;border-radius:12px;padding:1rem;animation:rise .5s .24s ease both}
     .badge{padding:.18rem .6rem;border-radius:999px;background:#fef3c7;color:#78350f;font-weight:800}
-    /* tiny sparkle for heading */
-    .shine{position:relative}
-    .shine::after{
-      content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 0%,rgba(255,255,255,.35) 30%,transparent 60%);
-      transform:translateX(-120%);animation:gloss 3.2s ease-in-out infinite
+
+    .row{display:flex;align-items:center;justify-content:space-between}
+    .btn{
+      display:inline-flex;align-items:center;gap:.5rem;background:var(--brand);color:#111827;
+      border:0;border-radius:12px;padding:.65rem .9rem;font-weight:800;box-shadow:0 10px 28px rgba(245,158,11,.28)
     }
-    @keyframes gloss{to{transform:translateX(120%)}}
+    .btn:hover{filter:brightness(1.03);transform:translateY(-1px)}
   </style>
 </head>
 <body>
   <div class="container">
     <p class="muted"><a href="/dashboard.html">← Back to Dashboard</a></p>
 
-    <!-- Heading: Ecobank [mpesa.png inline height 1em] Paybill -->
-    <h1 class="shine">
-      <span>Ecobank</span>
+    <!-- Heading: Ecobank [mpesa.png] Paybill, matching height + glow on text -->
+    <h1>
+      <span class="gold-glow">Ecobank</span>
       <img src="/mpesa.png" alt="M-PESA" class="mpesa">
-      <span>Paybill</span>
+      <span class="gold-glow">Paybill</span>
     </h1>
 
     <!-- Ecobank M-PESA Paybill -->
     <div class="card">
-      <div class="section-title"><strong>Ecobank M-PESA Paybill</strong></div>
+      <div class="section-title">Ecobank M-PESA Paybill</div>
 
       <div class="field">
         <div class="label">Paybill</div>
         <div class="inline">
           <div class="value" id="pb">700201</div>
           <button class="iconcopy" data-copy="#pb" aria-label="Copy Paybill">
-            <!-- two windows (copy) icon -->
             <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
               <rect x="9" y="9" width="11" height="11" rx="2"></rect>
               <rect x="4" y="4" width="11" height="11" rx="2"></rect>
             </svg>
-            <strong>Copy</strong>
           </button>
         </div>
       </div>
@@ -88,7 +112,6 @@
               <rect x="9" y="9" width="11" height="11" rx="2"></rect>
               <rect x="4" y="4" width="11" height="11" rx="2"></rect>
             </svg>
-            <strong>Copy</strong>
           </button>
         </div>
       </div>
@@ -96,7 +119,7 @@
 
     <!-- Bank Transfer Details (Ecobank) -->
     <div class="card">
-      <div class="section-title"><strong>Bank Transfer — Ecobank</strong></div>
+      <div class="section-title">Bank Transfer — Ecobank</div>
 
       <div class="field">
         <div class="label">Bank</div>
@@ -107,7 +130,6 @@
               <rect x="9" y="9" width="11" height="11" rx="2"></rect>
               <rect x="4" y="4" width="11" height="11" rx="2"></rect>
             </svg>
-            <strong>Copy</strong>
           </button>
         </div>
       </div>
@@ -121,7 +143,6 @@
               <rect x="9" y="9" width="11" height="11" rx="2"></rect>
               <rect x="4" y="4" width="11" height="11" rx="2"></rect>
             </svg>
-            <strong>Copy</strong>
           </button>
         </div>
       </div>
@@ -135,7 +156,6 @@
               <rect x="9" y="9" width="11" height="11" rx="2"></rect>
               <rect x="4" y="4" width="11" height="11" rx="2"></rect>
             </svg>
-            <strong>Copy</strong>
           </button>
         </div>
       </div>
@@ -152,7 +172,7 @@
           <div class="label" style="margin-bottom:.25rem">Go to Dashboard</div>
           <div class="muted">See updated Wallet & Shares</div>
         </div>
-        <a class="btn" href="/dashboard.html">
+        <a class="btn" href="/dashboard.html" aria-label="Open Dashboard">
           <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#111827" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           Open
         </a>
@@ -181,7 +201,7 @@
       t.textContent = msg;
       t.style.cssText = "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;font-weight:800;padding:.5rem .8rem;border-radius:10px;opacity:.96;z-index:1000;box-shadow:0 10px 24px rgba(2,8,23,.25)";
       document.body.appendChild(t);
-      setTimeout(()=>{ t.remove(); }, 1200);
+      setTimeout(()=>{ t.remove(); }, 1100);
     }
   </script>
 </body>
