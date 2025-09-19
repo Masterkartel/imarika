@@ -1,4 +1,3 @@
-// public/api/admin/init
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -12,24 +11,49 @@ export default {
       return json({ ok: false, error: "Not found" }, 404);
     }
 
-    // --- Auth with init secret ---
+    // --- protect with init secret
     const expected = (env.ADMIN_INIT_SECRET || "").trim();
     const given = url.searchParams.get("secret") || "";
     if (!expected || given !== expected) {
       return json({ ok: false, error: "Forbidden" }, 403);
     }
 
-    // IMPORTANT: make sure your D1 binding name matches here.
-    // If your binding is called something else, change env.DB to env.<YourBindingName>.
-    const db = env.DB;
+    // Use the correct D1 binding no matter which label you chose in the UI
+    const db = env.DB || env.imarika;
+    if (!db) return json({ ok: false, error: "D1 binding not found (DB/imarika)" }, 500);
 
-    const run = async (sql) => { await db.exec(sql); };
+    // Helper: run a single statement safely
+    const run = async (sql) => { await db.prepare(sql).run(); };
 
     try {
-      // One-line statements to avoid “incomplete input” on D1
-      await run('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, phone TEXT UNIQUE, "full" TEXT, idn TEXT, account TEXT UNIQUE, pass_hash TEXT, wallet INTEGER DEFAULT 0, invested INTEGER DEFAULT 0, created_at INTEGER);');
-      await run('CREATE TABLE IF NOT EXISTS tx (id TEXT PRIMARY KEY, ts INTEGER, phone TEXT, type TEXT, detail TEXT, amount INTEGER, status TEXT);');
-      await run('CREATE INDEX IF NOT EXISTS idx_tx_phone_ts ON tx(phone, ts DESC);');
+      // NOTE: no quoted identifiers; single-line; each executed via prepare().run()
+      await run(
+        "CREATE TABLE IF NOT EXISTS users (" +
+          "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+          "phone TEXT UNIQUE, " +
+          "full_name TEXT, " +         // renamed from \"full\" to avoid quoting
+          "idn TEXT, " +
+          "account TEXT UNIQUE, " +
+          "pass_hash TEXT, " +
+          "wallet INTEGER DEFAULT 0, " +
+          "invested INTEGER DEFAULT 0, " +
+          "created_at INTEGER" +
+        ")"
+      );
+
+      await run(
+        "CREATE TABLE IF NOT EXISTS tx (" +
+          "id TEXT PRIMARY KEY, " +
+          "ts INTEGER, " +
+          "phone TEXT, " +
+          "type TEXT, " +
+          "detail TEXT, " +
+          "amount INTEGER, " +
+          "status TEXT" +
+        ")"
+      );
+
+      await run("CREATE INDEX IF NOT EXISTS idx_tx_phone_ts ON tx(phone, ts DESC)");
     } catch (e) {
       return json({ ok: false, error: String(e) }, 500);
     }
@@ -49,14 +73,14 @@ export default {
     const adminAccount = "IMK-ADMIN";
 
     await db.prepare(
-      'INSERT INTO users (phone, "full", idn, account, pass_hash, wallet, invested, created_at) ' +
-      'VALUES (?1, "System Admin", "", ?2, ?3, 0, 0, ?4) ' +
-      'ON CONFLICT(phone) DO UPDATE SET pass_hash=excluded.pass_hash, account=excluded.account'
+      "INSERT INTO users (phone, full_name, idn, account, pass_hash, wallet, invested, created_at) " +
+      "VALUES (?1, 'System Admin', '', ?2, ?3, 0, 0, ?4) " +
+      "ON CONFLICT(phone) DO UPDATE SET pass_hash=excluded.pass_hash, account=excluded.account"
     ).bind(adminPhone, adminAccount, passHash, Date.now()).run();
 
-    const uCount = await db.prepare('SELECT COUNT(*) AS n FROM users').first();
-    const tCount = await db.prepare('SELECT COUNT(*) AS n FROM tx').first();
-    const admin  = await db.prepare('SELECT phone, account, wallet, invested FROM users WHERE phone=?1')
+    const uCount = await db.prepare("SELECT COUNT(*) AS n FROM users").first();
+    const tCount = await db.prepare("SELECT COUNT(*) AS n FROM tx").first();
+    const admin  = await db.prepare("SELECT phone, account, wallet, invested FROM users WHERE phone=?1")
                            .bind(adminPhone).first();
 
     return json({
