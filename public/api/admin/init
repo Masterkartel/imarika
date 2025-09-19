@@ -7,52 +7,51 @@ export default {
       });
 
     const url = new URL(request.url);
-    if (url.pathname !== "/api/admin/init")
-      return json({ ok: false, error: "Not found" }, 404);
+    if (url.pathname !== "/api/admin/init") return json({ ok: false, error: "Not found" }, 404);
 
-    // --- protect with secret (remember # must be encoded as %23) ---
+    // --- protect with secret (remember: # must be encoded as %23 in the URL)
     const given = url.searchParams.get("secret") || "";
     const expected = env.ADMIN_INIT_SECRET || "Oury2933#";
     if (given !== expected) return json({ ok: false, error: "Forbidden" }, 403);
 
-    // D1 binding (named DB in your Worker bindings)
-    const db = env.DB || env.imarika;
+    // D1 binding: you named it DB in the Worker
+    const db = env.DB;
 
-    // Build SQL with join() so we’re certain it’s a single clean line
-    const USERS_SQL = [
-      "CREATE TABLE IF NOT EXISTS users (",
-      "id INTEGER PRIMARY KEY,",
-      "phone TEXT UNIQUE NOT NULL,",
-      "full_name TEXT,",
-      "id_number TEXT,",
-      "pass_hash TEXT,",
-      "role TEXT DEFAULT 'user',",
-      "created_at INTEGER DEFAULT (strftime('%s','now'))",
-      ");",
-    ].join(" ");
+    // --- SQL (keep it super-plain) ---
+    const USERS_SQL =
+      "CREATE TABLE IF NOT EXISTS users (" +
+      "id INTEGER PRIMARY KEY, " +
+      "phone TEXT UNIQUE NOT NULL, " +
+      "full_name TEXT, " +
+      "id_number TEXT, " +
+      "pass_hash TEXT, " +
+      "role TEXT DEFAULT 'user', " +
+      "created_at INTEGER" +         // we'll set on insert; no DEFAULT expr
+      ")";
 
-    const TX_SQL = [
-      "CREATE TABLE IF NOT EXISTS tx (",
-      "id TEXT PRIMARY KEY,",
-      "user_phone TEXT,",
-      "type TEXT,",
-      "detail TEXT,",
-      "amount INTEGER,",
-      "status TEXT,",
-      "ts INTEGER",
-      ");",
-    ].join(" ");
+    const TX_SQL =
+      "CREATE TABLE IF NOT EXISTS tx (" +
+      "id TEXT PRIMARY KEY, " +
+      "user_phone TEXT, " +
+      "type TEXT, " +
+      "detail TEXT, " +
+      "amount INTEGER, " +
+      "status TEXT, " +
+      "ts INTEGER" +
+      ")";
 
     const TX_IDX_SQL =
-      "CREATE INDEX IF NOT EXISTS idx_tx_phone_ts ON tx(user_phone, ts DESC);";
+      "CREATE INDEX IF NOT EXISTS idx_tx_phone_ts ON tx(user_phone, ts DESC)";
 
     try {
-      // run schema (each statement separately)
-      await db.exec(USERS_SQL);
-      await db.exec(TX_SQL);
-      await db.exec(TX_IDX_SQL);
+      // Run schema with prepared statements to avoid any parsing quirks
+      await db.batch([
+        db.prepare(USERS_SQL),
+        db.prepare(TX_SQL),
+        db.prepare(TX_IDX_SQL),
+      ]);
 
-      // seed/update admin user
+      // Seed / update admin user
       const phone = env.ADMIN_PHONE || "0715151010";
       const pass = env.ADMIN_PASS || "Oury2933#";
       const salt = env.PASS_SALT || "imarika-salt";
@@ -63,26 +62,21 @@ export default {
         .map((b) => b.toString(16).padStart(2, "0"))
         .join("");
 
+      // upsert admin (set created_at if inserting)
       await db
         .prepare(
-          "INSERT INTO users (phone, full_name, id_number, pass_hash, role) VALUES (?, ?, ?, ?, 'admin') ON CONFLICT(phone) DO UPDATE SET pass_hash=excluded.pass_hash, role='admin'"
+          "INSERT INTO users (phone, full_name, id_number, pass_hash, role, created_at) " +
+            "VALUES (?, ?, ?, ?, 'admin', ?) " +
+            "ON CONFLICT(phone) DO UPDATE SET pass_hash=excluded.pass_hash, role='admin'"
         )
-        .bind(phone, "Imarika Admin", "ADMIN", passHash)
+        .bind(phone, "Imarika Admin", "ADMIN", passHash, Math.floor(Date.now() / 1000))
         .run();
 
       return json({ ok: true, message: "Schema ready, admin seeded.", phone });
     } catch (e) {
-      // surface details to logs and response so we can see exactly what D1 says
+      // Will also show in Workers → Logs
       console.error("INIT ERROR:", e);
-      return json(
-        {
-          ok: false,
-          error: String(e),
-          users_sql_len: USERS_SQL.length,
-          tx_sql_len: TX_SQL.length,
-        },
-        500
-      );
+      return json({ ok: false, error: String(e) }, 500);
     }
   },
 };
