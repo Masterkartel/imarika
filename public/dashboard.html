@@ -6,32 +6,70 @@
 <link rel="icon" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#fff;--text:#0f172a;--muted:#475569;--line:#e5e7eb;--card:#fff;
-    --brand:#f59e0b;--ok:#16a34a;--danger:#ef4444;--ring:rgba(245,158,11,.35)
-  }
+  :root{ --bg:#fff; --text:#0f172a; --muted:#475569; --line:#e5e7eb; --card:#fff;
+         --brand:#f59e0b; --ok:#16a34a; --danger:#ef4444; --ring:rgba(245,158,11,.35) }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  html,body{margin:0; background:var(--bg); color:var(--text); font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; overflow-x:hidden}
   a{text-decoration:none;color:inherit}
   .container{max-width:1120px;margin:0 auto;padding:0 1rem}
+  @media (max-width:560px){ .container{padding:0 .75rem} }
+
   header{position:sticky;top:0;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:40}
   .brand{display:flex;align-items:center;gap:.55rem;height:64px}
   .logo{height:32px;width:32px;border-radius:10px}
+
   .btn{display:inline-flex;align-items:center;justify-content:center;padding:.72rem 1rem;border-radius:14px;font-weight:700;background:var(--brand);color:#111827;border:0;cursor:pointer;box-shadow:0 10px 30px rgba(245,158,11,.25)}
   .btn-outline{background:#fff;border:1px solid var(--line)}
   .btn-slim{padding:.55rem .75rem;border-radius:12px}
+  @media (max-width:560px){
+    .btn, .btn-outline, .btn-slim{width:100%}
+  }
+
   .grid{display:grid;gap:1rem}
   .grid2{grid-template-columns:1fr}
   @media(min-width:768px){.grid2{grid-template-columns:2fr 1fr}}
+
   .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:1.15rem;box-shadow:0 10px 30px rgba(2,8,23,.06)}
+  @media (max-width:560px){ .card{padding:.9rem} }
+
   input,select,textarea{width:100%;padding:.85rem;border:1px solid var(--line);border-radius:14px;outline:none}
   input:focus,select:focus,textarea:focus{border-color:#cbd5e1;box-shadow:0 0 0 4px var(--ring)}
   .muted{color:var(--muted)}
   .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
-  .table{width:100%;border-collapse:collapse}
-  .table th,.table td{border:1px solid var(--line);padding:.6rem .7rem}
-  .table th{background:#fff7ed}
   .badge{padding:.18rem .5rem;border-radius:999px;background:#fef3c7;color:#78350f;font-weight:800}
+
+  /* Tables default */
+  .table{width:100%;border-collapse:collapse}
+  .table th,.table td{border:1px solid var(--line);padding:.6rem .7rem;vertical-align:top}
+  .table th{background:#fff7ed}
+
+  /* Mobile table → card list */
+  @media (max-width:560px){
+    .table{border-collapse:separate;border-spacing:0}
+    .table thead{display:none}
+    .table tr{display:block;border:1px solid var(--line);border-radius:12px;margin:.5rem 0;background:#fff}
+    .table td{display:flex;gap:.75rem;justify-content:space-between;border:none;border-bottom:1px solid var(--line);padding:.6rem .75rem}
+    .table td:last-child{border-bottom:none}
+    .table td::before{content:attr(data-label);font-weight:700;color:var(--muted)}
+  }
+
+  /* Mobile: pin Logout to top-right corner */
+  @media (max-width:640px){
+    #logoutBtn{
+      position:fixed;
+      top:calc(env(safe-area-inset-top, 0px) + 8px);
+      right:calc(env(safe-area-inset-right, 0px) + 8px);
+      z-index:90;
+      padding:.5rem .75rem;
+      border-radius:999px;
+      white-space:nowrap;
+      box-shadow:0 8px 22px rgba(2,8,23,.15);
+      backdrop-filter:blur(6px);
+    }
+  }
+
+  /* Smaller heading on phones */
+  @media (max-width:560px){ h1{font-size:1.35rem;margin: .9rem 0 .2rem} }
 </style>
 
 <body>
@@ -46,7 +84,7 @@
 
   <section>
     <div class="container">
-      <h1 style="margin:1rem 0 .25rem">Dashboard</h1>
+      <h1>Dashboard</h1>
       <div class="muted" id="who"></div>
 
       <div id="dash" class="grid grid2" style="margin-top:1rem;display:none">
@@ -64,7 +102,7 @@
               </div>
             </div>
 
-            <div style="margin-top:.8rem;display:flex;gap:.6rem;flex-wrap:wrap">
+            <div class="btn-row" style="margin-top:.8rem;display:flex;gap:.6rem;flex-wrap:wrap">
               <a class="btn btn-slim" href="/deposit.html">Deposit</a>
               <button class="btn btn-outline btn-slim" id="showWithdraw">Withdraw</button>
             </div>
@@ -72,7 +110,7 @@
 
           <!-- SHARES CARD -->
           <div class="card">
-            <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap">
               <div>
                 <strong>Investments (Shares)</strong>
                 <div class="muted">Active amount in plans</div>
@@ -175,8 +213,8 @@
     // ===== UI refs =====
     const dash = document.getElementById('dash'), who = document.getElementById('who');
     const walletEl = document.getElementById('wallet'), sharesEl = document.getElementById('shares'), stamp = document.getElementById('stamp');
-    const txTable = document.getElementById('txTable').querySelector('tbody'), txCount = document.getElementById('txCount');
-    const loanTable = document.getElementById('loanTable').querySelector('tbody'), loanCount = document.getElementById('loanCount');
+    const txBody = document.getElementById('txTable').querySelector('tbody'), txCount = document.getElementById('txCount');
+    const loanBody = document.getElementById('loanTable').querySelector('tbody'), loanCount = document.getElementById('loanCount');
 
     function show(u){
       who.innerHTML = `<span class="muted">Acct:</span> <span class="mono"><strong>${u.account}</strong></span> • ${u.full||''}`;
@@ -190,26 +228,26 @@
     function renderTx(){
       const list = getTx();
       txCount.textContent = list.length;
-      txTable.innerHTML = list.length ? list.map(t => `
+      txBody.innerHTML = list.length ? list.map(t => `
         <tr>
-          <td class="mono">${new Date(t.ts).toLocaleString()}</td>
-          <td>${t.type}</td>
-          <td>${t.detail||'-'}</td>
-          <td style="text-align:right">${fmt(t.amount||0)}</td>
-          <td>${t.status||'-'}</td>
+          <td class="mono" data-label="Date">${new Date(t.ts).toLocaleString()}</td>
+          <td data-label="Type">${t.type}</td>
+          <td data-label="Details">${t.detail||'-'}</td>
+          <td data-label="Amount (KES)" style="text-align:right">${fmt(t.amount||0)}</td>
+          <td data-label="Status">${t.status||'-'}</td>
         </tr>
       `).join('') : `<tr><td colspan="5" class="muted" style="text-align:center">No transactions yet.</td></tr>`;
     }
     function renderLoans(){
       const list = getLoans();
       loanCount.textContent = list.length;
-      loanTable.innerHTML = list.length ? list.map(t => `
+      loanBody.innerHTML = list.length ? list.map(t => `
         <tr>
-          <td class="mono">${new Date(t.ts).toLocaleString()}</td>
-          <td>${t.product||'-'}</td>
-          <td>${t.tenor||'-'}</td>
-          <td style="text-align:right">${fmt(t.amount||0)}</td>
-          <td>${t.status||'-'}</td>
+          <td class="mono" data-label="Date">${new Date(t.ts).toLocaleString()}</td>
+          <td data-label="Product">${t.product||'-'}</td>
+          <td data-label="Tenor">${t.tenor||'-'}</td>
+          <td data-label="Amount (KES)" style="text-align:right">${fmt(t.amount||0)}</td>
+          <td data-label="Status">${t.status||'-'}</td>
         </tr>
       `).join('') : `<tr><td colspan="5" class="muted" style="text-align:center">No loan activity yet.</td></tr>`;
     }
@@ -226,15 +264,9 @@
       if(a<=0){ h.textContent='Enter amount.'; return; }
       if(a > (u.wallet||0)){ h.textContent='Insufficient wallet balance.'; return; }
 
-      // Deduct and persist
-      u.wallet = (u.wallet||0) - a;
-      saveUser(u);
-      show(u);
-
-      // Add TX
+      u.wallet = (u.wallet||0) - a; saveUser(u); show(u);
       addTx({ ts:Date.now(), type:'Withdrawal', detail:`To ${p}`, amount:-Math.abs(a), status:'Requested' });
-      h.textContent='Withdrawal request submitted.';
-      wAmt.value=''; // reset
+      h.textContent='Withdrawal request submitted.'; wAmt.value='';
     };
 
     // ===== Calculator with plan limits =====
@@ -251,18 +283,15 @@
 
     function syncPlanUI(){
       const p = PLANS[planEl.value];
-      amtEl.min = p.min;
-      if (isFinite(p.max)) { amtEl.max = p.max; } else { amtEl.removeAttribute('max'); }
-      amtEl.placeholder = `Enter amount (${p.min.toLocaleString('en-KE')}${isFinite(p.max)?' – '+p.max.toLocaleString('en-KE'): ' and above'})`;
+      amtEl.min = p.min; isFinite(p.max) ? (amtEl.max = p.max) : amtEl.removeAttribute('max');
+      amtEl.placeholder = `Enter amount (${p.min.toLocaleString('en-KE')}${isFinite(p.max)?' – '+p.max.toLocaleString('en-KE'):' and above'})`;
       out.textContent = '';
     }
-    planEl.addEventListener('change', syncPlanUI);
-    syncPlanUI();
+    planEl.addEventListener('change', syncPlanUI); syncPlanUI();
 
     function validateAmount(){
-      const p = PLANS[planEl.value];
-      const amt = Number(amtEl.value || 0);
-      if(!amt || amt < p.min) { out.textContent = `Minimum for ${p.name} is KES ${p.min.toLocaleString('en-KE')}.`; return null; }
+      const p = PLANS[planEl.value], amt = Number(amtEl.value||0);
+      if(!amt || amt < p.min){ out.textContent = `Minimum for ${p.name} is KES ${p.min.toLocaleString('en-KE')}.`; return null; }
       if(isFinite(p.max) && amt > p.max){ out.textContent = `Maximum for ${p.name} is KES ${p.max.toLocaleString('en-KE')}.`; return null; }
       return {plan:p, amt};
     }
@@ -273,25 +302,15 @@
       out.innerHTML = `Projected earnings in 24h: <strong style="color:var(--ok)">KES ${fmt(earn)}</strong> • Total: <strong>KES ${fmt(v.amt+earn)}</strong>`;
     };
 
-    // Add pending investment only when amount is valid
     startBtn.addEventListener('click', (e)=>{
-      const v = validateAmount();
-      if(!v){ e.preventDefault(); return; }
-      addTx({
-        ts:Date.now(),
-        type:'Investment',
-        detail:`${v.plan.name} (${v.plan.pct}% in 24h) — Pending deposit`,
-        amount:v.amt,
-        status:'Pending'
-      });
+      const v = validateAmount(); if(!v){ e.preventDefault(); return; }
+      addTx({ ts:Date.now(), type:'Investment', detail:`${v.plan.name} (${v.plan.pct}% in 24h) — Pending deposit`, amount:v.amt, status:'Pending' });
     });
 
     // ===== Logout → Home =====
     document.getElementById('logoutBtn').onclick = ()=>{
       localStorage.removeItem('imarika_user');
-      // optionally also clear local history:
-      // localStorage.removeItem('imarika_tx'); localStorage.removeItem('imarika_loan_tx');
-      window.location.href = '/';  // back to Home
+      window.location.href = '/';
     };
 
     // ===== Gate: must be logged in =====
