@@ -33,10 +33,10 @@
   .table th{background:#fff7ed}
   .badge{padding:.18rem .5rem;border-radius:999px;background:#fef3c7;color:#78350f;font-weight:800}
 
-  /* Mobile pinned logout */
+  /* Logout pinned on small/tablet screens */
   #logoutBtn{position:static}
-  @media(max-width:520px){
-    header .container{padding-right:96px}
+  @media(max-width:900px){
+    header .container{padding-right:120px}
     #logoutBtn{position:fixed;top:10px;right:10px;z-index:100}
   }
 
@@ -210,7 +210,7 @@
     const saveUser = u => localStorage.setItem('imarika_user', JSON.stringify(u));
     const getUser  = () => { try { return JSON.parse(localStorage.getItem('imarika_user')||'null'); } catch { return null; } };
 
-    // Local (per-user) transactions
+    // Local (per-user) transactions shown in the table
     const TX_KEY='imarika_tx', LOAN_KEY='imarika_loan_tx';
     const getTx = () => { try { return JSON.parse(localStorage.getItem(TX_KEY)||'[]'); } catch { return []; } };
     const saveTx = list => localStorage.setItem(TX_KEY, JSON.stringify(list));
@@ -219,14 +219,12 @@
     const saveLoans = list => localStorage.setItem(LOAN_KEY, JSON.stringify(list));
     const addLoan = loan => { const list=getLoans(); list.unshift(loan); saveLoans(list); renderLoans(); };
 
-    // --- Global TX queue shared with Admin ---
-    const GLOBAL_TX_KEY = 'imarika_tx_global';
+    // --- Global TX queue shared with Admin (MUST match admin) ---
+    const GLOBAL_TX_KEY = 'imarika_global_tx'; // <- unified key
     const getGlobalTx = () => { try { return JSON.parse(localStorage.getItem(GLOBAL_TX_KEY)||'[]'); } catch { return []; } };
     const saveGlobalTx = (list) => localStorage.setItem(GLOBAL_TX_KEY, JSON.stringify(list));
     const uid = () => 'TX-' + Date.now() + '-' + Math.random().toString(36).slice(2,8).toUpperCase();
-    function pushGlobalTx(tx){
-      const list = getGlobalTx(); list.unshift(tx); saveGlobalTx(list);
-    }
+    function pushGlobalTx(tx){ const list = getGlobalTx(); list.unshift(tx); saveGlobalTx(list); }
 
     // ===== UI refs =====
     const dash = document.getElementById('dash'), who = document.getElementById('who');
@@ -241,7 +239,7 @@
       stamp.textContent = 'Updated ' + new Date().toLocaleString();
       dash.style.display='grid';
       renderTx(); renderLoans();
-      syncFromGlobal(); // ensure latest
+      syncFromGlobal(); // ensure latest statuses
     }
 
     function renderTx(){
@@ -271,12 +269,12 @@
       `).join('') : `<tr><td colspan="5" class="muted" style="text-align:center">No loan activity yet.</td></tr>`;
     }
 
-    // ---- SYNC FROM ADMIN GLOBAL QUEUE ----
+    // ---- SYNC FROM ADMIN GLOBAL QUEUE (statuses only; Admin adjusts balances) ----
     function syncFromGlobal(){
       const u = getUser(); if(!u) return;
       const globals = getGlobalTx().filter(g => g.phone === u.phone);
       let txs = getTx();
-      let changedUser = false, changedTx = false;
+      let changedTx = false;
 
       for(const g of globals){
         // Find matching local tx by id; fallback to fuzzy match
@@ -291,25 +289,11 @@
         }
         if(!t) continue;
 
-        // Update status
+        // Update local status to mirror Admin
         if(t.status !== g.status){ t.status = g.status; changedTx = true; }
-
-        // Apply wallet side-effects once
-        if(!t._applied){
-          if(g.type==='Deposit' && g.status==='Approved'){
-            u.wallet = (u.wallet||0) + Math.abs(g.amount);
-            t._applied = true; changedUser = true; changedTx = true;
-          }
-          if(g.type==='Withdrawal' && g.status==='Rejected'){
-            // refund previously deducted amount
-            u.wallet = (u.wallet||0) + Math.abs(g.amount);
-            t._applied = true; changedUser = true; changedTx = true;
-          }
-        }
       }
 
       if(changedTx){ saveTx(txs); renderTx(); }
-      if(changedUser){ saveUser(u); show(u); }
     }
 
     // ===== Withdraw (enforces wallet balance) =====
@@ -324,7 +308,7 @@
       if(a<=0){ h.textContent='Enter amount.'; return; }
       if(a > (u.wallet||0)){ h.textContent='Insufficient wallet balance.'; return; }
 
-      // Deduct and persist
+      // Deduct and persist (hold)
       u.wallet = (u.wallet||0) - a;
       saveUser(u);
       show(u);
@@ -377,7 +361,7 @@
       out.innerHTML = `Projected earnings in 24h: <strong style="color:var(--ok)">KES ${fmt(earn)}</strong> • Total: <strong>KES ${fmt(v.amt+earn)}</strong>`;
     };
 
-    // Start & Deposit: create local Investment (pending) + a Global Deposit for Admin
+    // Start & Deposit: local pending + a Global Deposit for Admin
     startBtn.addEventListener('click', (e)=>{
       const v = validateAmount();
       if(!v){ e.preventDefault(); return; }
