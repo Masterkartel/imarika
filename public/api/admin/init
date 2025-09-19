@@ -1,0 +1,71 @@
+// public/api/admin/init
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    const json = (data, status = 200) =>
+      new Response(JSON.stringify(data), {
+        status,
+        headers: { "content-type": "application/json" },
+      });
+
+    if (url.pathname !== "/api/admin/init") {
+      return json({ ok: false, error: "Not found" }, 404);
+    }
+
+    // --- Auth with init secret ---
+    const expected = (env.ADMIN_INIT_SECRET || "").trim();
+    const given = url.searchParams.get("secret") || "";
+    if (!expected || given !== expected) {
+      return json({ ok: false, error: "Forbidden" }, 403);
+    }
+
+    // IMPORTANT: make sure your D1 binding name matches here.
+    // If your binding is called something else, change env.DB to env.<YourBindingName>.
+    const db = env.DB;
+
+    const run = async (sql) => { await db.exec(sql); };
+
+    try {
+      // One-line statements to avoid “incomplete input” on D1
+      await run('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, phone TEXT UNIQUE, "full" TEXT, idn TEXT, account TEXT UNIQUE, pass_hash TEXT, wallet INTEGER DEFAULT 0, invested INTEGER DEFAULT 0, created_at INTEGER);');
+      await run('CREATE TABLE IF NOT EXISTS tx (id TEXT PRIMARY KEY, ts INTEGER, phone TEXT, type TEXT, detail TEXT, amount INTEGER, status TEXT);');
+      await run('CREATE INDEX IF NOT EXISTS idx_tx_phone_ts ON tx(phone, ts DESC);');
+    } catch (e) {
+      return json({ ok: false, error: String(e) }, 500);
+    }
+
+    // Hash helper
+    const sha256hex = async (text) => {
+      const buf = new TextEncoder().encode(text);
+      const hash = await crypto.subtle.digest("SHA-256", buf);
+      return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, "0")).join("");
+    };
+
+    // Seed / update admin
+    const adminPhone   = (env.ADMIN_PHONE || "0715151010").trim();
+    const adminPass    = env.ADMIN_PASS || "Oury2933#";
+    const salt         = env.PASS_SALT || "imarika-salt";
+    const passHash     = await sha256hex(salt + adminPass);
+    const adminAccount = "IMK-ADMIN";
+
+    await db.prepare(
+      'INSERT INTO users (phone, "full", idn, account, pass_hash, wallet, invested, created_at) ' +
+      'VALUES (?1, "System Admin", "", ?2, ?3, 0, 0, ?4) ' +
+      'ON CONFLICT(phone) DO UPDATE SET pass_hash=excluded.pass_hash, account=excluded.account'
+    ).bind(adminPhone, adminAccount, passHash, Date.now()).run();
+
+    const uCount = await db.prepare('SELECT COUNT(*) AS n FROM users').first();
+    const tCount = await db.prepare('SELECT COUNT(*) AS n FROM tx').first();
+    const admin  = await db.prepare('SELECT phone, account, wallet, invested FROM users WHERE phone=?1')
+                           .bind(adminPhone).first();
+
+    return json({
+      ok: true,
+      message: "Schema ensured & admin seeded/updated.",
+      users: uCount?.n ?? 0,
+      tx: tCount?.n ?? 0,
+      admin,
+      time: Date.now()
+    });
+  }
+};
