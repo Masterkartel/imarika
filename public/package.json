@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "dev": "wrangler dev --assets=public --local",
+    "deploy": "wrangler deploy"
+  }
+}
