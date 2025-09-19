@@ -1,8 +1,6 @@
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-
-    // simple JSON helper
     const json = (data, status = 200) =>
       new Response(JSON.stringify(data), {
         status,
@@ -11,7 +9,6 @@ export default {
 
     if (url.pathname === "/api/health") {
       try {
-        // prove the D1 binding works
         const row = await env.DB.prepare("SELECT 1 AS ok").first();
         return json({ ok: true, d1: !!row });
       } catch (e) {
