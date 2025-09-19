@@ -214,43 +214,84 @@
       `).join('') : `<tr><td colspan="5" class="muted" style="text-align:center">No loan activity yet.</td></tr>`;
     }
 
-    // ===== Withdraw =====
+    // ===== Withdraw (enforces wallet balance) =====
     document.getElementById('showWithdraw').onclick = ()=>{
       const c = document.getElementById('withdrawCard');
       c.style.display = c.style.display==='none' ? 'block' : 'none';
     };
     document.getElementById('doWithdraw').onclick = ()=>{
       const p = wPhone.value.trim(), a = Number(wAmt.value||0), h = wHint;
+      let u = getUser() || {wallet:0};
       if(!phoneOk(p)){ h.textContent='Enter a valid M-Pesa number.'; return; }
       if(a<=0){ h.textContent='Enter amount.'; return; }
-      h.textContent='Withdrawal request submitted.';
+      if(a > (u.wallet||0)){ h.textContent='Insufficient wallet balance.'; return; }
+
+      // Deduct and persist
+      u.wallet = (u.wallet||0) - a;
+      saveUser(u);
+      show(u);
+
+      // Add TX
       addTx({ ts:Date.now(), type:'Withdrawal', detail:`To ${p}`, amount:-Math.abs(a), status:'Requested' });
+      h.textContent='Withdrawal request submitted.';
+      wAmt.value=''; // reset
     };
 
-    // ===== Calculator / Start =====
-    const planEl=document.getElementById('plan'), out=document.getElementById('out');
-    document.getElementById('calc').onclick = ()=>{
-      const plan=planEl.value, amt=Number(document.getElementById('amt').value||0),
-            pct={std:30,gold:50,plat:70}[plan];
-      if(!amt || amt<1000){ out.textContent='Enter at least KES 1,000'; return; }
-      const earn=Math.round(amt*pct/100);
-      out.innerHTML=`Projected earnings in 24h: <strong style="color:var(--ok)">KES ${fmt(earn)}</strong> • Total: <strong>KES ${fmt(amt+earn)}</strong>`;
+    // ===== Calculator with plan limits =====
+    const planEl = document.getElementById('plan');
+    const amtEl  = document.getElementById('amt');
+    const out    = document.getElementById('out');
+    const startBtn = document.getElementById('startBtn');
+
+    const PLANS = {
+      std:  { name:'Standard',  pct:30, min:1000,   max:70000 },
+      gold: { name:'Gold',      pct:50, min:70001,  max:140000 },
+      plat: { name:'Platinum',  pct:70, min:140001, max:Infinity }
     };
-    document.getElementById('startBtn').addEventListener('click', ()=>{
-      const amt = Number(document.getElementById('amt').value||0);
-      const pct={std:30,gold:50,plat:70}[planEl.value];
-      if(amt && amt>=1000){
-        const planName = {std:'Standard',gold:'Gold',plat:'Platinum'}[planEl.value];
-        addTx({ ts:Date.now(), type:'Investment', detail:`${planName} (${pct}% in 24h) — Pending deposit`, amount:amt, status:'Pending' });
-      }
+
+    function syncPlanUI(){
+      const p = PLANS[planEl.value];
+      amtEl.min = p.min;
+      if (isFinite(p.max)) { amtEl.max = p.max; } else { amtEl.removeAttribute('max'); }
+      amtEl.placeholder = `Enter amount (${p.min.toLocaleString('en-KE')}${isFinite(p.max)?' – '+p.max.toLocaleString('en-KE'): ' and above'})`;
+      out.textContent = '';
+    }
+    planEl.addEventListener('change', syncPlanUI);
+    syncPlanUI();
+
+    function validateAmount(){
+      const p = PLANS[planEl.value];
+      const amt = Number(amtEl.value || 0);
+      if(!amt || amt < p.min) { out.textContent = `Minimum for ${p.name} is KES ${p.min.toLocaleString('en-KE')}.`; return null; }
+      if(isFinite(p.max) && amt > p.max){ out.textContent = `Maximum for ${p.name} is KES ${p.max.toLocaleString('en-KE')}.`; return null; }
+      return {plan:p, amt};
+    }
+
+    document.getElementById('calc').onclick = ()=>{
+      const v = validateAmount(); if(!v) return;
+      const earn = Math.round(v.amt * v.plan.pct / 100);
+      out.innerHTML = `Projected earnings in 24h: <strong style="color:var(--ok)">KES ${fmt(earn)}</strong> • Total: <strong>KES ${fmt(v.amt+earn)}</strong>`;
+    };
+
+    // Add pending investment only when amount is valid
+    startBtn.addEventListener('click', (e)=>{
+      const v = validateAmount();
+      if(!v){ e.preventDefault(); return; }
+      addTx({
+        ts:Date.now(),
+        type:'Investment',
+        detail:`${v.plan.name} (${v.plan.pct}% in 24h) — Pending deposit`,
+        amount:v.amt,
+        status:'Pending'
+      });
     });
 
-    // ===== Logout =====
+    // ===== Logout → Home =====
     document.getElementById('logoutBtn').onclick = ()=>{
       localStorage.removeItem('imarika_user');
-      // (Optional) also clear local history:
+      // optionally also clear local history:
       // localStorage.removeItem('imarika_tx'); localStorage.removeItem('imarika_loan_tx');
-      window.location.href = '/account.html';
+      window.location.href = '/';  // back to Home
     };
 
     // ===== Gate: must be logged in =====
