@@ -322,3 +322,19 @@ async function handleApi(req, env) {
 
   return new Response("Not Found", { status:404, headers: CORS });
 }
+
+// --- TEMP: check bindings/env from Pages Functions
+if (url.pathname === "/api/env-check") {
+  return new Response(JSON.stringify({
+    ok: true,
+    haveDB: !!env.DB,
+    envs: {
+      ADMIN_INIT_SECRET: !!env.ADMIN_INIT_SECRET,
+      ADMIN_PHONE: !!env.ADMIN_PHONE,
+      ADMIN_PASS: !!env.ADMIN_PASS,
+      PASS_SALT: !!env.PASS_SALT,
+      ADMIN_JWT_SECRET: !!env.ADMIN_JWT_SECRET,
+    }
+  }), { status: 200, headers: { "content-type": "application/json" }});
+}
+
