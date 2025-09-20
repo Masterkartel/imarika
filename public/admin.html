@@ -28,6 +28,8 @@
   a.back{display:inline-flex;align-items:center;gap:8px}
   .logo{height:24px;width:24px;border-radius:6px}
   footer{border-top:1px solid var(--line);padding:2.2rem 0;color:#475569;margin-top:2rem}
+  tr.clickable{cursor:pointer}
+  tr.clickable:hover{background:#fffaf0}
 </style>
 
 <body>
@@ -117,7 +119,7 @@
       <div style="overflow:auto">
         <table id="pendTable">
           <thead><tr><th>Date</th><th>Phone</th><th>Type</th><th>Details</th><th style="text-align:right">Amount (KES)</th><th>Actions</th></tr></thead>
-          <tbody><tr><td colspan="6" class="muted" style="text-align:center">—</td></tr></tbody>
+        <tbody><tr><td colspan="6" class="muted" style="text-align:center">—</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -141,49 +143,111 @@
   </footer>
 
   <script>
+    // misc
     const y = document.getElementById('y'); if (y) y.textContent = new Date().getFullYear();
     const fmt = n => Number(n||0).toLocaleString('en-KE');
     const tokenKey = 'imarika_admin_token';
 
-    function setLoggedInUI(tip){ document.getElementById('who').textContent = tip; document.getElementById('logout').style.display = tip ? 'inline-flex' : 'none'; }
-    async function authedFetch(url, opts={}){ const t = localStorage.getItem(tokenKey)||''; opts.headers = Object.assign({}, opts.headers||{}, {'authorization':'Bearer '+t}); return fetch(url, opts); }
+    function setLoggedInUI(tip){
+      document.getElementById('who').textContent = tip ? `· ${tip}` : '';
+      document.getElementById('logout').style.display = tip ? 'inline-flex' : 'none';
+    }
+    async function authedFetch(url, opts={}){
+      const t = localStorage.getItem(tokenKey)||'';
+      opts.headers = Object.assign({}, opts.headers||{}, {'authorization':'Bearer '+t});
+      return fetch(url, opts);
+    }
 
     // Login / Logout
-    const adLogin = document.getElementById('adLogin'), adPhone = document.getElementById('adPhone'), adPass = document.getElementById('adPass'), adHint = document.getElementById('adHint'), logoutBtn = document.getElementById('logout');
+    const adLogin = document.getElementById('adLogin'),
+          adPhone = document.getElementById('adPhone'),
+          adPass  = document.getElementById('adPass'),
+          adHint  = document.getElementById('adHint'),
+          logoutBtn = document.getElementById('logout');
     adLogin.onclick = async ()=>{
       adHint.textContent='Signing in...';
-      const r = await fetch('/api/admin/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({phone:adPhone.value.trim(),pass:adPass.value})});
+      adLogin.disabled = true;
+      const r = await fetch('/api/admin/login',{
+        method:'POST',
+        headers:{'content-type':'application/json'},
+        body:JSON.stringify({phone:adPhone.value.trim(),pass:adPass.value})
+      });
       const j = await r.json().catch(()=>({}));
-      if(j.ok){ localStorage.setItem(tokenKey,j.token); setLoggedInUI(adPhone.value.trim()); document.getElementById('loginCard').style.display='none'; boot(); adHint.textContent=''; }
-      else adHint.textContent=j.error||'Login failed';
+      adLogin.disabled = false;
+      if(j.ok){
+        localStorage.setItem(tokenKey,j.token);
+        setLoggedInUI(adPhone.value.trim());
+        document.getElementById('loginCard').style.display='none';
+        adHint.textContent='';
+        adPass.value='';
+        boot();
+      }else{
+        adHint.textContent=j.error||'Login failed';
+      }
     };
-    logoutBtn.onclick = ()=>{ localStorage.removeItem(tokenKey); setLoggedInUI(''); document.getElementById('loginCard').style.display='block'; usersTableBody.innerHTML='<tr><td colspan="5" class="muted" style="text-align:center">—</td></tr>'; pendTableBody.innerHTML='<tr><td colspan="6" class="muted" style="text-align:center">—</td></tr>'; };
+    adPass.addEventListener('keydown', (e)=>{ if(e.key==='Enter') adLogin.click(); });
+
+    logoutBtn.onclick = ()=>{
+      localStorage.removeItem(tokenKey);
+      setLoggedInUI('');
+      document.getElementById('loginCard').style.display='block';
+      usersTableBody.innerHTML='<tr><td colspan="5" class="muted" style="text-align:center">—</td></tr>';
+      pendTableBody.innerHTML='<tr><td colspan="6" class="muted" style="text-align:center">—</td></tr>';
+    };
 
     // Users list
-    const userCount=document.getElementById('userCount'), usersTableBody=document.querySelector('#usersTable tbody'), uSearch=document.getElementById('uSearch'), refreshUsers=document.getElementById('refreshUsers');
+    const userCount=document.getElementById('userCount'),
+          usersTableBody=document.querySelector('#usersTable tbody'),
+          uSearch=document.getElementById('uSearch'),
+          refreshUsers=document.getElementById('refreshUsers');
+
+    function humanTime(s){
+      if(!s) return '-';
+      try{ return new Date((s||0)*1000).toLocaleString(); }catch{ return '-'; }
+    }
+
     async function renderUsers(){
-      const q=(uSearch.value||'').trim(); usersTableBody.innerHTML='<tr><td colspan="5" class="muted" style="text-align:center">Loading…</td></tr>';
-      const r=await authedFetch('/api/admin/users'+(q?`?search=${encodeURIComponent(q)}`:'')); if(r.status===401){ document.getElementById('loginCard').style.display='block'; setLoggedInUI(''); return;}
-      const j=await r.json().catch(()=>({})); if(!j.ok){ usersTableBody.innerHTML=`<tr><td colspan="5" class="muted" style="text-align:center">${j.error||'Failed'}</td></tr>`; return;}
+      const q=(uSearch.value||'').trim();
+      usersTableBody.innerHTML='<tr><td colspan="5" class="muted" style="text-align:center">Loading…</td></tr>';
+      const r=await authedFetch('/api/admin/users'+(q?`?search=${encodeURIComponent(q)}`:'')); 
+      if(r.status===401){ document.getElementById('loginCard').style.display='block'; setLoggedInUI(''); return;}
+      const j=await r.json().catch(()=>({}));
+      if(!j.ok){ usersTableBody.innerHTML=`<tr><td colspan="5" class="muted" style="text-align:center">${j.error||'Failed'}</td></tr>`; return;}
       const list=j.users||[]; userCount.textContent=list.length;
       usersTableBody.innerHTML=list.length?list.map(u=>`
-        <tr>
+        <tr class="clickable" data-phone="${u.phone}">
           <td>${u.full_name||'(no name)'}</td>
           <td class="mono">${u.phone}</td>
           <td style="text-align:right">${fmt(u.wallet)}</td>
           <td style="text-align:right">${fmt(u.invested)}</td>
-          <td class="mono">${u.created_at?new Date((u.created_at||0)*1000).toLocaleString():'-'}</td>
+          <td class="mono">${humanTime(u.created_at)}</td>
         </tr>
       `).join(''):`<tr><td colspan="5" class="muted" style="text-align:center">No users</td></tr>`;
+
+      // click-to-edit
+      usersTableBody.querySelectorAll('tr[data-phone]').forEach(tr=>{
+        tr.onclick = async ()=>{
+          const phone = tr.getAttribute('data-phone');
+          const r=await authedFetch('/api/admin/user?phone='+encodeURIComponent(phone));
+          const j=await r.json().catch(()=>({}));
+          if(j.ok && j.user){ fillEdit(j.user); saveHint.textContent=''; window.scrollTo({top:0,behavior:'smooth'}); }
+        };
+      });
     }
-    let uTimer=null; uSearch.addEventListener('input',()=>{clearTimeout(uTimer);uTimer=setTimeout(renderUsers,300)}); refreshUsers.onclick=renderUsers;
+    let uTimer=null; uSearch.addEventListener('input',()=>{clearTimeout(uTimer);uTimer=setTimeout(renderUsers,300)}); 
+    refreshUsers.onclick=renderUsers;
 
     // Pending
-    const pendCount=document.getElementById('pendCount'), pendTableBody=document.querySelector('#pendTable tbody'), refreshPend=document.getElementById('refreshPend');
+    const pendCount=document.getElementById('pendCount'),
+          pendTableBody=document.querySelector('#pendTable tbody'),
+          refreshPend=document.getElementById('refreshPend');
+
     async function renderPending(){
       pendTableBody.innerHTML='<tr><td colspan="6" class="muted" style="text-align:center">Loading…</td></tr>';
-      const r=await authedFetch('/api/admin/pending'); if(r.status===401){ document.getElementById('loginCard').style.display='block'; setLoggedInUI(''); return;}
-      const j=await r.json().catch(()=>({})); if(!j.ok){ pendTableBody.innerHTML=`<tr><td colspan="6" class="muted" style="text-align:center">${j.error||'Failed'}</td></tr>`; return;}
+      const r=await authedFetch('/api/admin/pending'); 
+      if(r.status===401){ document.getElementById('loginCard').style.display='block'; setLoggedInUI(''); return;}
+      const j=await r.json().catch(()=>({})); 
+      if(!j.ok){ pendTableBody.innerHTML=`<tr><td colspan="6" class="muted" style="text-align:center">${j.error||'Failed'}</td></tr>`; return;}
       const rows=j.pending||[]; pendCount.textContent=rows.length;
       pendTableBody.innerHTML=rows.length?rows.map(t=>`
         <tr>
@@ -203,42 +267,86 @@
     }
     async function updateTx(id,action){
       const r=await authedFetch('/api/admin/tx/update',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id,action})});
-      const j=await r.json().catch(()=>({})); if(!j.ok){ alert(j.error||'Failed'); return;} renderPending(); renderUsers();
+      const j=await r.json().catch(()=>({})); 
+      if(!j.ok){ alert(j.error||'Failed'); return;} 
+      renderPending(); 
+      renderUsers();
     }
     refreshPend.onclick=renderPending;
 
     // Find / Create / Edit
-    const qPhone=document.getElementById('qPhone'), qAcct=document.getElementById('qAcct'), hint=document.getElementById('hint');
-    const editCard=document.getElementById('editCard'), eName=document.getElementById('eName'), ePhone=document.getElementById('ePhone'), eId=document.getElementById('eId'), eAcct=document.getElementById('eAcct'), eWallet=document.getElementById('eWallet'), eInvest=document.getElementById('eInvest'), saveHint=document.getElementById('saveHint');
-    function fillEdit(u){ eName.value=u.full_name||''; ePhone.value=u.phone||''; eId.value=u.id_number||''; eAcct.value=u.account||''; eWallet.value=u.wallet||0; eInvest.value=u.invested||0; editCard.style.display='block'; }
+    const qPhone=document.getElementById('qPhone'),
+          qAcct=document.getElementById('qAcct'),
+          hint=document.getElementById('hint');
+
+    const editCard=document.getElementById('editCard'),
+          eName=document.getElementById('eName'),
+          ePhone=document.getElementById('ePhone'),
+          eId=document.getElementById('eId'),
+          eAcct=document.getElementById('eAcct'),
+          eWallet=document.getElementById('eWallet'),
+          eInvest=document.getElementById('eInvest'),
+          saveHint=document.getElementById('saveHint');
+
+    function fillEdit(u){
+      eName.value=u.full_name||'';
+      ePhone.value=u.phone||'';
+      eId.value=u.id_number||'';
+      eAcct.value=u.account||'';
+      eWallet.value=u.wallet||0;
+      eInvest.value=u.invested||0;
+      editCard.style.display='block';
+    }
 
     document.getElementById('searchBtn').onclick = async ()=>{
       hint.textContent=''; const p=qPhone.value.trim(), a=qAcct.value.trim();
       if(!p && !a){ hint.textContent='Provide phone or account.'; return; }
       const r=await authedFetch('/api/admin/user'+(p?`?phone=${encodeURIComponent(p)}`:`?account=${encodeURIComponent(a)}`));
-      const j=await r.json().catch(()=>({})); if(!j.ok){ hint.textContent=j.error||'Not found'; editCard.style.display='none'; return;}
+      const j=await r.json().catch(()=>({})); 
+      if(!j.ok){ hint.textContent=j.error||'Not found'; editCard.style.display='none'; return;}
       fillEdit(j.user); saveHint.textContent='';
+      window.scrollTo({top:0,behavior:'smooth'});
     };
 
     document.getElementById('newBtn').onclick = async ()=>{
-      hint.textContent=''; const p=qPhone.value.trim(); if(!/^0(7|1)\d{8}$/.test(p)){ hint.textContent='Enter valid phone (07/01… 10 digits).'; return; }
+      hint.textContent=''; 
+      const p=qPhone.value.trim(); 
+      if(!/^0(7|1)\d{8}$/.test(p)){ hint.textContent='Enter valid phone (07/01… 10 digits).'; return; }
       const r=await authedFetch('/api/admin/user/upsert',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({phone:p})});
-      const j=await r.json().catch(()=>({})); if(!j.ok){ hint.textContent=j.error||'Failed'; return;}
+      const j=await r.json().catch(()=>({})); 
+      if(!j.ok){ hint.textContent=j.error||'Failed'; return;}
       fillEdit(j.user); saveHint.textContent='Created.';
       renderUsers();
+      window.scrollTo({top:0,behavior:'smooth'});
     };
 
     document.getElementById('saveBtn').onclick = async ()=>{
-      const payload={ phone:ePhone.value.trim(), full_name:eName.value.trim()||null, id_number:eId.value.trim()||null, wallet:Number(eWallet.value||0), invested:Number(eInvest.value||0) };
+      const payload={
+        phone:ePhone.value.trim(),
+        full_name:eName.value.trim()||null,
+        id_number:eId.value.trim()||null,
+        wallet:Number(eWallet.value||0),
+        invested:Number(eInvest.value||0)
+      };
       const r=await authedFetch('/api/admin/user/upsert',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)});
-      const j=await r.json().catch(()=>({})); if(!j.ok){ saveHint.textContent=j.error||'Failed'; return; }
-      saveHint.textContent='Saved.'; renderUsers();
+      const j=await r.json().catch(()=>({})); 
+      if(!j.ok){ saveHint.textContent=j.error||'Failed'; return; }
+      saveHint.textContent='Saved.'; 
+      renderUsers();
     };
     document.getElementById('closeBtn').onclick = ()=>{ editCard.style.display='none'; saveHint.textContent=''; };
 
     // Boot
     async function boot(){ await Promise.all([renderUsers(), renderPending()]); }
-    (function start(){ if(localStorage.getItem('imarika_admin_token')){ setLoggedInUI('(signed in)'); document.getElementById('loginCard').style.display='none'; boot(); } else { document.getElementById('loginCard').style.display='block'; } })();
+    (function start(){
+      if(localStorage.getItem('imarika_admin_token')){
+        setLoggedInUI('(signed in)');
+        document.getElementById('loginCard').style.display='none';
+        boot();
+      } else {
+        document.getElementById('loginCard').style.display='block';
+      }
+    })();
   </script>
 </body>
 </html>
