@@ -4,7 +4,15 @@ export default {
 
     // ---------- serve API here ----------
     if (url.pathname.startsWith("/api/")) {
-      return handleApi(req, env);
+      try {
+        return await handleApi(req, env);
+      } catch (e) {
+        // Always return JSON so the frontend never sees a generic "Network error"
+        return new Response(JSON.stringify({ ok: false, error: String(e) }), {
+          status: 500,
+          headers: { "content-type": "application/json" },
+        });
+      }
     }
 
     // ---------- otherwise serve static site ----------
@@ -16,18 +24,19 @@ export default {
 async function handleApi(req, env) {
   const url = new URL(req.url);
 
-  // --- CORS (simple) ---
-  const ORIGINS = new Set([
-    "https://imarika.net",
-    "https://www.imarika.net",
-    "https://imarika.pages.dev"
-  ]);
+  // --- CORS (robust) ---
   const origin = req.headers.get("origin") || "";
-  const allowOrigin = ORIGINS.has(origin) ? origin : "https://imarika.net";
+  const sameSite = origin && origin.includes(url.host); // same custom domain
+  const allow =
+    sameSite ||
+    /^https?:\/\/(www\.)?imarika\.net$/i.test(origin) ||
+    /^https?:\/\/imarika\.pages\.dev$/i.test(origin) ||
+    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(origin);
+
   const CORS = {
-    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Origin": allow ? origin : "https://imarika.net",
     "Access-Control-Allow-Headers": "authorization, content-type",
-    "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS"
+    "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS",
   };
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
 
@@ -208,7 +217,7 @@ async function handleApi(req, env) {
     return json({ ok:true, user:u });
   }
 
-  // ---------- PUBLIC TX ENDPOINTS (NEW) ----------
+  // ---------- PUBLIC TX ENDPOINTS ----------
   // GET /api/tx?phone=07...
   if (url.pathname === "/api/tx" && req.method === "GET") {
     await ensureSchema();
@@ -241,7 +250,6 @@ async function handleApi(req, env) {
   }
 
   // POST /api/tx/migrate  { phone, items:[{id?, type, amount, detail, status, ts}] }
-  // Used once by the dashboard to upload legacy localStorage tx and then clear them.
   if (url.pathname === "/api/tx/migrate" && req.method === "POST") {
     await ensureSchema();
     const { phone, items } = await req.json().catch(()=>({}));
