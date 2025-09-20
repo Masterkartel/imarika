@@ -1,5 +1,6 @@
 // POST /api/login
 if (pathname === "/api/login" && request.method === "POST") {
+  await ensureSchema(env.DB); // <<< IMPORTANT
   const { phone, pin } = await request.json();
   const pass_hash = await sha256(`${pin}:${env.PASS_SALT || "imarika-salt"}`);
 
@@ -9,6 +10,6 @@ if (pathname === "/api/login" && request.method === "POST") {
     .bind(phone, pass_hash)
     .first();
 
-  if (!u) return json({ ok:false, error:"Invalid credentials" }, { status: 401 });
-  return json({ ok:true, user:u });
+  if (!u) return json({ ok: false, error: "Invalid credentials" }, { status: 401 });
+  return json({ ok: true, user: u });
 }
