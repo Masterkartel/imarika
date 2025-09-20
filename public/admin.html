@@ -1,34 +1,35 @@
 <!doctype html>
 <html lang="en">
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Imarika Admin</title>
 <link rel="icon" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#fff;--text:#0f172a;--muted:#475569;--line:#e5e7eb;--brand:#f59e0b}
+  :root{--bg:#fff;--text:#0f172a;--muted:#475569;--line:#e5e7eb;--brand:#f59e0b;--ring:rgba(245,158,11,.35)}
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
   .container{max-width:1100px;margin:32px auto;padding:0 16px}
-  h1{display:flex;align-items:center;gap:10px;font-size:clamp(1.6rem,3vw,2rem)}
+  h1,h2,h3{margin:.2rem 0}
   .card{border:1px solid var(--line);border-radius:16px;padding:16px;margin:14px 0;background:#fff;box-shadow:0 10px 30px rgba(2,8,23,.06)}
-  .row{display:grid;gap:10px}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .btn{background:var(--brand);border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(245,158,11,.25)}
   .btn-outline{background:#fff;border:1px solid var(--line)}
+  .btn-slim{padding:.55rem .8rem;border-radius:10px}
   .muted{color:var(--muted)}
   input{width:100%;padding:10px;border:1px solid var(--line);border-radius:12px;outline:none}
-  input:focus{box-shadow:0 0 0 4px rgba(245,158,11,.35)}
+  input:focus{box-shadow:0 0 0 4px var(--ring)}
   .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
   .topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
   a.back{display:inline-flex;align-items:center;gap:8px}
+  .logo{height:24px;width:24px;border-radius:6px}
   table{border-collapse:collapse;width:100%}
-  th,td{border:1px solid var(--line);padding:.6rem .7rem}
+  th,td{border:1px solid var(--line);padding:.6rem .7rem;vertical-align:top}
   th{background:#fff7ed}
   .badge{padding:.18rem .5rem;border-radius:999px;background:#fef3c7;color:#78350f;font-weight:800}
-  /* favicon image in header */
-  .logo{height:24px;width:24px;border-radius:6px}
-
-  /* Footer */
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .right{display:flex;gap:8px;align-items:center}
+  .pill{display:inline-block;padding:.2rem .5rem;border-radius:999px;background:#ecfeff;color:#0e7490;font-weight:700}
   footer{border-top:1px solid var(--line);padding:2.2rem 0;color:#475569;margin-top:2rem}
 </style>
 
@@ -36,86 +37,59 @@
   <div class="container">
     <div class="topbar">
       <a class="back" href="/"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#0f172a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</a>
-      <div style="display:flex;align-items:center;gap:8px">
+      <div class="right">
         <img src="/favicon.svg" class="logo" alt="">
         <strong>Imarika Admin</strong>
+        <span id="who" class="muted" style="margin-left:8px"></span>
+        <button class="btn btn-outline btn-slim" id="logout" style="display:none">Logout</button>
+      </div>
+    </div>
+
+    <!-- Login bar -->
+    <div id="loginCard" class="card" style="display:none">
+      <div class="row">
+        <input id="adPhone" placeholder="Admin phone" value="0715151010" class="mono" style="max-width:220px">
+        <input id="adPass" type="password" placeholder="Password" style="max-width:220px">
+        <button class="btn" id="adLogin">Login</button>
+        <span id="adHint" class="muted"></span>
       </div>
     </div>
 
     <!-- Users List -->
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
-        <h2 style="margin:.2rem 0">Users</h2>
-        <div><span class="badge" id="userCount">0</span></div>
-      </div>
-      <div class="grid2" style="margin:.4rem 0">
-        <input id="uSearch" placeholder="Search name / phone / account">
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-outline" id="refreshUsers">Refresh</button>
-          <button class="btn" id="newBtnTop">Create New</button>
+      <div class="row" style="justify-content:space-between">
+        <h2>Users</h2>
+        <div class="right">
+          <span class="badge" id="userCount">0</span>
+          <input id="uSearch" placeholder="Search name / phone" style="min-width:220px">
+          <button class="btn btn-outline btn-slim" id="refreshUsers">Refresh</button>
         </div>
       </div>
       <div style="overflow:auto">
         <table id="usersTable">
-          <thead><tr><th>Name</th><th>Phone</th><th>Account</th><th style="text-align:right">Wallet</th><th style="text-align:right">Shares</th><th>Actions</th></tr></thead>
-        <tbody><tr><td colspan="6" class="muted" style="text-align:center">No users yet.</td></tr></tbody>
+          <thead>
+            <tr><th>Name</th><th>Phone</th><th style="text-align:right">Wallet</th><th style="text-align:right">Shares</th><th>Created</th></tr>
+          </thead>
+          <tbody><tr><td colspan="5" class="muted" style="text-align:center">—</td></tr></tbody>
         </table>
-      </div>
-    </div>
-
-    <!-- Find / Create -->
-    <div class="card">
-      <div class="row">
-        <h2 style="margin:.2rem 0">Find Account</h2>
-        <div class="grid2">
-          <input id="qPhone" placeholder="Phone (07/01… 10 digits)" inputmode="tel">
-          <input id="qAcct" class="mono" placeholder="Account (e.g., IMK-ABCD-1234)">
-        </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn" id="searchBtn">Search</button>
-          <button class="btn btn-outline" id="newBtn">Create New</button>
-          <span class="muted" id="hint"></span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Edit -->
-    <div id="editCard" class="card" style="display:none">
-      <div class="row">
-        <h3>Account</h3>
-        <div class="grid2">
-          <div><div class="muted">Name</div><div id="eName"></div></div>
-          <div><div class="muted">Phone</div><div id="ePhone" class="mono"></div></div>
-          <div><div class="muted">ID Number</div><div id="eId" class="mono"></div></div>
-          <div><div class="muted">Account #</div><div id="eAcct" class="mono"></div></div>
-        </div>
-
-        <h3 style="margin-top:10px">Balances</h3>
-        <div class="grid2">
-          <div><div class="muted">Wallet Balance (KES)</div><input id="eWallet" type="number" placeholder="0"></div>
-          <div><div class="muted">Investments (Shares) (KES)</div><input id="eInvest" type="number" placeholder="0"></div>
-        </div>
-
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
-          <button class="btn" id="saveBtn">Save</button>
-          <button class="btn btn-outline" id="closeBtn">Close</button>
-          <span class="muted" id="saveHint"></span>
-        </div>
       </div>
     </div>
 
     <!-- Pending Transactions -->
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
-        <h2 style="margin:.2rem 0">Pending Transactions</h2>
-        <span class="badge" id="pendCount">0</span>
+      <div class="row" style="justify-content:space-between">
+        <h2>Pending Transactions</h2>
+        <div class="right">
+          <span class="badge" id="pendCount">0</span>
+          <button class="btn btn-outline btn-slim" id="refreshPend">Refresh</button>
+        </div>
       </div>
       <div style="overflow:auto;margin-top:.6rem">
         <table id="pendTable">
           <thead>
             <tr><th>Date</th><th>Phone</th><th>Type</th><th>Details</th><th style="text-align:right">Amount (KES)</th><th>Actions</th></tr>
           </thead>
-          <tbody><tr><td colspan="6" class="muted" style="text-align:center">No pending items.</td></tr></tbody>
+          <tbody><tr><td colspan="6" class="muted" style="text-align:center">—</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -142,212 +116,166 @@
     // Footer year
     const y = document.getElementById('y'); if (y) y.textContent = new Date().getFullYear();
 
-    // --- Simple gate (demo only)
-    (function gate(){
-      const ok = sessionStorage.getItem('imarika_admin_ok');
-      if(ok==='1') return;
-      const pass = prompt('Admin passphrase (demo):');
-      if(pass !== 'imarika-admin'){ alert('Access denied'); location.href='/'; }
-      else sessionStorage.setItem('imarika_admin_ok','1');
-    })();
+    // ===== Helpers =====
+    const fmt = n => Number(n||0).toLocaleString('en-KE');
+    const tokenKey = 'imarika_admin_token';
 
-    // helpers
-    const fmt = n => Number(n).toLocaleString('en-KE');
-    const phoneOk = p => /^0(7|1)\d{8}$/.test(String(p||'').trim());
-    const acctNum = () => 'IMK-' + Math.random().toString(36).slice(2,6).toUpperCase() + '-' + Math.floor(Math.random()*9000+1000);
-
-    // storage helpers
-    function getUsersMap(){
-      let m = {};
-      try { m = JSON.parse(localStorage.getItem('imarika_users')||'{}') } catch {}
-      try {
-        const u = JSON.parse(localStorage.getItem('imarika_user')||'null');
-        if(u && u.phone && !m[u.phone]) { m[u.phone] = u; localStorage.setItem('imarika_users', JSON.stringify(m)); }
-      } catch {}
-      return m;
+    function setLoggedInUI(phone){
+      document.getElementById('who').textContent = phone ? `• ${phone}` : '';
+      document.getElementById('logout').style.display = phone ? 'inline-flex' : 'none';
+      document.getElementById('loginCard').style.display = phone ? 'none' : 'block';
     }
-    function saveUsersMap(m){ localStorage.setItem('imarika_users', JSON.stringify(m)); }
-    function upsertUser(u){
-      const m = getUsersMap(); m[u.phone]=u; saveUsersMap(m);
-      try { const cu = JSON.parse(localStorage.getItem('imarika_user')||'null'); if(cu && cu.phone===u.phone){ localStorage.setItem('imarika_user', JSON.stringify(u)); } } catch {}
-      renderUsers();
+
+    async function authedFetch(url, opts={}){
+      const t = localStorage.getItem(tokenKey)||'';
+      opts.headers = Object.assign({}, opts.headers||{}, {'authorization':'Bearer '+t});
+      return fetch(url, opts);
     }
-    function findByPhone(phone){ const m=getUsersMap(); return m[phone]||null; }
-    function findByAcct(acct){ const m=getUsersMap(); for(const k in m){ if(m[k].account===acct) return m[k]; } return null; }
 
-    // global tx queue
-    const GLOBAL_TX_KEY = 'imarika_tx_global';
-    const getGlobalTx = () => { try { return JSON.parse(localStorage.getItem(GLOBAL_TX_KEY)||'[]'); } catch { return []; } };
-    const saveGlobalTx = list => localStorage.setItem(GLOBAL_TX_KEY, JSON.stringify(list));
+    // ===== Login / Logout =====
+    const adLogin = document.getElementById('adLogin');
+    const adPhone = document.getElementById('adPhone');
+    const adPass  = document.getElementById('adPass');
+    const adHint  = document.getElementById('adHint');
+    const logoutBtn = document.getElementById('logout');
 
-    // --- Users table ---
-    const usersTableBody = document.querySelector('#usersTable tbody');
-    const userCount = document.getElementById('userCount');
-    const uSearch = document.getElementById('uSearch');
-
-    function renderUsers(){
-      const q = (uSearch.value||'').toLowerCase().trim();
-      const m = getUsersMap();
-      const arr = Object.values(m).sort((a,b)=> (a.full||'').localeCompare(b.full||''));
-      const filtered = arr.filter(u =>
-        !q || (u.full||'').toLowerCase().includes(q) || (u.phone||'').includes(q) || (u.account||'').toLowerCase().includes(q)
-      );
-      userCount.textContent = filtered.length;
-      usersTableBody.innerHTML = filtered.length ? filtered.map(u=>`
-        <tr>
-          <td>${u.full||'(no name)'}</td>
-          <td class="mono">${u.phone||'-'}</td>
-          <td class="mono">${u.account||'-'}</td>
-          <td style="text-align:right">${fmt(u.wallet||0)}</td>
-          <td style="text-align:right">${fmt(u.invested||0)}</td>
-          <td><button class="btn btn-outline" data-edit="${u.phone}">Edit</button></td>
-        </tr>
-      `).join('') : `<tr><td colspan="6" class="muted" style="text-align:center">No users yet.</td></tr>`;
-
-      usersTableBody.querySelectorAll('button[data-edit]').forEach(btn=>{
-        btn.onclick = ()=> { const u=findByPhone(btn.dataset.edit); if(u) loadUser(u); };
+    async function doLogin(){
+      adHint.textContent = 'Signing in...';
+      const r = await fetch('/api/admin/login',{
+        method:'POST',
+        headers:{'content-type':'application/json'},
+        body: JSON.stringify({ phone: adPhone.value.trim(), pass: adPass.value })
       });
+      const j = await r.json().catch(()=>({}));
+      if(j.ok){
+        localStorage.setItem(tokenKey, j.token);
+        setLoggedInUI(adPhone.value.trim());
+        adHint.textContent = '';
+        boot();
+      }else{
+        adHint.textContent = j.error || 'Login failed';
+      }
+    }
+    adLogin.onclick = doLogin;
+    logoutBtn.onclick = ()=>{
+      localStorage.removeItem(tokenKey);
+      setLoggedInUI('');
+      // clear tables
+      usersTableBody.innerHTML = `<tr><td colspan="5" class="muted" style="text-align:center">—</td></tr>`;
+      pendTableBody.innerHTML  = `<tr><td colspan="6" class="muted" style="text-align:center">—</td></tr>`;
+      document.getElementById('loginCard').style.display='block';
+    };
+
+    // ===== Users =====
+    const userCount = document.getElementById('userCount');
+    const usersTableBody = document.querySelector('#usersTable tbody');
+    const uSearch = document.getElementById('uSearch');
+    const refreshUsers = document.getElementById('refreshUsers');
+
+    async function renderUsers(){
+      const q = (uSearch.value||'').trim();
+      usersTableBody.innerHTML = `<tr><td colspan="5" class="muted" style="text-align:center">Loading…</td></tr>`;
+      const r = await authedFetch('/api/admin/users' + (q?`?search=${encodeURIComponent(q)}`:''));      
+      if(r.status===401){ // token bad
+        setLoggedInUI('');
+        document.getElementById('loginCard').style.display='block';
+        usersTableBody.innerHTML = `<tr><td colspan="5" class="muted" style="text-align:center">Please login.</td></tr>`;
+        return;
+      }
+      const j = await r.json().catch(()=>({}));
+      if(!j.ok){
+        usersTableBody.innerHTML = `<tr><td colspan="5" class="muted" style="text-align:center">${j.error||'Failed'}</td></tr>`;
+        return;
+      }
+      const list = j.users || [];
+      userCount.textContent = list.length;
+      usersTableBody.innerHTML = list.length ? list.map(u=>`
+        <tr>
+          <td>${u.full_name||'(no name)'}</td>
+          <td class="mono">${u.phone}</td>
+          <td style="text-align:right">${fmt(u.wallet)}</td>
+          <td style="text-align:right">${fmt(u.invested)}</td>
+          <td class="mono">${u.created_at ? new Date((u.created_at||0)*1000).toLocaleString() : '-'}</td>
+        </tr>
+      `).join('') : `<tr><td colspan="5" class="muted" style="text-align:center">No users</td></tr>`;
     }
 
-    document.getElementById('refreshUsers').onclick = renderUsers;
-    uSearch.addEventListener('input', renderUsers);
-    document.getElementById('newBtnTop').onclick = ()=> document.getElementById('newBtn').click();
-
-    // --- Find/Create UI ---
-    const qPhone = document.getElementById('qPhone');
-    const qAcct  = document.getElementById('qAcct');
-    const hint   = document.getElementById('hint');
-    const editCard = document.getElementById('editCard');
-    const eName = document.getElementById('eName');
-    const ePhone= document.getElementById('ePhone');
-    const eId   = document.getElementById('eId');
-    const eAcct = document.getElementById('eAcct');
-    const eWallet = document.getElementById('eWallet');
-    const eInvest = document.getElementById('eInvest');
-    const saveHint= document.getElementById('saveHint');
-
-    let current = null;
-
-    document.getElementById('searchBtn').addEventListener('click', ()=>{
-      saveHint.textContent = '';
-      hint.textContent = '';
-      let u = null;
-      const p = qPhone.value.trim();
-      const a = qAcct.value.trim();
-      if(p && phoneOk(p)) u = findByPhone(p);
-      if(!u && a) u = findByAcct(a);
-      if(!u){ hint.textContent = 'Not found. You can create it with “Create New”.'; editCard.style.display='none'; return; }
-      loadUser(u);
+    let uTimer=null;
+    uSearch.addEventListener('input', ()=>{
+      clearTimeout(uTimer); uTimer=setTimeout(renderUsers, 300);
     });
+    refreshUsers.onclick = renderUsers;
 
-    document.getElementById('newBtn').addEventListener('click', ()=>{
-      saveHint.textContent = '';
-      hint.textContent = '';
-      const p = qPhone.value.trim();
-      if(!phoneOk(p)){ hint.textContent='Enter a valid phone to create new.'; return; }
-      const u = { full:'', idn:'', phone:p, passHash:'', account:acctNum(), wallet:0, invested:0, createdAt:Date.now() };
-      upsertUser(u);
-      loadUser(u);
-      hint.textContent = 'New account created.';
-    });
-
-    function loadUser(u){
-      current = JSON.parse(JSON.stringify(u));
-      eName.textContent  = u.full || '(no name)';
-      ePhone.textContent = u.phone;
-      eId.textContent    = u.idn || '(none)';
-      eAcct.textContent  = u.account;
-      eWallet.value = u.wallet || 0;
-      eInvest.value = u.invested || 0;
-      editCard.style.display = 'block';
-      setTimeout(()=> eWallet.focus(), 10);
-    }
-
-    document.getElementById('saveBtn').addEventListener('click', ()=>{
-      if(!current) return;
-      const wallet = Number(eWallet.value||0);
-      const invested = Number(eInvest.value||0);
-      current.wallet = wallet;
-      current.invested = invested;
-      upsertUser(current);
-      saveHint.textContent = 'Saved. Wallet: KES ' + fmt(wallet) + ' • Shares: KES ' + fmt(invested);
-    });
-
-    document.getElementById('closeBtn').addEventListener('click', ()=>{
-      editCard.style.display = 'none';
-      saveHint.textContent = '';
-    });
-
-    // --- Pending transactions (approve/reject) ---
+    // ===== Pending TX =====
     const pendTableBody = document.querySelector('#pendTable tbody');
     const pendCount = document.getElementById('pendCount');
+    const refreshPend = document.getElementById('refreshPend');
 
-    function renderPending(){
-      const all = getGlobalTx();
-      const pend = all.filter(t => t.status==='Pending');
-      pendCount.textContent = pend.length;
-      pendTableBody.innerHTML = pend.length ? pend.map(t=>`
+    async function renderPending(){
+      pendTableBody.innerHTML = `<tr><td colspan="6" class="muted" style="text-align:center">Loading…</td></tr>`;
+      const r = await authedFetch('/api/admin/pending');
+      if(r.status===401){
+        setLoggedInUI('');
+        document.getElementById('loginCard').style.display='block';
+        pendTableBody.innerHTML = `<tr><td colspan="6" class="muted" style="text-align:center">Please login.</td></tr>`;
+        return;
+      }
+      const j = await r.json().catch(()=>({}));
+      if(!j.ok){
+        pendTableBody.innerHTML = `<tr><td colspan="6" class="muted" style="text-align:center">${j.error||'Failed'}</td></tr>`;
+        return;
+      }
+      const rows = j.pending||[];
+      pendCount.textContent = rows.length;
+      pendTableBody.innerHTML = rows.length ? rows.map(t=>`
         <tr>
           <td class="mono">${new Date(t.ts).toLocaleString()}</td>
           <td class="mono">${t.phone||'-'}</td>
           <td>${t.type}</td>
           <td>${t.detail||'-'}</td>
           <td style="text-align:right">${(t.amount<0?'-':'')}${fmt(Math.abs(t.amount||0))}</td>
-          <td>
-            <button class="btn" data-approve="${t.id}">Approve</button>
-            <button class="btn btn-outline" data-reject="${t.id}">Reject</button>
+          <td class="row">
+            <button class="btn btn-slim" data-approve="${t.id}">Approve</button>
+            <button class="btn btn-outline btn-slim" data-reject="${t.id}">Reject</button>
           </td>
         </tr>
       `).join('') : `<tr><td colspan="6" class="muted" style="text-align:center">No pending items.</td></tr>`;
 
-      pendTableBody.querySelectorAll('button[data-approve]').forEach(b=> b.onclick = ()=> approveTx(b.dataset.approve));
-      pendTableBody.querySelectorAll('button[data-reject]').forEach(b=> b.onclick = ()=> rejectTx(b.dataset.reject));
+      pendTableBody.querySelectorAll('button[data-approve]').forEach(b=> b.onclick = ()=> updateTx(b.dataset.approve,'approve'));
+      pendTableBody.querySelectorAll('button[data-reject]').forEach(b=> b.onclick = ()=> updateTx(b.dataset.reject,'reject'));
     }
 
-    function updateGlobalTx(id, newStatus){
-      const list = getGlobalTx();
-      const idx = list.findIndex(t=>t.id===id);
-      if(idx<0) return null;
-      list[idx].status = newStatus;
-      localStorage.setItem(GLOBAL_TX_KEY, JSON.stringify(list));
-      return list[idx];
+    async function updateTx(id, action){
+      const r = await authedFetch('/api/admin/tx/update',{
+        method:'POST',
+        headers:{'content-type':'application/json'},
+        body: JSON.stringify({ id, action })
+      });
+      const j = await r.json().catch(()=>({}));
+      if(!j.ok){ alert(j.error||'Failed'); return; }
+      renderPending(); // refresh
+      // optional: also refresh users to reflect wallet changes
+      renderUsers();
     }
 
-    function approveTx(id){
-      const t = updateGlobalTx(id,'Approved'); if(!t) return;
-      if(t.phone){
-        const u = findByPhone(t.phone);
-        if(u){
-          if(t.type==='Deposit'){
-            u.wallet = (u.wallet||0) + Math.abs(t.amount);
-          }
-          upsertUser(u);
-        }
+    refreshPend.onclick = renderPending;
+
+    // ===== Boot =====
+    async function boot(){
+      setLoggedInUI(''); // reset while we resolve token phone (not needed now)
+      await Promise.all([renderUsers(), renderPending()]);
+    }
+
+    // Start: if token is present, show dashboard; else show login
+    (function start(){
+      if(localStorage.getItem(tokenKey)){
+        setLoggedInUI('(signed in)');
+        document.getElementById('loginCard').style.display='none';
+        boot();
+      } else {
+        document.getElementById('loginCard').style.display='block';
       }
-      renderPending();
-    }
-
-    function rejectTx(id){
-      const t = updateGlobalTx(id,'Rejected'); if(!t) return;
-      if(t.phone){
-        const u = findByPhone(t.phone);
-        if(u){
-          if(t.type==='Withdrawal'){
-            u.wallet = (u.wallet||0) + Math.abs(t.amount);
-          }
-          upsertUser(u);
-        }
-      }
-      renderPending();
-    }
-
-    renderUsers();
-    renderPending();
-
-    window.addEventListener('storage', (e)=>{
-      if(e.key==='imarika_users') renderUsers();
-      if(e.key===GLOBAL_TX_KEY) renderPending();
-    });
+    })();
   </script>
 </body>
 </html>
