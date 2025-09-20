@@ -1,78 +1,28 @@
-// helper
-const hash = async (str, salt="") => {
-  const data = new TextEncoder().encode(`${str}:${salt}`);
-  const buf  = await crypto.subtle.digest("SHA-256", data);
-  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
-};
-
-// ensure schema (call before first use)
-async function ensureSchema(db){
-  await db.exec(`CREATE TABLE IF NOT EXISTS users(
-    phone       TEXT PRIMARY KEY,
-    full_name   TEXT,
-    id_number   TEXT,
-    pass_hash   TEXT,                      -- <— PIN hash
-    account     TEXT UNIQUE,
-    wallet      INTEGER DEFAULT 0,
-    invested    INTEGER DEFAULT 0,
-    created_at  INTEGER DEFAULT (strftime('%s','now'))
-  );`);
-}
-
 // POST /api/register
 if (pathname === "/api/register" && request.method === "POST") {
-  const json = (d, s = 200) => new Response(JSON.stringify(d), { status: s, headers: { "content-type": "application/json" } });
-  const b = await request.json().catch(()=>({}));
-  const phone = String(b.phone||"").trim();
-  const full  = String(b.full_name||b.full||"").trim();
-  const idn   = String(b.id_number||b.id||"").trim();
-  const pin   = String(b.pin||"").trim();
+  const { full_name, id_number, phone, pin } = await request.json();
 
-  if (!/^0(7|1)\d{8}$/.test(phone)) return json({ ok:false, error:"Bad phone" }, 400);
-  if (!full || !idn)                 return json({ ok:false, error:"Name & ID required" }, 400);
-  if (!/^\d{4}$/.test(pin))          return json({ ok:false, error:"PIN must be 4 digits" }, 400);
+  if (!/^0(7|1)\d{8}$/.test(String(phone||"").trim()))
+    return json({ ok:false, error:"Invalid phone" }, { status: 400 });
+  if (!/^\d{4}$/.test(String(pin||"")))
+    return json({ ok:false, error:"PIN must be 4 digits" }, { status: 400 });
 
-  await ensureSchema(env.DB);
+  // auto-issue account number
+  const acct = `IMK-${crypto.randomUUID().slice(0,4).toUpperCase()}-${Math.floor(Math.random()*9000+1000)}`;
+  const pass_hash = await sha256(`${pin}:${env.PASS_SALT || "imarika-salt"}`);
 
-  const exist = await env.DB.prepare("SELECT account FROM users WHERE phone=?").bind(phone).first();
-  const passHash = await hash(pin, String(env.PASS_SALT||""));
-
-  if (exist) {
-    await env.DB.prepare("UPDATE users SET full_name=?, id_number=?, pass_hash=? WHERE phone=?")
-      .bind(full, idn, passHash, phone).run();
-  } else {
-    const mkAcct = () => `IMK-${Math.random().toString(36).slice(2,6).toUpperCase()}-${Math.floor(Math.random()*9000+1000)}`;
-    let account = mkAcct();
-    for (let i=0;i<6;i++){
-      const clash = await env.DB.prepare("SELECT 1 FROM users WHERE account=?").bind(account).first();
-      if (!clash) break;
-      account = mkAcct();
-    }
-    await env.DB.prepare(
-      `INSERT INTO users (phone, full_name, id_number, pass_hash, account, wallet, invested, created_at)
-       VALUES (?,?,?,?,?,0,0,strftime('%s','now'))`
-    ).bind(phone, full, idn, passHash, account).run();
+  // create if not exists
+  const exists = await env.DB.prepare(`SELECT id FROM users WHERE phone=?`).bind(phone).first();
+  if (!exists) {
+    await env.DB.prepare(`
+      INSERT INTO users (phone, full_name, id_number, account, wallet, invested, pass_hash)
+      VALUES (?, ?, ?, ?, 0, 0, ?)
+    `).bind(phone, full_name||null, id_number||null, acct, pass_hash).run();
   }
 
-  const user = await env.DB
-    .prepare("SELECT phone,full_name,id_number,account,wallet,invested,created_at FROM users WHERE phone=?")
+  const u = await env.DB
+    .prepare(`SELECT phone, full_name, id_number, account, wallet, invested, created_at FROM users WHERE phone=?`)
     .bind(phone).first();
 
-  return json({ ok:true, user });
-}
-
-// POST /api/login
-if (pathname === "/api/login" && request.method === "POST") {
-  const json = (d, s = 200) => new Response(JSON.stringify(d), { status: s, headers: { "content-type": "application/json" } });
-  const { phone="", pin="" } = await request.json().catch(()=>({}));
-  if (!/^0(7|1)\d{8}$/.test(phone) || !/^\d{4}$/.test(pin)) return json({ ok:false, error:"Invalid phone or PIN" }, 400);
-
-  await ensureSchema(env.DB);
-  const passHash = await hash(pin, String(env.PASS_SALT||""));
-  const user = await env.DB.prepare(
-    "SELECT phone,full_name,id_number,account,wallet,invested,created_at FROM users WHERE phone=? AND pass_hash=?"
-  ).bind(phone, passHash).first();
-
-  if (!user) return json({ ok:false, error:"Invalid credentials" }, 401);
-  return json({ ok:true, user });
+  return json({ ok:true, user: u });
 }
