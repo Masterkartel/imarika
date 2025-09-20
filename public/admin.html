@@ -14,7 +14,6 @@
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .btn{background:var(--brand);border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(245,158,11,.25)}
-  .btn[disabled]{opacity:.6;cursor:not-allowed}
   .btn-outline{background:#fff;border:1px solid var(--line)}
   .btn-slim{padding:.55rem .8rem;border-radius:10px}
   .muted{color:var(--muted)}
@@ -31,11 +30,8 @@
   footer{border-top:1px solid var(--line);padding:2.2rem 0;color:#475569;margin-top:2rem}
   tr.clickable{cursor:pointer}
   tr.clickable:hover{background:#fffaf0}
-
-  /* eye toggle */
   .input-wrap{position:relative}
   .eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer;padding:6px;border-radius:8px}
-  .eye:focus{outline:2px solid var(--ring)}
 </style>
 
 <body>
@@ -56,11 +52,8 @@
         <input id="adPhone" placeholder="Admin phone" value="0715151010" class="mono" style="max-width:220px">
         <div class="input-wrap" style="max-width:220px">
           <input id="adPass" type="password" placeholder="Password">
-          <button class="eye" type="button" aria-label="Show/Hide password" id="adEye">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" stroke="#334155" stroke-width="2"/>
-              <circle cx="12" cy="12" r="3" stroke="#334155" stroke-width="2"/>
-            </svg>
+          <button class="eye" type="button" id="adEye">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" stroke="#334155" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="#334155" stroke-width="2"/></svg>
           </button>
         </div>
         <button class="btn" id="adLogin">Login</button>
@@ -68,81 +61,77 @@
       </div>
     </div>
 
-    <!-- All admin features are inside #app (hidden until logged in) -->
-    <div id="app" style="display:none">
-      <!-- Users list -->
-      <div class="card">
-        <div class="row" style="justify-content:space-between">
-          <h2>Users</h2>
-          <div class="row">
-            <span class="badge" id="userCount">0</span>
-            <input id="uSearch" placeholder="Search name / phone / account" style="min-width:220px">
-            <button class="btn btn-outline btn-slim" id="refreshUsers">Refresh</button>
-          </div>
-        </div>
-        <div style="overflow:auto">
-          <table id="usersTable">
-            <thead><tr><th>Name</th><th>Phone</th><th style="text-align:right">Wallet</th><th style="text-align:right">Shares</th><th>Created</th></tr></thead>
-            <tbody><tr><td colspan="5" class="muted" style="text-align:center">—</td></tr></tbody>
-          </table>
+    <!-- Users -->
+    <div id="usersCard" class="card" style="display:none">
+      <div class="row" style="justify-content:space-between">
+        <h2>Users</h2>
+        <div class="row">
+          <span class="badge" id="userCount">0</span>
+          <input id="uSearch" placeholder="Search name / phone / account" style="min-width:220px">
+          <button class="btn btn-outline btn-slim" id="refreshUsers">Refresh</button>
         </div>
       </div>
+      <div style="overflow:auto">
+        <table id="usersTable">
+          <thead><tr><th>Name</th><th>Phone</th><th style="text-align:right">Wallet</th><th style="text-align:right">Shares</th><th>Created</th></tr></thead>
+          <tbody><tr><td colspan="5" class="muted" style="text-align:center">—</td></tr></tbody>
+        </table>
+      </div>
+    </div>
 
-      <!-- Find / Create -->
-      <div class="card">
-        <h2>Find / Create</h2>
-        <div class="grid2">
-          <input id="qPhone" placeholder="Phone (07/01… 10 digits)" inputmode="tel" class="mono">
-          <input id="qAcct" placeholder="Account (IMK-....-....)" class="mono">
-        </div>
-        <div class="row" style="margin-top:8px">
-          <button class="btn" id="searchBtn">Search</button>
-          <button class="btn btn-outline" id="newBtn">Create New</button>
-          <span class="muted" id="hint"></span>
+    <!-- Find / Create -->
+    <div id="findCard" class="card" style="display:none">
+      <h2>Find / Create</h2>
+      <div class="grid2">
+        <input id="qPhone" placeholder="Phone (07/01… 10 digits)" inputmode="tel" class="mono">
+        <input id="qAcct" placeholder="Account (IMK-....-....)" class="mono">
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn" id="searchBtn">Search</button>
+        <button class="btn btn-outline" id="newBtn">Create New</button>
+        <span class="muted" id="hint"></span>
+      </div>
+    </div>
+
+    <!-- Edit -->
+    <div id="editCard" class="card" style="display:none">
+      <h2>Edit User</h2>
+      <div class="grid2">
+        <div><div class="muted">Full Name</div><input id="eName" placeholder="(optional)"></div>
+        <div><div class="muted">Phone</div><input id="ePhone" class="mono" readonly></div>
+        <div><div class="muted">ID Number</div><input id="eId" class="mono" placeholder="(optional)"></div>
+        <div><div class="muted">Account</div><input id="eAcct" class="mono" readonly></div>
+      </div>
+      <h3 style="margin-top:10px">Balances</h3>
+      <div class="grid2">
+        <div><div class="muted">Wallet (KES)</div><input id="eWallet" type="number" placeholder="0"></div>
+        <div><div class="muted">Shares (KES)</div><input id="eInvest" type="number" placeholder="0"></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="saveBtn">Save</button>
+        <button class="btn btn-outline" id="closeBtn">Close</button>
+        <span class="muted" id="saveHint"></span>
+      </div>
+    </div>
+
+    <!-- Pending -->
+    <div id="pendingCard" class="card" style="display:none">
+      <div class="row" style="justify-content:space-between">
+        <h2>Pending Transactions</h2>
+        <div class="row">
+          <span class="badge" id="pendCount">0</span>
+          <button class="btn btn-outline btn-slim" id="refreshPend">Refresh</button>
         </div>
       </div>
-
-      <!-- Edit user -->
-      <div id="editCard" class="card" style="display:none">
-        <h2>Edit User</h2>
-        <div class="grid2">
-          <div><div class="muted">Full Name</div><input id="eName" placeholder="(optional)"></div>
-          <div><div class="muted">Phone</div><input id="ePhone" class="mono" readonly></div>
-          <div><div class="muted">ID Number</div><input id="eId" class="mono" placeholder="(optional)"></div>
-          <div><div class="muted">Account</div><input id="eAcct" class="mono" readonly></div>
-        </div>
-        <h3 style="margin-top:10px">Balances</h3>
-        <div class="grid2">
-          <div><div class="muted">Wallet (KES)</div><input id="eWallet" type="number" placeholder="0"></div>
-          <div><div class="muted">Shares (KES)</div><input id="eInvest" type="number" placeholder="0"></div>
-        </div>
-        <div class="row" style="margin-top:10px">
-          <button class="btn" id="saveBtn">Save</button>
-          <button class="btn btn-outline" id="closeBtn">Close</button>
-          <span class="muted" id="saveHint"></span>
-        </div>
-      </div>
-
-      <!-- Pending -->
-      <div class="card">
-        <div class="row" style="justify-content:space-between">
-          <h2>Pending Transactions</h2>
-          <div class="row">
-            <span class="badge" id="pendCount">0</span>
-            <button class="btn btn-outline btn-slim" id="refreshPend">Refresh</button>
-          </div>
-        </div>
-        <div style="overflow:auto">
-          <table id="pendTable">
-            <thead><tr><th>Date</th><th>Phone</th><th>Type</th><th>Details</th><th style="text-align:right">Amount (KES)</th><th>Actions</th></tr></thead>
-            <tbody><tr><td colspan="6" class="muted" style="text-align:center">—</td></tr></tbody>
-          </table>
-        </div>
+      <div style="overflow:auto">
+        <table id="pendTable">
+          <thead><tr><th>Date</th><th>Phone</th><th>Type</th><th>Details</th><th style="text-align:right">Amount (KES)</th><th>Actions</th></tr></thead>
+          <tbody><tr><td colspan="6" class="muted" style="text-align:center">—</td></tr></tbody>
+        </table>
       </div>
     </div>
   </div>
 
-  <!-- Footer -->
   <footer>
     <div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
       <div class="row">
@@ -160,95 +149,65 @@
   </footer>
 
   <script>
-    // misc
-    const y = document.getElementById('y'); if (y) y.textContent = new Date().getFullYear();
+    const y = document.getElementById('y'); y.textContent = new Date().getFullYear();
     const fmt = n => Number(n||0).toLocaleString('en-KE');
     const tokenKey = 'imarika_admin_token';
-    const app = document.getElementById('app');
-    const loginCard = document.getElementById('loginCard');
-
-    // eye toggle
-    document.getElementById('adEye').onclick = () => {
-      const p = document.getElementById('adPass');
-      p.type = (p.type === 'password') ? 'text' : 'password';
-      p.focus();
-    };
-
-    function setLoggedInUI(tip){
+    const setLoggedInUI = (tip)=>{
       document.getElementById('who').textContent = tip ? `· ${tip}` : '';
       document.getElementById('logout').style.display = tip ? 'inline-flex' : 'none';
-    }
-    async function authedFetch(url, opts={}){
-      const t = localStorage.getItem(tokenKey)||'';
-      opts.headers = Object.assign({}, opts.headers||{}, {'authorization':'Bearer '+t});
-      return fetch(url, opts);
-    }
-
-    // Login / Logout
-    const adLogin = document.getElementById('adLogin'),
-          adPhone = document.getElementById('adPhone'),
-          adPass  = document.getElementById('adPass'),
-          adHint  = document.getElementById('adHint'),
-          logoutBtn = document.getElementById('logout');
-
-    adLogin.onclick = async ()=>{
-      adHint.textContent='Signing in...';
-      adLogin.disabled = true;
-      try {
-        const r = await fetch('/api/admin/login',{
-          method:'POST',
-          headers:{'content-type':'application/json'},
-          body:JSON.stringify({phone:adPhone.value.trim(),pass:adPass.value})
-        });
-        const j = await r.json().catch(()=>({}));
-        if(j.ok){
-          localStorage.setItem(tokenKey,j.token);
-          setLoggedInUI(adPhone.value.trim());
-          adHint.textContent='';
-          adPass.value='';
-          loginCard.style.display='none';
-          app.style.display='block';
-          await boot();
-        } else {
-          adHint.textContent=j.error||'Login failed';
-        }
-      } finally {
-        adLogin.disabled = false;
-      }
+      const show = !!tip;
+      document.getElementById('usersCard').style.display = show?'block':'none';
+      document.getElementById('findCard').style.display  = show?'block':'none';
+      document.getElementById('editCard').style.display  = 'none';
+      document.getElementById('pendingCard').style.display = show?'block':'none';
+      document.getElementById('loginCard').style.display = show?'none':'block';
     };
-    // quick enter
-    adPass.addEventListener('keydown', (e)=>{ if(e.key==='Enter') adLogin.click(); });
-    adPhone.addEventListener('keydown', (e)=>{ if(e.key==='Enter') adLogin.click(); });
+    const authedFetch = (url, opts={})=>{
+      const t = localStorage.getItem(tokenKey)||'';
+      opts.headers = Object.assign({}, opts.headers||{}, { authorization:'Bearer '+t });
+      return fetch(url, opts);
+    };
 
-    logoutBtn.onclick = ()=>{
+    // eye toggle
+    document.getElementById('adEye').onclick = ()=>{
+      const i = document.getElementById('adPass');
+      i.type = (i.type === 'password') ? 'text' : 'password';
+    };
+
+    // login
+    document.getElementById('adLogin').onclick = async ()=>{
+      const adPhone = document.getElementById('adPhone').value.trim();
+      const adPass  = document.getElementById('adPass').value;
+      const hint = document.getElementById('adHint');
+      hint.textContent='Signing in...';
+      const r = await fetch('/api/admin/login',{ method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ phone:adPhone, pass:adPass }) });
+      const j = await r.json().catch(()=>({}));
+      if (!j.ok){ hint.textContent=j.error || 'Login failed'; return; }
+      localStorage.setItem(tokenKey, j.token);
+      hint.textContent='';
+      setLoggedInUI(adPhone);
+      boot();
+    };
+    document.getElementById('logout').onclick = ()=>{
       localStorage.removeItem(tokenKey);
       setLoggedInUI('');
-      app.style.display='none';
-      loginCard.style.display='block';
-      usersTableBody.innerHTML='<tr><td colspan="5" class="muted" style="text-align:center">—</td></tr>';
-      pendTableBody.innerHTML='<tr><td colspan="6" class="muted" style="text-align:center">—</td></tr>';
+      document.querySelector('#usersTable tbody').innerHTML='<tr><td colspan="5" class="muted" style="text-align:center">—</td></tr>';
+      document.querySelector('#pendTable tbody').innerHTML='<tr><td colspan="6" class="muted" style="text-align:center">—</td></tr>';
     };
 
-    // Users list
+    // users
     const userCount=document.getElementById('userCount'),
           usersTableBody=document.querySelector('#usersTable tbody'),
-          uSearch=document.getElementById('uSearch'),
-          refreshUsers=document.getElementById('refreshUsers');
-
-    function humanTime(s){
-      if(!s) return '-';
-      try{ return new Date((s||0)*1000).toLocaleString(); }catch{ return '-'; }
-    }
+          uSearch=document.getElementById('uSearch');
+    const humanTime = s => s ? new Date(s*1000).toLocaleString() : '-';
 
     async function renderUsers(){
       const q=(uSearch.value||'').trim();
       usersTableBody.innerHTML='<tr><td colspan="5" class="muted" style="text-align:center">Loading…</td></tr>';
-      const r=await authedFetch('/api/admin/users'+(q?`?search=${encodeURIComponent(q)}`:'')); 
-      if(r.status===401){ // not authorized -> show login and hide app
-        loginCard.style.display='block'; app.style.display='none'; setLoggedInUI(''); return;
-      }
+      const r=await authedFetch('/api/admin/users'+(q?`?search=${encodeURIComponent(q)}`:''));
+      if (r.status===401){ setLoggedInUI(''); return; }
       const j=await r.json().catch(()=>({}));
-      if(!j.ok){ usersTableBody.innerHTML=`<tr><td colspan="5" class="muted" style="text-align:center">${j.error||'Failed'}</td></tr>`; return;}
+      if (!j.ok){ usersTableBody.innerHTML=`<tr><td colspan="5" class="muted" style="text-align:center">${j.error||'Failed'}</td></tr>`; return; }
       const list=j.users||[]; userCount.textContent=list.length;
       usersTableBody.innerHTML=list.length?list.map(u=>`
         <tr class="clickable" data-phone="${u.phone}">
@@ -257,34 +216,28 @@
           <td style="text-align:right">${fmt(u.wallet)}</td>
           <td style="text-align:right">${fmt(u.invested)}</td>
           <td class="mono">${humanTime(u.created_at)}</td>
-        </tr>
-      `).join(''):`<tr><td colspan="5" class="muted" style="text-align:center">No users</td></tr>`;
-
-      // click-to-edit
+        </tr>`).join(''):`<tr><td colspan="5" class="muted" style="text-align:center">No users</td></tr>`;
       usersTableBody.querySelectorAll('tr[data-phone]').forEach(tr=>{
         tr.onclick = async ()=>{
           const phone = tr.getAttribute('data-phone');
           const r=await authedFetch('/api/admin/user?phone='+encodeURIComponent(phone));
           const j=await r.json().catch(()=>({}));
-          if(j.ok && j.user){ fillEdit(j.user); saveHint.textContent=''; window.scrollTo({top:0,behavior:'smooth'}); }
-          else if(r.status===401){ loginCard.style.display='block'; app.style.display='none'; setLoggedInUI(''); }
+          if (j.ok && j.user){ fillEdit(j.user); document.getElementById('saveHint').textContent=''; scrollTo({top:0,behavior:'smooth'}); }
         };
       });
     }
-    let uTimer=null; uSearch.addEventListener('input',()=>{clearTimeout(uTimer);uTimer=setTimeout(renderUsers,300)}); 
-    refreshUsers.onclick=renderUsers;
+    document.getElementById('refreshUsers').onclick = renderUsers;
+    let t=null; uSearch.addEventListener('input', ()=>{ clearTimeout(t); t=setTimeout(renderUsers,300); });
 
-    // Pending
+    // pending
     const pendCount=document.getElementById('pendCount'),
-          pendTableBody=document.querySelector('#pendTable tbody'),
-          refreshPend=document.getElementById('refreshPend');
-
+          pendTableBody=document.querySelector('#pendTable tbody');
     async function renderPending(){
       pendTableBody.innerHTML='<tr><td colspan="6" class="muted" style="text-align:center">Loading…</td></tr>';
-      const r=await authedFetch('/api/admin/pending'); 
-      if(r.status===401){ loginCard.style.display='block'; app.style.display='none'; setLoggedInUI(''); return;}
-      const j=await r.json().catch(()=>({})); 
-      if(!j.ok){ pendTableBody.innerHTML=`<tr><td colspan="6" class="muted" style="text-align:center">${j.error||'Failed'}</td></tr>`; return;}
+      const r=await authedFetch('/api/admin/pending');
+      if (r.status===401){ setLoggedInUI(''); return; }
+      const j=await r.json().catch(()=>({}));
+      if (!j.ok){ pendTableBody.innerHTML=`<tr><td colspan="6" class="muted" style="text-align:center">${j.error||'Failed'}</td></tr>`; return; }
       const rows=j.pending||[]; pendCount.textContent=rows.length;
       pendTableBody.innerHTML=rows.length?rows.map(t=>`
         <tr>
@@ -297,98 +250,58 @@
             <button class="btn btn-slim" data-approve="${t.id}">Approve</button>
             <button class="btn btn-outline btn-slim" data-reject="${t.id}">Reject</button>
           </td>
-        </tr>
-      `).join(''):`<tr><td colspan="6" class="muted" style="text-align:center">No pending items.</td></tr>`;
+        </tr>`).join(''):`<tr><td colspan="6" class="muted" style="text-align:center">No pending items.</td></tr>`;
       pendTableBody.querySelectorAll('button[data-approve]').forEach(b=> b.onclick=()=>updateTx(b.dataset.approve,'approve'));
       pendTableBody.querySelectorAll('button[data-reject]').forEach(b=> b.onclick=()=>updateTx(b.dataset.reject,'reject'));
     }
-    async function updateTx(id,action){
-      const r=await authedFetch('/api/admin/tx/update',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id,action})});
-      const j=await r.json().catch(()=>({})); 
-      if(!j.ok){ alert(j.error||'Failed'); return;} 
-      renderPending(); 
-      renderUsers();
+    async function updateTx(id, action){
+      const r=await authedFetch('/api/admin/tx/update',{ method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ id, action }) });
+      const j=await r.json().catch(()=>({}));
+      if (!j.ok){ alert(j.error||'Failed'); return; }
+      renderPending(); renderUsers();
     }
-    refreshPend.onclick=renderPending;
+    document.getElementById('refreshPend').onclick = renderPending;
 
-    // Find / Create / Edit
-    const qPhone=document.getElementById('qPhone'),
-          qAcct=document.getElementById('qAcct'),
-          hint=document.getElementById('hint');
-
-    const editCard=document.getElementById('editCard'),
-          eName=document.getElementById('eName'),
-          ePhone=document.getElementById('ePhone'),
-          eId=document.getElementById('eId'),
-          eAcct=document.getElementById('eAcct'),
-          eWallet=document.getElementById('eWallet'),
-          eInvest=document.getElementById('eInvest'),
-          saveHint=document.getElementById('saveHint');
+    // find/create/edit
+    const qPhone=document.getElementById('qPhone'), qAcct=document.getElementById('qAcct'), hint=document.getElementById('hint');
+    const eName=document.getElementById('eName'), ePhone=document.getElementById('ePhone'), eId=document.getElementById('eId'), eAcct=document.getElementById('eAcct'), eWallet=document.getElementById('eWallet'), eInvest=document.getElementById('eInvest');
 
     function fillEdit(u){
-      eName.value=u.full_name||'';
-      ePhone.value=u.phone||'';
-      eId.value=u.id_number||'';
-      eAcct.value=u.account||'';
-      eWallet.value=u.wallet||0;
-      eInvest.value=u.invested||0;
-      editCard.style.display='block';
+      document.getElementById('editCard').style.display='block';
+      eName.value=u.full_name||''; ePhone.value=u.phone||''; eId.value=u.id_number||''; eAcct.value=u.account||'';
+      eWallet.value=u.wallet||0; eInvest.value=u.invested||0;
     }
-
     document.getElementById('searchBtn').onclick = async ()=>{
       hint.textContent=''; const p=qPhone.value.trim(), a=qAcct.value.trim();
       if(!p && !a){ hint.textContent='Provide phone or account.'; return; }
       const r=await authedFetch('/api/admin/user'+(p?`?phone=${encodeURIComponent(p)}`:`?account=${encodeURIComponent(a)}`));
-      if(r.status===401){ loginCard.style.display='block'; app.style.display='none'; setLoggedInUI(''); return; }
-      const j=await r.json().catch(()=>({})); 
-      if(!j.ok){ hint.textContent=j.error||'Not found'; editCard.style.display='none'; return;}
-      fillEdit(j.user); saveHint.textContent='';
-      window.scrollTo({top:0,behavior:'smooth'});
+      const j=await r.json().catch(()=>({}));
+      if(!j.ok || !j.user){ hint.textContent=j.error||'Not found'; document.getElementById('editCard').style.display='none'; return; }
+      fillEdit(j.user); document.getElementById('saveHint').textContent='';
+      scrollTo({top:0,behavior:'smooth'});
     };
-
     document.getElementById('newBtn').onclick = async ()=>{
-      hint.textContent=''; 
-      const p=qPhone.value.trim(); 
+      hint.textContent=''; const p=qPhone.value.trim();
       if(!/^0(7|1)\d{8}$/.test(p)){ hint.textContent='Enter valid phone (07/01… 10 digits).'; return; }
-      const r=await authedFetch('/api/admin/user/upsert',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({phone:p})});
-      if(r.status===401){ loginCard.style.display='block'; app.style.display='none'; setLoggedInUI(''); return; }
-      const j=await r.json().catch(()=>({})); 
-      if(!j.ok){ hint.textContent=j.error||'Failed'; return;}
-      fillEdit(j.user); saveHint.textContent='Created.';
-      renderUsers();
-      window.scrollTo({top:0,behavior:'smooth'});
+      const r=await authedFetch('/api/admin/user/upsert',{ method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify({ phone:p }) });
+      const j=await r.json().catch(()=>({}));
+      if(!j.ok){ hint.textContent=j.error||'Failed'; return; }
+      fillEdit(j.user); document.getElementById('saveHint').textContent='Created.'; renderUsers(); scrollTo({top:0,behavior:'smooth'});
     };
-
     document.getElementById('saveBtn').onclick = async ()=>{
-      const payload={
-        phone:ePhone.value.trim(),
-        full_name:eName.value.trim()||null,
-        id_number:eId.value.trim()||null,
-        wallet:Number(eWallet.value||0),
-        invested:Number(eInvest.value||0)
-      };
-      const r=await authedFetch('/api/admin/user/upsert',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload)});
-      if(r.status===401){ loginCard.style.display='block'; app.style.display='none'; setLoggedInUI(''); return; }
-      const j=await r.json().catch(()=>({})); 
-      if(!j.ok){ saveHint.textContent=j.error||'Failed'; return; }
-      saveHint.textContent='Saved.'; 
-      renderUsers();
+      const payload = { phone:ePhone.value.trim(), full_name:eName.value.trim()||null, id_number:eId.value.trim()||null, wallet:Number(eWallet.value||0), invested:Number(eInvest.value||0) };
+      const r=await authedFetch('/api/admin/user/upsert',{ method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify(payload) });
+      const j=await r.json().catch(()=>({}));
+      document.getElementById('saveHint').textContent = j.ok ? 'Saved.' : (j.error||'Failed');
+      if (j.ok) renderUsers();
     };
-    document.getElementById('closeBtn').onclick = ()=>{ editCard.style.display='none'; saveHint.textContent=''; };
+    document.getElementById('closeBtn').onclick = ()=>{ document.getElementById('editCard').style.display='none'; document.getElementById('saveHint').textContent=''; };
 
-    // Boot
+    // boot
     async function boot(){ await Promise.all([renderUsers(), renderPending()]); }
-
     (function start(){
-      if(localStorage.getItem('imarika_admin_token')){
-        setLoggedInUI('(signed in)');
-        loginCard.style.display='none';
-        app.style.display='block';
-        boot();
-      } else {
-        app.style.display='none';
-        loginCard.style.display='block';
-      }
+      if (localStorage.getItem(tokenKey)) { setLoggedInUI('(signed in)'); boot(); }
+      else { setLoggedInUI(''); }
     })();
   </script>
 </body>
