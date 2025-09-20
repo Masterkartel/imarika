@@ -18,24 +18,21 @@
   .brand{display:flex;align-items:center;gap:.55rem;height:64px}
   .logo{height:32px;width:32px;border-radius:10px}
 
-  /* Cards & layout */
   .card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:1.15rem;box-shadow:0 10px 30px rgba(2,8,23,.06)}
   .stack{display:grid;gap:1rem;max-width:560px;margin:1rem 0}
 
-  /* Inputs & buttons */
   input{width:100%;padding:.85rem;border:1px solid var(--line);border-radius:14px;outline:none}
   input:focus{border-color:#cbd5e1;box-shadow:0 0 0 4px var(--ring)}
   .btn{display:inline-flex;align-items:center;justify-content:center;padding:.8rem 1rem;border-radius:14px;font-weight:700;background:var(--brand);color:#111827;border:0;cursor:pointer;box-shadow:0 10px 30px rgba(245,158,11,.25)}
+  .btn[disabled]{opacity:.6;cursor:not-allowed}
   .btn-outline{background:#fff;border:1px solid var(--line)}
   .muted{color:var(--muted)}
 
-  /* eye toggle */
   .input-wrap{position:relative}
   .eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer;padding:6px;border-radius:8px}
   .eye:focus{outline:2px solid var(--ring)}
   .inline-note{font-size:.9rem;color:#64748b;margin-top:-.3rem}
 
-  /* Tabs (pill switch) */
   .tabs{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:#fff}
   .tab{padding:.5rem 1rem;border:0;background:#fff;cursor:pointer;font-weight:700}
   .tab.active{background:var(--brand)}
@@ -60,7 +57,6 @@
           <p class="muted" style="margin:0">Login or create an account to access your dashboard.</p>
         </div>
 
-        <!-- pill tabs -->
         <div class="tabs" role="tablist" aria-label="Auth switch">
           <button id="tabLogin"  class="tab active" role="tab" aria-selected="true"  aria-controls="loginCard">Login</button>
           <button id="tabCreate" class="tab"        role="tab" aria-selected="false" aria-controls="createCard">Create account</button>
@@ -68,7 +64,7 @@
       </div>
 
       <div class="stack">
-        <!-- LOGIN (default visible) -->
+        <!-- LOGIN -->
         <form id="loginCard" class="card" onsubmit="return false;" style="display:grid;gap:.6rem">
           <h3>Login</h3>
           <input id="lPhone" inputmode="tel" placeholder="Phone (07/01… 10 digits)" required autofocus>
@@ -82,11 +78,11 @@
             </button>
           </div>
           <button class="btn" id="lBtn">Login</button>
-          <div class="muted" id="lHint"></div>
+          <div class="muted" id="lHint" aria-live="polite"></div>
           <div class="muted" style="font-size:.9rem">No account? <a href="#" id="toCreate"><strong>Create one</strong></a></div>
         </form>
 
-        <!-- CREATE (hidden by default; toggled via pill) -->
+        <!-- CREATE -->
         <form id="createCard" class="card" onsubmit="return false;" style="display:none;gap:.6rem">
           <h3>Create Account</h3>
           <input id="sFull" placeholder="Full Name (First Middle Last)" required>
@@ -114,14 +110,13 @@
           <div class="inline-note">Tip: PIN must be exactly 4 digits.</div>
 
           <button class="btn" id="sBtn">Create Account</button>
-          <div class="muted" id="sHint"></div>
+          <div class="muted" id="sHint" aria-live="polite"></div>
           <div class="muted" style="font-size:.9rem">Already have an account? <a href="#" id="toLogin"><strong>Login</strong></a></div>
         </form>
       </div>
     </div>
   </section>
 
-  <!-- Footer -->
   <footer>
     <div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:.6rem">
@@ -143,58 +138,43 @@
     const y = document.getElementById('y'); if (y) y.textContent = new Date().getFullYear();
 
     // Utilities
-    const phoneOk = p => /^0(7|1)\d{8}$/.test(String(p||'').trim());
-    const onlyDigits = s => String(s||'').replace(/\D+/g,'');
-    const acctNum = () => 'IMK-' + Math.random().toString(36).slice(2,6).toUpperCase() + '-' + Math.floor(Math.random()*9000+1000);
-    const saveUser = u => localStorage.setItem('imarika_user', JSON.stringify(u));
-    const getUser  = () => { try { return JSON.parse(localStorage.getItem('imarika_user')||'null'); } catch { return null; } };
+    const phoneOk   = p => /^0(7|1)\d{8}$/.test(String(p||'').trim());
+    const onlyDigits= s => String(s||'').replace(/\D+/g,'');
+    const acctNum   = () => 'IMK-' + Math.random().toString(36).slice(2,6).toUpperCase() + '-' + Math.floor(Math.random()*9000+1000);
+    const saveUser  = u => localStorage.setItem('imarika_user', JSON.stringify(u));
+    const getUser   = () => { try { return JSON.parse(localStorage.getItem('imarika_user')||'null'); } catch { return null; } };
 
-    // If already logged in, go to dashboard
     if (getUser()) window.location.replace('/dashboard');
 
-    // Tabs logic (default: Login)
+    // Tabs
     const tabLogin  = document.getElementById('tabLogin');
     const tabCreate = document.getElementById('tabCreate');
     const loginCard  = document.getElementById('loginCard');
     const createCard = document.getElementById('createCard');
-
-    function showLogin(){
-      tabLogin.classList.add('active'); tabLogin.setAttribute('aria-selected','true');
-      tabCreate.classList.remove('active'); tabCreate.setAttribute('aria-selected','false');
-      loginCard.style.display='grid'; createCard.style.display='none';
-      document.getElementById('lPhone').focus();
-    }
-    function showCreate(){
-      tabCreate.classList.add('active'); tabCreate.setAttribute('aria-selected','true');
-      tabLogin.classList.remove('active'); tabLogin.setAttribute('aria-selected','false');
-      createCard.style.display='grid'; loginCard.style.display='none';
-      document.getElementById('sFull').focus();
-    }
-    tabLogin.onclick = showLogin;
-    tabCreate.onclick = showCreate;
+    function showLogin(){ tabLogin.classList.add('active'); tabLogin.setAttribute('aria-selected','true'); tabCreate.classList.remove('active'); tabCreate.setAttribute('aria-selected','false'); loginCard.style.display='grid'; createCard.style.display='none'; document.getElementById('lPhone').focus(); }
+    function showCreate(){ tabCreate.classList.add('active'); tabCreate.setAttribute('aria-selected','true'); tabLogin.classList.remove('active'); tabLogin.setAttribute('aria-selected','false'); createCard.style.display='grid'; loginCard.style.display='none'; document.getElementById('sFull').focus(); }
+    tabLogin.onclick = showLogin; tabCreate.onclick = showCreate;
     document.getElementById('toCreate').onclick = (e)=>{ e.preventDefault(); showCreate(); };
     document.getElementById('toLogin').onclick  = (e)=>{ e.preventDefault(); showLogin(); };
 
-    // Eye toggles + force numeric 4 digits
+    // Eye + numeric
     function bindEye(inputId, btnId){
       const inp = document.getElementById(inputId);
       const btn = document.getElementById(btnId);
-      inp.addEventListener('input', ()=>{
-        const d = onlyDigits(inp.value).slice(0,4);
-        inp.value = d;
-      });
+      inp.addEventListener('input', ()=>{ inp.value = onlyDigits(inp.value).slice(0,4); });
       btn.onclick = ()=>{ inp.type = (inp.type === 'password') ? 'text' : 'password'; };
     }
     bindEye('sPIN','sEye'); bindEye('sPIN2','sEye2'); bindEye('lPIN','lEye');
 
-    // Create Account
+    // -------- Create Account (calls /api/register WITH pin) ----------
     const sHint = document.getElementById('sHint');
-    document.getElementById('sBtn').onclick = async () => {
-      const full = document.getElementById('sFull').value.trim();
-      const idn  = document.getElementById('sId').value.trim();
-      const phone= document.getElementById('sPhone').value.trim();
-      const pin  = document.getElementById('sPIN').value.trim();
-      const pin2 = document.getElementById('sPIN2').value.trim();
+    const sBtn  = document.getElementById('sBtn');
+    sBtn.onclick = async () => {
+      const full  = document.getElementById('sFull').value.trim();
+      const idn   = document.getElementById('sId').value.trim();
+      const phone = document.getElementById('sPhone').value.trim();
+      const pin   = document.getElementById('sPIN').value.trim();
+      const pin2  = document.getElementById('sPIN2').value.trim();
       sHint.textContent='';
 
       if(!full || !idn){ sHint.textContent='Name and ID are required.'; return; }
@@ -202,45 +182,95 @@
       if(pin.length !== 4 || /\D/.test(pin)){ sHint.textContent='PIN must be exactly 4 digits.'; return; }
       if(pin !== pin2){ sHint.textContent='PINs do not match.'; return; }
 
-      // Try server register (auto-issue IMK account). Fallback to local if it fails.
-      let serverUser = null;
+      sBtn.disabled = true;
       try{
+        // IMPORTANT: send the PIN to server so it’s saved in D1
         const r = await fetch('/api/register', {
           method:'POST',
           headers:{'content-type':'application/json'},
-          body: JSON.stringify({ phone, full_name: full, id_number: idn })
+          body: JSON.stringify({ phone, full_name: full, id_number: idn, pin })
         });
         const j = await r.json().catch(()=>null);
-        if(j && j.ok && j.user) serverUser = j.user;
-      }catch{ /* offline or endpoint missing */ }
 
-      const user = {
-        full: full,
-        idn: idn,
-        phone: phone,
-        pinHash: btoa(pin),   // demo-only (client-side)
-        account: serverUser?.account || acctNum(),
-        wallet: serverUser?.wallet ?? 0,
-        invested: serverUser?.invested ?? 0,
-        createdAt: serverUser?.created_at ? (serverUser.created_at*1000) : Date.now()
-      };
+        if(j && j.ok && j.user){
+          const u = j.user;
+          saveUser({
+            full: u.full_name ?? full,
+            idn:  u.id_number ?? idn,
+            phone: u.phone ?? phone,
+            pinHash: btoa(pin),                 // local convenience only
+            account: u.account ?? acctNum(),
+            wallet:  u.wallet ?? 0,
+            invested:u.invested ?? 0,
+            createdAt: u.created_at ? (u.created_at*1000) : Date.now()
+          });
+          window.location.href = '/dashboard';
+          return;
+        }
 
-      saveUser(user);
-      window.location.href = '/dashboard';
+        // fallback (should rarely run)
+        sHint.textContent = (j && j.error) ? j.error : 'Could not create account.';
+      } catch(e){
+        sHint.textContent = 'Network error. Please try again.';
+      } finally {
+        sBtn.disabled = false;
+      }
     };
 
-    // Login (client-side demo)
+    // -------- Login (calls /api/login so it persists after logout) ----------
     const lHint = document.getElementById('lHint');
-    document.getElementById('lBtn').onclick = () => {
-      const u = getUser(),
-            phone = document.getElementById('lPhone').value.trim(),
-            pin   = document.getElementById('lPIN').value.trim();
-      if(!u){ lHint.textContent='No account on this device. Please create one first.'; return; }
+    const lBtn  = document.getElementById('lBtn');
+    lBtn.onclick = async () => {
+      const phone = document.getElementById('lPhone').value.trim();
+      const pin   = document.getElementById('lPIN').value.trim();
+      lHint.textContent='';
+
       if(!phoneOk(phone)){ lHint.textContent='Enter a valid phone.'; return; }
       if(pin.length !== 4){ lHint.textContent='PIN must be 4 digits.'; return; }
-      if(u.phone !== phone || u.pinHash !== btoa(pin)){ lHint.textContent='Invalid phone or PIN.'; return; }
-      window.location.href = '/dashboard';
+
+      lBtn.disabled = true;
+      try{
+        const r = await fetch('/api/login', {
+          method:'POST',
+          headers:{'content-type':'application/json'},
+          body: JSON.stringify({ phone, pin })
+        });
+        const j = await r.json().catch(()=>null);
+
+        if(j && j.ok && j.user){
+          const u = j.user;
+          saveUser({
+            full: u.full_name || '',
+            idn:  u.id_number || '',
+            phone: u.phone,
+            pinHash: btoa(pin),
+            account: u.account,
+            wallet:  u.wallet || 0,
+            invested:u.invested || 0,
+            createdAt: u.created_at ? (u.created_at*1000) : Date.now()
+          });
+          window.location.href = '/dashboard';
+          return;
+        }
+
+        // if server says no, fall back to local-only check (optional)
+        const local = getUser();
+        if(local && local.phone === phone && local.pinHash === btoa(pin)){
+          window.location.href = '/dashboard';
+          return;
+        }
+
+        lHint.textContent = (j && j.error) ? j.error : 'Login failed.';
+      } catch(e){
+        lHint.textContent = 'Network error. Please try again.';
+      } finally {
+        lBtn.disabled = false;
+      }
     };
+
+    // Enter-to-submit
+    document.getElementById('lPIN').addEventListener('keydown',e=>{ if(e.key==='Enter') lBtn.click(); });
+    document.getElementById('sPIN2').addEventListener('keydown',e=>{ if(e.key==='Enter') sBtn.click(); });
   </script>
 </body>
 </html>
