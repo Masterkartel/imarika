@@ -1,0 +1,56 @@
+// public/api/register
+export default {
+  async fetch(request, env) {
+    const json = (d, s = 200) =>
+      new Response(JSON.stringify(d), { status: s, headers: { "content-type": "application/json" } });
+
+    if (request.method !== "POST") return json({ ok: false, error: "POST only" }, 405);
+
+    const body = await request.json().catch(() => null);
+    if (!body) return json({ ok: false, error: "Bad JSON" }, 400);
+
+    const full  = String(body.full || body.full_name || "").trim();
+    const idn   = String(body.id   || body.id_number || "").trim();
+    const phone = String(body.phone || "").trim();
+
+    if (!full || !idn) return json({ ok: false, error: "Name & ID required" }, 400);
+    if (!/^0(7|1)\d{8}$/.test(phone)) return json({ ok: false, error: "Phone invalid" }, 400);
+
+    const db = env.DB;
+
+    // Schema (create if missing)
+    await db.exec(`CREATE TABLE IF NOT EXISTS users (
+      phone     TEXT PRIMARY KEY,
+      full_name TEXT,
+      id_number TEXT,
+      account   TEXT UNIQUE,
+      wallet    INTEGER DEFAULT 0,
+      invested  INTEGER DEFAULT 0,
+      created_at INTEGER DEFAULT (strftime('%s','now'))
+    );`);
+
+    // Already registered?
+    const exists = await db.prepare("SELECT 1 FROM users WHERE phone=?").bind(phone).first();
+    if (exists) return json({ ok: false, error: "Phone already registered" }, 409);
+
+    // Generate unique account like IMK-ABCD-1234
+    const newAcct = async () => {
+      const part = Math.random().toString(36).slice(2, 6).toUpperCase();
+      const tail = Math.floor(Math.random() * 9000 + 1000);
+      return `IMK-${part}-${tail}`;
+    };
+    let account = await newAcct();
+    for (let i = 0; i < 5; i++) {
+      const clash = await db.prepare("SELECT 1 FROM users WHERE account=?").bind(account).first();
+      if (!clash) break;
+      account = await newAcct();
+    }
+
+    await db
+      .prepare("INSERT INTO users (phone, full_name, id_number, account) VALUES (?,?,?,?)")
+      .bind(phone, full, idn, account)
+      .run();
+
+    return json({ ok: true, account });
+  },
+};
