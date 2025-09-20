@@ -1,0 +1,14 @@
+// POST /api/login
+if (pathname === "/api/login" && request.method === "POST") {
+  const { phone, pin } = await request.json();
+  const pass_hash = await sha256(`${pin}:${env.PASS_SALT || "imarika-salt"}`);
+
+  const u = await env.DB
+    .prepare(`SELECT phone, full_name, id_number, account, wallet, invested, created_at
+              FROM users WHERE phone=? AND pass_hash=?`)
+    .bind(phone, pass_hash)
+    .first();
+
+  if (!u) return json({ ok:false, error:"Invalid credentials" }, { status: 401 });
+  return json({ ok:true, user:u });
+}
