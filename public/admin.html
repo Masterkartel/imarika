@@ -14,6 +14,7 @@
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
   .btn{background:var(--brand);border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(245,158,11,.25)}
+  .btn[disabled]{opacity:.6;cursor:not-allowed}
   .btn-outline{background:#fff;border:1px solid var(--line)}
   .btn-slim{padding:.55rem .8rem;border-radius:10px}
   .muted{color:var(--muted)}
@@ -119,7 +120,7 @@
       <div style="overflow:auto">
         <table id="pendTable">
           <thead><tr><th>Date</th><th>Phone</th><th>Type</th><th>Details</th><th style="text-align:right">Amount (KES)</th><th>Actions</th></tr></thead>
-        <tbody><tr><td colspan="6" class="muted" style="text-align:center">—</td></tr></tbody>
+          <tbody><tr><td colspan="6" class="muted" style="text-align:center">—</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -164,6 +165,7 @@
           adPass  = document.getElementById('adPass'),
           adHint  = document.getElementById('adHint'),
           logoutBtn = document.getElementById('logout');
+
     adLogin.onclick = async ()=>{
       adHint.textContent='Signing in...';
       adLogin.disabled = true;
@@ -185,7 +187,9 @@
         adHint.textContent=j.error||'Login failed';
       }
     };
+    // quick enter
     adPass.addEventListener('keydown', (e)=>{ if(e.key==='Enter') adLogin.click(); });
+    adPhone.addEventListener('keydown', (e)=>{ if(e.key==='Enter') adLogin.click(); });
 
     logoutBtn.onclick = ()=>{
       localStorage.removeItem(tokenKey);
