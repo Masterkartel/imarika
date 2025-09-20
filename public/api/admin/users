@@ -1,0 +1,30 @@
+<script>
+  // ... keep helpers you already have ...
+
+  const sHint = document.getElementById('sHint');
+  document.getElementById('sBtn').onclick = async () => {
+    const full  = sFull.value.trim();
+    const idn   = sId.value.trim();
+    const phone = sPhone.value.trim();
+    const pin   = sPin.value.trim();     // kama umeweka PIN 4-digit field
+    const pin2  = sPin2.value.trim();
+
+    // validations (same as now)
+    // ...
+
+    sHint.textContent = 'Saving...';
+    const r = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ full, id: idn, phone })
+    });
+    const j = await r.json().catch(()=>({}));
+    if (!j.ok) { sHint.textContent = j.error || 'Failed to create account'; return; }
+
+    // Cache local copy for dashboard UX
+    const user = { full, idn, phone, account: j.account, wallet: 0, invested: 0, createdAt: Date.now() };
+    localStorage.setItem('imarika_user', JSON.stringify(user));
+
+    window.location.href = '/dashboard';
+  };
+</script>
