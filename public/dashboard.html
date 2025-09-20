@@ -220,7 +220,7 @@
     const addLoan = loan => { const list=getLoans(); list.unshift(loan); saveLoans(list); renderLoans(); };
 
     // --- Global TX queue shared with Admin (MUST match admin) ---
-    const GLOBAL_TX_KEY = 'imarika_global_tx'; // <- unified key
+    const GLOBAL_TX_KEY = 'imarika_global_tx'; // unified key
     const getGlobalTx = () => { try { return JSON.parse(localStorage.getItem(GLOBAL_TX_KEY)||'[]'); } catch { return []; } };
     const saveGlobalTx = (list) => localStorage.setItem(GLOBAL_TX_KEY, JSON.stringify(list));
     const uid = () => 'TX-' + Date.now() + '-' + Math.random().toString(36).slice(2,8).toUpperCase();
@@ -233,7 +233,8 @@
     const loanTable = document.getElementById('loanTable').querySelector('tbody'), loanCount = document.getElementById('loanCount');
 
     function show(u){
-      who.innerHTML = `<span class="muted">Acct:</span> <span class="mono"><strong>${u.account}</strong></span> • ${u.full||''}`;
+      const name = u.full_name || u.full || '';
+      who.innerHTML = `<span class="muted">Acct:</span> <span class="mono"><strong>${u.account || ''}</strong></span>${name ? ' • ' + name : ''}`;
       walletEl.textContent = 'KES ' + fmt(u.wallet||0);
       sharesEl.textContent = 'KES ' + fmt(u.invested||0);
       stamp.textContent = 'Updated ' + new Date().toLocaleString();
@@ -277,7 +278,6 @@
       let changedTx = false;
 
       for(const g of globals){
-        // Find matching local tx by id; fallback to fuzzy match
         let t = txs.find(x => x.id && x.id === g.id);
         if(!t){
           if(g.type === 'Withdrawal'){
@@ -288,8 +288,6 @@
           if(t){ t.id = g.id; changedTx = true; }
         }
         if(!t) continue;
-
-        // Update local status to mirror Admin
         if(t.status !== g.status){ t.status = g.status; changedTx = true; }
       }
 
@@ -308,17 +306,14 @@
       if(a<=0){ h.textContent='Enter amount.'; return; }
       if(a > (u.wallet||0)){ h.textContent='Insufficient wallet balance.'; return; }
 
-      // Deduct and persist (hold)
       u.wallet = (u.wallet||0) - a;
       saveUser(u);
       show(u);
 
       const id = uid();
 
-      // Local TX
       addTx({ id, ts:Date.now(), type:'Withdrawal', detail:`To ${p}`, amount:-Math.abs(a), status:'Requested' });
 
-      // Push to Admin global queue
       pushGlobalTx({ id, ts:Date.now(), phone:u.phone||null, type:'Withdrawal', detail:`To ${p}`, amount:-Math.abs(a), status:'Pending' });
 
       h.textContent='Withdrawal request submitted.';
