@@ -6,8 +6,12 @@
 <link rel="icon" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  :root{--bg:#fff;--text:#0f172a;--muted:#475569;--line:#e5e7eb;--card:#fff;--brand:#f59e0b;--ring:rgba(245,158,11,.35)}
-  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  :root{
+    --bg:#fff;--text:#0f172a;--muted:#475569;--line:#e5e7eb;--card:#fff;
+    --brand:#f59e0b;--ring:rgba(245,158,11,.35)
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
   a{text-decoration:none;color:inherit}
   .container{max-width:920px;margin:0 auto;padding:0 1rem}
   header{position:sticky;top:0;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:40}
@@ -21,6 +25,12 @@
   .btn{display:inline-flex;align-items:center;justify-content:center;padding:.8rem 1rem;border-radius:14px;font-weight:700;background:var(--brand);color:#111827;border:0;cursor:pointer;box-shadow:0 10px 30px rgba(245,158,11,.25)}
   .btn-outline{background:#fff;border:1px solid var(--line)}
   .muted{color:var(--muted)}
+  /* eye toggle */
+  .input-wrap{position:relative}
+  .eye{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer;padding:6px;border-radius:8px}
+  .eye:focus{outline:2px solid var(--ring)}
+  .inline-note{font-size:.9rem;color:#64748b;margin-top:-.3rem}
+  footer{border-top:1px solid var(--line);padding:2.2rem 0;color:#475569;margin-top:2rem}
 </style>
 
 <body>
@@ -37,21 +47,51 @@
       <p class="muted" style="margin-top:0">Create an account or log in to access your dashboard.</p>
 
       <div class="grid grid2" style="margin-top:1rem">
+        <!-- CREATE -->
         <form id="sForm" class="card" onsubmit="return false;" style="display:grid;gap:.6rem">
           <h3>Create Account</h3>
           <input id="sFull" placeholder="Full Name (First Middle Last)" required>
           <input id="sId" inputmode="numeric" placeholder="ID Number *" required>
           <input id="sPhone" inputmode="tel" placeholder="Phone * (07/01… 10 digits)" required>
-          <input id="sPass" type="password" placeholder="Password * (min 6 chars)" required>
-          <input id="sPass2" type="password" placeholder="Confirm Password *" required>
+
+          <div class="input-wrap">
+            <input id="sPIN" type="password" inputmode="numeric" pattern="\\d{4}" maxlength="4" placeholder="4-digit PIN *" required>
+            <button class="eye" type="button" aria-label="Show/Hide PIN" id="sEye">
+              <!-- eye icon -->
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" stroke="#334155" stroke-width="2"/>
+                <circle cx="12" cy="12" r="3" stroke="#334155" stroke-width="2"/>
+              </svg>
+            </button>
+          </div>
+          <div class="input-wrap">
+            <input id="sPIN2" type="password" inputmode="numeric" pattern="\\d{4}" maxlength="4" placeholder="Confirm PIN *" required>
+            <button class="eye" type="button" aria-label="Show/Hide PIN" id="sEye2">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" stroke="#334155" stroke-width="2"/>
+                <circle cx="12" cy="12" r="3" stroke="#334155" stroke-width="2"/>
+              </svg>
+            </button>
+          </div>
+          <div class="inline-note">Tip: PIN must be exactly 4 digits.</div>
+
           <button class="btn" id="sBtn">Create Account</button>
           <div class="muted" id="sHint"></div>
         </form>
 
+        <!-- LOGIN -->
         <form id="lForm" class="card" onsubmit="return false;" style="display:grid;gap:.6rem">
           <h3>Login</h3>
           <input id="lPhone" inputmode="tel" placeholder="Phone (07/01… 10 digits)" required>
-          <input id="lPass" type="password" placeholder="Password" required>
+          <div class="input-wrap">
+            <input id="lPIN" type="password" inputmode="numeric" pattern="\\d{4}" maxlength="4" placeholder="4-digit PIN" required>
+            <button class="eye" type="button" aria-label="Show/Hide PIN" id="lEye">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" stroke="#334155" stroke-width="2"/>
+                <circle cx="12" cy="12" r="3" stroke="#334155" stroke-width="2"/>
+              </svg>
+            </button>
+          </div>
           <button class="btn" id="lBtn">Login</button>
           <div class="muted" id="lHint"></div>
         </form>
@@ -59,9 +99,30 @@
     </div>
   </section>
 
+  <!-- Footer (same style as home/dashboard) -->
+  <footer>
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:.6rem">
+        <img src="/favicon.svg" class="logo" alt="">
+        <span>© <span id="y"></span> Imarika — <a class="muted" href="https://imarika.net">imarika.net</a></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+        <span class="muted">Payments Accepted:&nbsp;</span>
+        <img src="/mpesa.png" alt="M-Pesa" style="height:60px;width:auto;vertical-align:middle">
+        <span class="muted">·</span>
+        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#334155" d="M3 10.5 12 5l9 5.5v7A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z"/><path fill="#94a3b8" d="M12 7.2 5 11v6.5h14V11z"/></svg>
+        <strong>Bank Transfer</strong>
+      </div>
+    </div>
+  </footer>
+
   <script>
-    // same storage model as dashboard
+    // Footer year
+    const y = document.getElementById('y'); if (y) y.textContent = new Date().getFullYear();
+
+    // Utilities
     const phoneOk = p => /^0(7|1)\d{8}$/.test(String(p||'').trim());
+    const onlyDigits = s => String(s||'').replace(/\D+/g,'');
     const acctNum = () => 'IMK-' + Math.random().toString(36).slice(2,6).toUpperCase() + '-' + Math.floor(Math.random()*9000+1000);
     const saveUser = u => localStorage.setItem('imarika_user', JSON.stringify(u));
     const getUser  = () => { try { return JSON.parse(localStorage.getItem('imarika_user')||'null'); } catch { return null; } };
@@ -69,25 +130,69 @@
     // If already logged in, go to dashboard
     if (getUser()) window.location.replace('/dashboard');
 
-    // Sign up
+    // Eye toggles
+    function bindEye(inputId, btnId){
+      const inp = document.getElementById(inputId);
+      const btn = document.getElementById(btnId);
+      // force numeric & 4 digits
+      inp.addEventListener('input', ()=>{
+        const d = onlyDigits(inp.value).slice(0,4);
+        inp.value = d;
+      });
+      btn.onclick = ()=>{
+        inp.type = (inp.type === 'password') ? 'text' : 'password';
+      };
+    }
+    bindEye('sPIN','sEye'); bindEye('sPIN2','sEye2'); bindEye('lPIN','lEye');
+
+    // Create Account
     const sHint = document.getElementById('sHint');
-    document.getElementById('sBtn').onclick = () => {
-      const full=sFull.value.trim(), idn=sId.value.trim(), phone=sPhone.value.trim(), pass=sPass.value, pass2=sPass2.value;
-      if(!full||!idn){ sHint.textContent='Name and ID are required.'; return; }
+    document.getElementById('sBtn').onclick = async () => {
+      const full = sFull.value.trim(), idn = sId.value.trim(), phone = sPhone.value.trim();
+      const pin  = sPIN.value.trim(), pin2 = sPIN2.value.trim();
+      sHint.textContent='';
+
+      if(!full || !idn){ sHint.textContent='Name and ID are required.'; return; }
       if(!phoneOk(phone)){ sHint.textContent='Phone must start with 07/01 and be 10 digits.'; return; }
-      if(pass.length<6){ sHint.textContent='Password must be at least 6 characters.'; return; }
-      if(pass!==pass2){ sHint.textContent='Passwords do not match.'; return; }
-      const user={ full,idn,phone,passHash:btoa(pass),account:acctNum(),wallet:0,invested:0,createdAt:Date.now() };
+      if(pin.length !== 4 || /\D/.test(pin)){ sHint.textContent='PIN must be exactly 4 digits.'; return; }
+      if(pin !== pin2){ sHint.textContent='PINs do not match.'; return; }
+
+      // Try server register (auto-issue IMK account). Fallback to local if it fails.
+      let serverUser = null;
+      try{
+        const r = await fetch('/api/register', {
+          method:'POST',
+          headers:{'content-type':'application/json'},
+          body: JSON.stringify({ phone, full_name: full, id_number: idn })
+        });
+        const j = await r.json();
+        if(j && j.ok && j.user) serverUser = j.user;
+      }catch{ /* ignore */ }
+
+      const user = {
+        full: full,
+        idn: idn,
+        phone: phone,
+        pinHash: btoa(pin),   // demo-only (client-side)
+        account: serverUser?.account || acctNum(),
+        wallet: serverUser?.wallet ?? 0,
+        invested: serverUser?.invested ?? 0,
+        createdAt: serverUser?.created_at ? (serverUser.created_at*1000) : Date.now()
+      };
+
       saveUser(user);
-      window.location.href='/dashboard';
+      window.location.href = '/dashboard';
     };
 
-    // Login
+    // Login (client-side demo: compares against localStorage only)
     const lHint = document.getElementById('lHint');
     document.getElementById('lBtn').onclick = () => {
-      const u=getUser(), phone=lPhone.value.trim(), pass=lPass.value;
-      if(!u || u.phone!==phone || u.passHash!==btoa(pass)){ lHint.textContent='Invalid phone or password.'; return; }
-      window.location.href='/dashboard';
+      const u = getUser(), phone = lPhone.value.trim(), pin = lPIN.value.trim();
+      if(!u){ lHint.textContent='No account on this device. Please create one first.'; return; }
+      if(!phoneOk(phone)){ lHint.textContent='Enter a valid phone.'; return; }
+      if(pin.length !== 4){ lHint.textContent='PIN must be 4 digits.'; return; }
+      if(u.phone !== phone || u.pinHash !== btoa(pin)){ lHint.textContent='Invalid phone or PIN.'; return; }
+      window.location.href = '/dashboard';
     };
   </script>
 </body>
