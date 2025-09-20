@@ -1,22 +1,17 @@
 export default {
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
-
-    // If it's an API route, handle here
     if (url.pathname.startsWith("/api/")) {
       return handleApi(req, env);
     }
-
-    // Otherwise, serve the static site
-    return env.ASSETS.fetch(req);
+    return env.ASSETS.fetch(req); // serve static
   }
 };
 
-// ================= API =================
 async function handleApi(req, env) {
   const url = new URL(req.url);
 
-  // ---------- CORS ----------
+  // ----- CORS -----
   const ORIGINS = new Set([
     "https://imarika.net",
     "https://www.imarika.net",
@@ -31,76 +26,44 @@ async function handleApi(req, env) {
   };
   if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
 
-  // ---------- helpers ----------
   const json = (d, { status = 200, headers = {} } = {}) =>
     new Response(JSON.stringify(d), {
       status,
       headers: { "content-type": "application/json", ...CORS, ...headers }
     });
 
+  // ----- helpers -----
   const q = (sql, ...args) => env.DB.prepare(sql).bind(...args);
   const nowSec = () => Math.floor(Date.now() / 1000);
   const acctNum = () =>
     `IMK-${crypto.randomUUID().slice(0, 4).toUpperCase()}-${Math.floor(Math.random() * 9000 + 1000)}`;
-
   const sha256Hex = async (s) => {
     const data = new TextEncoder().encode(s);
     const hash = await crypto.subtle.digest("SHA-256", data);
     return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, "0")).join("");
   };
 
-  // ---------- schema (idempotent) ----------
+  // ----- schema (super-stable) -----
   async function ensureSchema() {
-    // users
-    await env.DB.exec(`
-      CREATE TABLE IF NOT EXISTS users (
-        id         INTEGER PRIMARY KEY AUTOINCREMENT,
-        phone      TEXT UNIQUE NOT NULL,
-        full_name  TEXT,
-        id_number  TEXT,
-        account    TEXT UNIQUE,
-        wallet     INTEGER DEFAULT 0,
-        invested   INTEGER DEFAULT 0,
-        pass_hash  TEXT,
-        created_at INTEGER DEFAULT (strftime('%s','now'))
-      );
-    `);
-    // Add missing columns safely for older DBs
-    for (const sql of [
-      `ALTER TABLE users ADD COLUMN full_name  TEXT`,
-      `ALTER TABLE users ADD COLUMN id_number  TEXT`,
-      `ALTER TABLE users ADD COLUMN account    TEXT`,
-      `ALTER TABLE users ADD COLUMN wallet     INTEGER DEFAULT 0`,
-      `ALTER TABLE users ADD COLUMN invested   INTEGER DEFAULT 0`,
-      `ALTER TABLE users ADD COLUMN pass_hash  TEXT`,
-      `ALTER TABLE users ADD COLUMN created_at INTEGER DEFAULT (strftime('%s','now'))`,
-    ]) { try { await env.DB.exec(sql); } catch {} }
+    // SINGLE-LINE SQL, run via batch(prepared)
+    const USERS_SQL =
+      "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, phone TEXT UNIQUE NOT NULL, full_name TEXT, id_number TEXT, account TEXT UNIQUE, wallet INTEGER DEFAULT 0, invested INTEGER DEFAULT 0, pass_hash TEXT, created_at INTEGER)";
+    const TX_SQL =
+      "CREATE TABLE IF NOT EXISTS transactions (id TEXT PRIMARY KEY, phone TEXT, type TEXT, amount INTEGER, detail TEXT, status TEXT, ts INTEGER)";
+    const TX_IDX_SQL =
+      "CREATE INDEX IF NOT EXISTS idx_tx_phone_ts ON transactions(phone, ts)";
+    const ADMINS_SQL =
+      "CREATE TABLE IF NOT EXISTS admins (phone TEXT PRIMARY KEY, pass_hash TEXT NOT NULL, created_at INTEGER)";
 
-    // transactions
-    await env.DB.exec(`
-      CREATE TABLE IF NOT EXISTS transactions (
-        id     TEXT PRIMARY KEY,
-        phone  TEXT,
-        type   TEXT,
-        amount INTEGER,
-        detail TEXT,
-        status TEXT,
-        ts     INTEGER
-      );
-    `);
-    await env.DB.exec(`CREATE INDEX IF NOT EXISTS idx_tx_phone_ts ON transactions(phone, ts DESC);`);
-
-    // admins
-    await env.DB.exec(`
-      CREATE TABLE IF NOT EXISTS admins (
-        phone TEXT PRIMARY KEY,
-        pass_hash TEXT NOT NULL,
-        created_at INTEGER DEFAULT (strftime('%s','now'))
-      );
-    `);
+    await env.DB.batch([
+      env.DB.prepare(USERS_SQL),
+      env.DB.prepare(TX_SQL),
+      env.DB.prepare(TX_IDX_SQL),
+      env.DB.prepare(ADMINS_SQL),
+    ]);
   }
 
-  // ---------- JWT (HS256) for admin ----------
+  // ----- JWT (HS256) -----
   const b64url = (b) => b.replace(/=+$/g, "").replace(/\+/g, "-").replace(/\//g, "_");
   const enc = (obj) => b64url(btoa(unescape(encodeURIComponent(JSON.stringify(obj)))));
   const signH = async (msg, secret) => {
@@ -133,7 +96,7 @@ async function handleApi(req, env) {
     } catch { return false; }
   };
 
-  // ---------- debug: env/bindings ----------
+  // ===== debug routes (use these to confirm) =====
   if (url.pathname === "/api/env-check") {
     return json({
       ok: true,
@@ -147,132 +110,159 @@ async function handleApi(req, env) {
       }
     });
   }
+  if (url.pathname === "/api/db-ping") {
+    try {
+      const r = await q("SELECT 1 as x").first();
+      return json({ ok: true, result: r?.x ?? null });
+    } catch (e) {
+      return json({ ok: false, error: String(e) }, { status: 500 });
+    }
+  }
+  if (url.pathname === "/api/db-tables") {
+    try {
+      const r = await env.DB.prepare("SELECT name, sql FROM sqlite_master WHERE type='table' ORDER BY name").all();
+      return json({ ok: true, tables: r.results || [] });
+    } catch (e) {
+      return json({ ok: false, error: String(e) }, { status: 500 });
+    }
+  }
 
-  // ---------- health ----------
+  // ===== health =====
   if (url.pathname === "/api/health") {
     return json({ ok: true, time: Date.now() });
   }
 
-  // ---------- admin init (run after setting env & binding) ----------
+  // ===== admin init =====
   if (url.pathname === "/api/admin/init") {
     const given = url.searchParams.get("secret") || "";
     const expected = env.ADMIN_INIT_SECRET || "Oury2933#";
     if (given !== expected) return json({ ok: false, error: "Forbidden" }, { status: 403 });
 
-    await ensureSchema();
+    try {
+      await ensureSchema();
 
-    // seed/update admin
-    const adminPhone = env.ADMIN_PHONE || "0715151010";
-    const adminPass  = env.ADMIN_PASS  || "Oury2933#";
-    const salt       = env.PASS_SALT   || "imarika-salt";
-    const passHash   = await sha256Hex(`${adminPass}:${salt}`);
+      // seed/overwrite admin
+      const adminPhone = env.ADMIN_PHONE || "0715151010";
+      const adminPass  = env.ADMIN_PASS  || "Oury2933#";
+      const salt       = env.PASS_SALT   || "imarika-salt";
+      const passHash   = await sha256Hex(`${adminPass}:${salt}`);
 
-    await q(`
-      INSERT INTO admins (phone, pass_hash, created_at)
-      VALUES (?, ?, ?)
-      ON CONFLICT(phone) DO UPDATE SET pass_hash=excluded.pass_hash
-    `, adminPhone, passHash, nowSec()).run();
+      await env.DB.prepare(
+        "INSERT INTO admins (phone, pass_hash, created_at) VALUES (?, ?, ?) " +
+        "ON CONFLICT(phone) DO UPDATE SET pass_hash=excluded.pass_hash"
+      ).bind(adminPhone, passHash, nowSec()).run();
 
-    const cols = await env.DB.prepare(`PRAGMA table_info(users)`).all();
-    return json({ ok: true, adminPhone, usersColumns: (cols.results || []).map(c => c.name) });
+      return json({ ok: true, seeded: true, adminPhone });
+    } catch (e) {
+      return json({ ok: false, error: String(e) }, { status: 500 });
+    }
   }
 
-  // ---------- public: register ----------
+  // ===== public: register =====
   if (url.pathname === "/api/register" && req.method === "POST") {
-    await ensureSchema();
-    const { full_name, id_number, phone, pin } = await req.json().catch(() => ({}));
-    if (!/^0(7|1)\d{8}$/.test(String(phone || "").trim()))
-      return json({ ok: false, error: "Invalid phone" }, { status: 400 });
-    if (!/^\d{4}$/.test(String(pin || "")))
-      return json({ ok: false, error: "PIN must be 4 digits" }, { status: 400 });
+    try {
+      await ensureSchema();
+      const { full_name, id_number, phone, pin } = await req.json().catch(() => ({}));
+      if (!/^0(7|1)\d{8}$/.test(String(phone || "").trim()))
+        return json({ ok: false, error: "Invalid phone" }, { status: 400 });
+      if (!/^\d{4}$/.test(String(pin || "")))
+        return json({ ok: false, error: "PIN must be 4 digits" }, { status: 400 });
 
-    const exists = await q(`SELECT id FROM users WHERE phone=?`, phone).first();
-    if (exists) return json({ ok: false, error: "Phone already registered" }, { status: 409 });
+      const exists = await q("SELECT id FROM users WHERE phone=?", phone).first();
+      if (exists) return json({ ok: false, error: "Phone already registered" }, { status: 409 });
 
-    const pass_hash = await sha256Hex(`${pin}:${env.PASS_SALT || "imarika-salt"}`);
-    await q(`
-      INSERT INTO users (phone, full_name, id_number, account, wallet, invested, pass_hash, created_at)
-      VALUES (?, ?, ?, ?, 0, 0, ?, ?)
-    `, phone, full_name || null, id_number || null, acctNum(), pass_hash, nowSec()).run();
+      const pass_hash = await sha256Hex(`${pin}:${env.PASS_SALT || "imarika-salt"}`);
+      await env.DB.prepare(
+        "INSERT INTO users (phone, full_name, id_number, account, wallet, invested, pass_hash, created_at) " +
+        "VALUES (?, ?, ?, ?, 0, 0, ?, ?)"
+      ).bind(phone, full_name || null, id_number || null, acctNum(), pass_hash, nowSec()).run();
 
-    const u = await q(`
-      SELECT phone, full_name, id_number, account, wallet, invested, created_at
-      FROM users WHERE phone=?
-    `, phone).first();
-    return json({ ok: true, user: u });
+      const u = await q(
+        "SELECT phone, full_name, id_number, account, wallet, invested, created_at FROM users WHERE phone=?",
+        phone
+      ).first();
+      return json({ ok: true, user: u });
+    } catch (e) {
+      return json({ ok: false, error: String(e) }, { status: 500 });
+    }
   }
 
-  // ---------- public: login ----------
+  // ===== public: login =====
   if (url.pathname === "/api/login" && req.method === "POST") {
-    await ensureSchema();
-    const { phone, pin } = await req.json().catch(() => ({}));
-    if (!/^0(7|1)\d{8}$/.test(String(phone || "").trim()))
-      return json({ ok: false, error: "Invalid phone" }, { status: 400 });
-    if (!/^\d{4}$/.test(String(pin || "")))
-      return json({ ok: false, error: "PIN must be 4 digits" }, { status: 400 });
+    try {
+      await ensureSchema();
+      const { phone, pin } = await req.json().catch(() => ({}));
+      if (!/^0(7|1)\d{8}$/.test(String(phone || "").trim()))
+        return json({ ok: false, error: "Invalid phone" }, { status: 400 });
+      if (!/^\d{4}$/.test(String(pin || "")))
+        return json({ ok: false, error: "PIN must be 4 digits" }, { status: 400 });
 
-    const pass_hash = await sha256Hex(`${pin}:${env.PASS_SALT || "imarika-salt"}`);
-    const u = await q(`
-      SELECT phone, full_name, id_number, account, wallet, invested, created_at
-      FROM users WHERE phone=? AND pass_hash=?
-    `, phone, pass_hash).first();
-    if (!u) return json({ ok: false, error: "Invalid credentials" }, { status: 401 });
-    return json({ ok: true, user: u });
+      const pass_hash = await sha256Hex(`${pin}:${env.PASS_SALT || "imarika-salt"}`);
+      const u = await q(
+        "SELECT phone, full_name, id_number, account, wallet, invested, created_at FROM users WHERE phone=? AND pass_hash=?",
+        phone, pass_hash
+      ).first();
+      if (!u) return json({ ok: false, error: "Invalid credentials" }, { status: 401 });
+      return json({ ok: true, user: u });
+    } catch (e) {
+      return json({ ok: false, error: String(e) }, { status: 500 });
+    }
   }
 
-  // ---------- public: create pending tx ----------
+  // ===== public: create pending tx =====
   if (url.pathname === "/api/tx" && req.method === "POST") {
-    await ensureSchema();
-    const { phone, type, amount, detail = "" } = await req.json().catch(() => ({}));
-    if (!phone || !type || !Number.isFinite(Number(amount)))
-      return json({ ok: false, error: "phone/type/amount required" }, { status: 400 });
-    const id = crypto.randomUUID();
-    await q(`
-      INSERT INTO transactions (id, phone, type, amount, detail, status, ts)
-      VALUES (?, ?, ?, ?, ?, 'Pending', ?)
-    `, id, phone, String(type), Number(amount), detail, Date.now()).run();
-    return json({ ok: true, id, status: "Pending" }, { status: 201 });
+    try {
+      await ensureSchema();
+      const { phone, type, amount, detail = "" } = await req.json().catch(() => ({}));
+      if (!phone || !type || !Number.isFinite(Number(amount)))
+        return json({ ok: false, error: "phone/type/amount required" }, { status: 400 });
+      const id = crypto.randomUUID();
+      await env.DB.prepare(
+        "INSERT INTO transactions (id, phone, type, amount, detail, status, ts) VALUES (?, ?, ?, ?, ?, 'Pending', ?)"
+      ).bind(id, phone, String(type), Number(amount), detail, Date.now()).run();
+      return json({ ok: true, id, status: "Pending" }, { status: 201 });
+    } catch (e) {
+      return json({ ok: false, error: String(e) }, { status: 500 });
+    }
   }
 
-  // ---------- admin: login ----------
+  // ===== admin: login =====
   if (url.pathname === "/api/admin/login" && req.method === "POST") {
-    await ensureSchema();
-    const { phone = "", pass = "" } = await req.json().catch(() => ({}));
-    const salt = env.PASS_SALT || "imarika-salt";
-    const hash = await sha256Hex(`${pass}:${salt}`);
+    try {
+      await ensureSchema();
+      const { phone = "", pass = "" } = await req.json().catch(() => ({}));
+      const salt = env.PASS_SALT || "imarika-salt";
+      const hash = await sha256Hex(`${pass}:${salt}`);
 
-    // DB check
-    const row = await q(`SELECT phone FROM admins WHERE phone=? AND pass_hash=?`, phone, hash).first();
+      const row = await q("SELECT phone FROM admins WHERE phone=? AND pass_hash=?", phone, hash).first();
+      const envOK = (env.ADMIN_PHONE && env.ADMIN_PASS && phone === env.ADMIN_PHONE && pass === env.ADMIN_PASS);
+      if (!row && !envOK) return json({ ok: false, error: "Invalid credentials" }, { status: 401 });
 
-    // env fallback
-    const envOK = (env.ADMIN_PHONE && env.ADMIN_PASS &&
-                   phone === env.ADMIN_PHONE && pass === env.ADMIN_PASS);
-
-    if (!row && !envOK) return json({ ok: false, error: "Invalid credentials" }, { status: 401 });
-
-    const token = await issueAdminToken();
-    return json({ ok: true, token });
+      const token = await issueAdminToken();
+      return json({ ok: true, token });
+    } catch (e) {
+      return json({ ok: false, error: String(e) }, { status: 500 });
+    }
   }
 
-  // ---------- admin: auth helper ----------
+  // ===== admin: auth helper =====
   const needAdmin = async () => (await verifyAdmin(req)) ? true : false;
 
-  // ---------- admin: users list ----------
+  // ===== admin: users list =====
   if (url.pathname === "/api/admin/users" && req.method === "GET") {
     if (!(await needAdmin())) return json({ ok: false, error: "Unauthorized" }, { status: 401 });
     await ensureSchema();
     const search = (url.searchParams.get("search") || "").trim();
-    const res = await q(`
-      SELECT full_name, phone, id_number, account, wallet, invested, created_at
-      FROM users
-      WHERE (? = '' OR full_name LIKE ? OR phone LIKE ? OR account LIKE ?)
-      ORDER BY created_at DESC
-      LIMIT 500
-    `, search, `%${search}%`, `%${search}%`, `%${search}%`).all();
+    const res = await q(
+      "SELECT full_name, phone, id_number, account, wallet, invested, created_at " +
+      "FROM users WHERE (?='' OR full_name LIKE ? OR phone LIKE ? OR account LIKE ?) " +
+      "ORDER BY created_at DESC LIMIT 500",
+      search, `%${search}%`, `%${search}%`, `%${search}%`
+    ).all();
     return json({ ok: true, users: res.results || [] });
   }
 
-  // ---------- admin: get user ----------
+  // ===== admin: get user =====
   if (url.pathname === "/api/admin/user" && req.method === "GET") {
     if (!(await needAdmin())) return json({ ok: false, error: "Unauthorized" }, { status: 401 });
     await ensureSchema();
@@ -281,15 +271,15 @@ async function handleApi(req, env) {
     if (!phone && !account) return json({ ok: false, error: "phone or account required" }, { status: 400 });
     const where = phone ? "phone=?" : "account=?";
     const val = phone || account;
-    const u = await q(`
-      SELECT full_name, phone, id_number, account, wallet, invested, created_at
-      FROM users WHERE ${where}
-    `, val).first();
+    const u = await q(
+      `SELECT full_name, phone, id_number, account, wallet, invested, created_at FROM users WHERE ${where}`,
+      val
+    ).first();
     if (!u) return json({ ok: false, error: "Not found" }, { status: 404 });
     return json({ ok: true, user: u });
   }
 
-  // ---------- admin: upsert user ----------
+  // ===== admin: upsert user =====
   if (url.pathname === "/api/admin/user/upsert" && req.method === "POST") {
     if (!(await needAdmin())) return json({ ok: false, error: "Unauthorized" }, { status: 401 });
     await ensureSchema();
@@ -297,71 +287,62 @@ async function handleApi(req, env) {
       await req.json().catch(() => ({}));
     if (!phone) return json({ ok: false, error: "phone is required" }, { status: 400 });
 
-    const exists = await q(`SELECT id FROM users WHERE phone=?`, phone).first();
+    const exists = await q("SELECT id FROM users WHERE phone=?", phone).first();
     if (exists) {
-      await q(`
-        UPDATE users SET
-          full_name = COALESCE(?, full_name),
-          id_number = COALESCE(?, id_number),
-          wallet    = COALESCE(?, wallet),
-          invested  = COALESCE(?, invested),
-          account   = COALESCE(?, account)
-        WHERE phone=?
-      `, full_name, id_number, wallet, invested, account, phone).run();
+      await env.DB.prepare(
+        "UPDATE users SET full_name=COALESCE(?, full_name), id_number=COALESCE(?, id_number), " +
+        "wallet=COALESCE(?, wallet), invested=COALESCE(?, invested), account=COALESCE(?, account) WHERE phone=?"
+      ).bind(full_name, id_number, wallet, invested, account, phone).run();
     } else {
       const acct = (account && String(account).trim()) || acctNum();
-      await q(`
-        INSERT INTO users (phone, full_name, id_number, account, wallet, invested, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-      `, phone, full_name, id_number, acct, wallet ?? 0, invested ?? 0, nowSec()).run();
+      await env.DB.prepare(
+        "INSERT INTO users (phone, full_name, id_number, account, wallet, invested, created_at) " +
+        "VALUES (?, ?, ?, ?, ?, ?, ?)"
+      ).bind(phone, full_name, id_number, acct, wallet ?? 0, invested ?? 0, nowSec()).run();
     }
 
-    const u = await q(`
-      SELECT full_name, phone, id_number, account, wallet, invested, created_at
-      FROM users WHERE phone=?
-    `, phone).first();
+    const u = await q(
+      "SELECT full_name, phone, id_number, account, wallet, invested, created_at FROM users WHERE phone=?",
+      phone
+    ).first();
     return json({ ok: true, user: u });
   }
 
-  // ---------- admin: pending tx ----------
+  // ===== admin: pending =====
   if (url.pathname === "/api/admin/pending" && req.method === "GET") {
     if (!(await needAdmin())) return json({ ok: false, error: "Unauthorized" }, { status: 401 });
     await ensureSchema();
-    const res = await q(`
-      SELECT id, phone, type, amount, detail, status, ts
-      FROM transactions
-      WHERE status='Pending'
-      ORDER BY ts DESC
-      LIMIT 500
-    `).all();
+    const res = await q(
+      "SELECT id, phone, type, amount, detail, status, ts FROM transactions WHERE status='Pending' ORDER BY ts DESC LIMIT 500"
+    ).all();
     return json({ ok: true, pending: res.results || [] });
   }
 
-  // ---------- admin: update tx ----------
+  // ===== admin: update tx =====
   if (url.pathname === "/api/admin/tx/update" && req.method === "POST") {
     if (!(await needAdmin())) return json({ ok: false, error: "Unauthorized" }, { status: 401 });
     await ensureSchema();
     const { id, action } = await req.json().catch(() => ({}));
     if (!id || !action) return json({ ok: false, error: "id and action required" }, { status: 400 });
 
-    const t = await q(`SELECT * FROM transactions WHERE id=?`, id).first();
+    const t = await q("SELECT * FROM transactions WHERE id=?", id).first();
     if (!t) return json({ ok: false, error: "Not found" }, { status: 404 });
 
     const newStatus = action === "approve" ? "Approved" : "Rejected";
-    await q(`UPDATE transactions SET status=? WHERE id=?`, newStatus, id).run();
+    await env.DB.prepare("UPDATE transactions SET status=? WHERE id=?").bind(newStatus, id).run();
 
-    // side-effects
     if (t.phone) {
       if (t.type === "Deposit" && newStatus === "Approved") {
-        await q(`UPDATE users SET wallet = wallet + ? WHERE phone=?`, Math.abs(t.amount || 0), t.phone).run();
+        await env.DB.prepare("UPDATE users SET wallet = wallet + ? WHERE phone=?")
+          .bind(Math.abs(t.amount || 0), t.phone).run();
       }
       if (t.type === "Withdrawal" && newStatus === "Rejected") {
-        await q(`UPDATE users SET wallet = wallet + ? WHERE phone=?`, Math.abs(t.amount || 0), t.phone).run();
+        await env.DB.prepare("UPDATE users SET wallet = wallet + ? WHERE phone=?")
+          .bind(Math.abs(t.amount || 0), t.phone).run();
       }
     }
     return json({ ok: true, id, status: newStatus });
   }
 
-  // 404
   return new Response("Not Found", { status: 404, headers: CORS });
 }
