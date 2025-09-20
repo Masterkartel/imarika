@@ -1,30 +1,20 @@
-// POST /api/admin/login
+// ---------- POST /api/admin/login ----------
 if (pathname === "/api/admin/login" && request.method === "POST") {
-  const json = (d, s = 200) => new Response(JSON.stringify(d), { status: s, headers: { "content-type": "application/json" } });
-
   const { phone = "", pass = "" } = await request.json().catch(() => ({}));
 
-  const norm = p => String(p).replace(/\D/g,"").replace(/^254/,"0");
-  const okPhone = norm(phone) === norm(env.ADMIN_PHONE || "");
-
+  const okPhone = normPhone(phone) === normPhone(env.ADMIN_PHONE || "");
   let okPass = false;
+
   if (env.ADMIN_PASS) {
     okPass = pass === env.ADMIN_PASS;
   } else if (env.ADMIN_PASS_HASH) {
-    const data = new TextEncoder().encode(String(env.PASS_SALT || "") + pass);
-    const buf  = await crypto.subtle.digest("SHA-256", data);
-    const hex  = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,"0")).join("");
-    okPass = hex === String(env.ADMIN_PASS_HASH).toLowerCase();
+    // ADMIN_PASS_HASH is sha256("<salt><pass>")
+    const digest = await sha256Hex(String(env.PASS_SALT || "") + pass);
+    okPass = digest === String(env.ADMIN_PASS_HASH).toLowerCase();
   }
 
-  if (!okPhone || !okPass) return json({ ok:false, error:"Invalid credentials" }, 401);
+  if (!okPhone || !okPass) return json({ ok: false, error: "Invalid credentials" }, 401);
 
-  // token = base64(raw) + '.' + HMAC(raw, PASS_SALT)
-  const raw = `${Date.now()}:${Math.random().toString(36).slice(2)}`;
-  const key = new TextEncoder().encode(String(env.PASS_SALT || "imarika-salt"));
-  const k   = await crypto.subtle.importKey("raw", key, { name:"HMAC", hash:"SHA-256" }, false, ["sign"]);
-  const mac = await crypto.subtle.sign("HMAC", k, new TextEncoder().encode(raw));
-  const sig = [...new Uint8Array(mac)].map(b => b.toString(16).padStart(2,"0")).join("");
-
-  return json({ ok:true, token: btoa(raw) + "." + sig });
+  const token = await issueAdminToken(env);
+  return json({ ok: true, token });
 }
