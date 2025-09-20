@@ -1,56 +1,78 @@
-// public/api/register
-export default {
-  async fetch(request, env) {
-    const json = (d, s = 200) =>
-      new Response(JSON.stringify(d), { status: s, headers: { "content-type": "application/json" } });
-
-    if (request.method !== "POST") return json({ ok: false, error: "POST only" }, 405);
-
-    const body = await request.json().catch(() => null);
-    if (!body) return json({ ok: false, error: "Bad JSON" }, 400);
-
-    const full  = String(body.full || body.full_name || "").trim();
-    const idn   = String(body.id   || body.id_number || "").trim();
-    const phone = String(body.phone || "").trim();
-
-    if (!full || !idn) return json({ ok: false, error: "Name & ID required" }, 400);
-    if (!/^0(7|1)\d{8}$/.test(phone)) return json({ ok: false, error: "Phone invalid" }, 400);
-
-    const db = env.DB;
-
-    // Schema (create if missing)
-    await db.exec(`CREATE TABLE IF NOT EXISTS users (
-      phone     TEXT PRIMARY KEY,
-      full_name TEXT,
-      id_number TEXT,
-      account   TEXT UNIQUE,
-      wallet    INTEGER DEFAULT 0,
-      invested  INTEGER DEFAULT 0,
-      created_at INTEGER DEFAULT (strftime('%s','now'))
-    );`);
-
-    // Already registered?
-    const exists = await db.prepare("SELECT 1 FROM users WHERE phone=?").bind(phone).first();
-    if (exists) return json({ ok: false, error: "Phone already registered" }, 409);
-
-    // Generate unique account like IMK-ABCD-1234
-    const newAcct = async () => {
-      const part = Math.random().toString(36).slice(2, 6).toUpperCase();
-      const tail = Math.floor(Math.random() * 9000 + 1000);
-      return `IMK-${part}-${tail}`;
-    };
-    let account = await newAcct();
-    for (let i = 0; i < 5; i++) {
-      const clash = await db.prepare("SELECT 1 FROM users WHERE account=?").bind(account).first();
-      if (!clash) break;
-      account = await newAcct();
-    }
-
-    await db
-      .prepare("INSERT INTO users (phone, full_name, id_number, account) VALUES (?,?,?,?)")
-      .bind(phone, full, idn, account)
-      .run();
-
-    return json({ ok: true, account });
-  },
+// helper
+const hash = async (str, salt="") => {
+  const data = new TextEncoder().encode(`${str}:${salt}`);
+  const buf  = await crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
 };
+
+// ensure schema (call before first use)
+async function ensureSchema(db){
+  await db.exec(`CREATE TABLE IF NOT EXISTS users(
+    phone       TEXT PRIMARY KEY,
+    full_name   TEXT,
+    id_number   TEXT,
+    pass_hash   TEXT,                      -- <— PIN hash
+    account     TEXT UNIQUE,
+    wallet      INTEGER DEFAULT 0,
+    invested    INTEGER DEFAULT 0,
+    created_at  INTEGER DEFAULT (strftime('%s','now'))
+  );`);
+}
+
+// POST /api/register
+if (pathname === "/api/register" && request.method === "POST") {
+  const json = (d, s = 200) => new Response(JSON.stringify(d), { status: s, headers: { "content-type": "application/json" } });
+  const b = await request.json().catch(()=>({}));
+  const phone = String(b.phone||"").trim();
+  const full  = String(b.full_name||b.full||"").trim();
+  const idn   = String(b.id_number||b.id||"").trim();
+  const pin   = String(b.pin||"").trim();
+
+  if (!/^0(7|1)\d{8}$/.test(phone)) return json({ ok:false, error:"Bad phone" }, 400);
+  if (!full || !idn)                 return json({ ok:false, error:"Name & ID required" }, 400);
+  if (!/^\d{4}$/.test(pin))          return json({ ok:false, error:"PIN must be 4 digits" }, 400);
+
+  await ensureSchema(env.DB);
+
+  const exist = await env.DB.prepare("SELECT account FROM users WHERE phone=?").bind(phone).first();
+  const passHash = await hash(pin, String(env.PASS_SALT||""));
+
+  if (exist) {
+    await env.DB.prepare("UPDATE users SET full_name=?, id_number=?, pass_hash=? WHERE phone=?")
+      .bind(full, idn, passHash, phone).run();
+  } else {
+    const mkAcct = () => `IMK-${Math.random().toString(36).slice(2,6).toUpperCase()}-${Math.floor(Math.random()*9000+1000)}`;
+    let account = mkAcct();
+    for (let i=0;i<6;i++){
+      const clash = await env.DB.prepare("SELECT 1 FROM users WHERE account=?").bind(account).first();
+      if (!clash) break;
+      account = mkAcct();
+    }
+    await env.DB.prepare(
+      `INSERT INTO users (phone, full_name, id_number, pass_hash, account, wallet, invested, created_at)
+       VALUES (?,?,?,?,?,0,0,strftime('%s','now'))`
+    ).bind(phone, full, idn, passHash, account).run();
+  }
+
+  const user = await env.DB
+    .prepare("SELECT phone,full_name,id_number,account,wallet,invested,created_at FROM users WHERE phone=?")
+    .bind(phone).first();
+
+  return json({ ok:true, user });
+}
+
+// POST /api/login
+if (pathname === "/api/login" && request.method === "POST") {
+  const json = (d, s = 200) => new Response(JSON.stringify(d), { status: s, headers: { "content-type": "application/json" } });
+  const { phone="", pin="" } = await request.json().catch(()=>({}));
+  if (!/^0(7|1)\d{8}$/.test(phone) || !/^\d{4}$/.test(pin)) return json({ ok:false, error:"Invalid phone or PIN" }, 400);
+
+  await ensureSchema(env.DB);
+  const passHash = await hash(pin, String(env.PASS_SALT||""));
+  const user = await env.DB.prepare(
+    "SELECT phone,full_name,id_number,account,wallet,invested,created_at FROM users WHERE phone=? AND pass_hash=?"
+  ).bind(phone, passHash).first();
+
+  if (!user) return json({ ok:false, error:"Invalid credentials" }, 401);
+  return json({ ok:true, user });
+}
