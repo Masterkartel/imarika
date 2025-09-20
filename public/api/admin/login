@@ -1,0 +1,35 @@
+// public/api/admin/login
+export default {
+  async fetch(request, env) {
+    const json = (d, s = 200) =>
+      new Response(JSON.stringify(d), { status: s, headers: { "content-type": "application/json" } });
+    if (request.method !== "POST") return json({ ok: false, error: "POST only" }, 405);
+
+    const { phone = "", pass = "" } = await request.json().catch(() => ({}));
+    const norm = (p) => String(p).replace(/\D/g, "").replace(/^254/, "0");
+    const okPhone = norm(phone) === norm(env.ADMIN_PHONE || "");
+
+    let okPass = false;
+    if (env.ADMIN_PASS) {
+      okPass = pass === env.ADMIN_PASS;
+    } else if (env.ADMIN_PASS_HASH) {
+      const salt = String(env.PASS_SALT || "");
+      const data = new TextEncoder().encode(salt + pass);
+      const buf = await crypto.subtle.digest("SHA-256", data);
+      const hex = [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+      okPass = hex === String(env.ADMIN_PASS_HASH).toLowerCase();
+    }
+
+    if (!okPhone || !okPass) return json({ ok: false, error: "Invalid credentials" }, 401);
+
+    // Stateless token = base64(raw) + '.' + HMAC(raw, PASS_SALT)
+    const raw = `${Date.now()}:${Math.random().toString(36).slice(2)}`;
+    const key = new TextEncoder().encode(String(env.PASS_SALT || "imarika-salt"));
+    const cryptoKey = await crypto.subtle.importKey("raw", key, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+    const mac = await crypto.subtle.sign("HMAC", cryptoKey, new TextEncoder().encode(raw));
+    const sig = [...new Uint8Array(mac)].map(b => b.toString(16).padStart(2, "0")).join("");
+    const token = btoa(raw) + "." + sig;
+
+    return json({ ok: true, token });
+  },
+};
