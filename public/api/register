@@ -1,14 +1,15 @@
 // POST /api/register
 if (pathname === "/api/register" && request.method === "POST") {
+  await ensureSchema(env.DB); // <<< IMPORTANT
   const { full_name, id_number, phone, pin } = await request.json();
 
-  if (!/^0(7|1)\d{8}$/.test(String(phone||"").trim()))
-    return json({ ok:false, error:"Invalid phone" }, { status: 400 });
-  if (!/^\d{4}$/.test(String(pin||"")))
-    return json({ ok:false, error:"PIN must be 4 digits" }, { status: 400 });
+  if (!/^0(7|1)\d{8}$/.test(String(phone || "").trim()))
+    return json({ ok: false, error: "Invalid phone" }, { status: 400 });
+  if (!/^\d{4}$/.test(String(pin || "")))
+    return json({ ok: false, error: "PIN must be 4 digits" }, { status: 400 });
 
   // auto-issue account number
-  const acct = `IMK-${crypto.randomUUID().slice(0,4).toUpperCase()}-${Math.floor(Math.random()*9000+1000)}`;
+  const acct = `IMK-${crypto.randomUUID().slice(0, 4).toUpperCase()}-${Math.floor(Math.random() * 9000 + 1000)}`;
   const pass_hash = await sha256(`${pin}:${env.PASS_SALT || "imarika-salt"}`);
 
   // create if not exists
@@ -17,12 +18,14 @@ if (pathname === "/api/register" && request.method === "POST") {
     await env.DB.prepare(`
       INSERT INTO users (phone, full_name, id_number, account, wallet, invested, pass_hash)
       VALUES (?, ?, ?, ?, 0, 0, ?)
-    `).bind(phone, full_name||null, id_number||null, acct, pass_hash).run();
+    `).bind(phone, full_name || null, id_number || null, acct, pass_hash).run();
   }
 
   const u = await env.DB
-    .prepare(`SELECT phone, full_name, id_number, account, wallet, invested, created_at FROM users WHERE phone=?`)
-    .bind(phone).first();
+    .prepare(`SELECT phone, full_name, id_number, account, wallet, invested, created_at
+              FROM users WHERE phone=?`)
+    .bind(phone)
+    .first();
 
-  return json({ ok:true, user: u });
+  return json({ ok: true, user: u });
 }
