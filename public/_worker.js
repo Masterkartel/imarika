@@ -1,5 +1,5 @@
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     const url = new URL(req.url);
 
     // ---------- serve API here ----------
@@ -8,6 +8,7 @@ export default {
     }
 
     // ---------- otherwise serve static site ----------
+    // (ASSETS is provided by Pages automatically)
     return env.ASSETS.fetch(req);
   }
 };
@@ -62,6 +63,7 @@ async function handleApi(req, env) {
         created_at INTEGER DEFAULT (strftime('%s','now'))
       );
     `);
+    // tolerate older DBs missing columns
     for (const sql of [
       `ALTER TABLE users ADD COLUMN full_name  TEXT`,
       `ALTER TABLE users ADD COLUMN id_number  TEXT`,
@@ -76,10 +78,10 @@ async function handleApi(req, env) {
       CREATE TABLE IF NOT EXISTS transactions (
         id     TEXT PRIMARY KEY,
         phone  TEXT,
-        type   TEXT,     -- Deposit | Withdrawal | Investment
-        amount INTEGER,  -- store POSITIVE numbers
+        type   TEXT,
+        amount INTEGER,
         detail TEXT,
-        status TEXT,     -- Pending | Approved | Rejected | Requested
+        status TEXT,
         ts     INTEGER
       );
     `);
@@ -127,6 +129,21 @@ async function handleApi(req, env) {
     return json({ ok:true, time: Date.now() });
   }
 
+  // small debug to see bindings
+  if (url.pathname === "/api/env-check") {
+    return new Response(JSON.stringify({
+      ok: true,
+      haveDB: !!env.DB,
+      envs: {
+        ADMIN_INIT_SECRET: !!env.ADMIN_INIT_SECRET,
+        ADMIN_PHONE: !!env.ADMIN_PHONE,
+        ADMIN_PASS: !!env.ADMIN_PASS,
+        PASS_SALT: !!env.PASS_SALT,
+        ADMIN_JWT_SECRET: !!env.ADMIN_JWT_SECRET,
+      }
+    }), { status: 200, headers: { "content-type": "application/json", ...CORS }});
+  }
+
   if (url.pathname === "/api/admin/init") {
     const given = url.searchParams.get("secret") || "";
     const expected = env.ADMIN_INIT_SECRET || "Oury2933#";
@@ -134,6 +151,7 @@ async function handleApi(req, env) {
 
     await ensureSchema();
 
+    // seed/update admin
     const adminPhone = env.ADMIN_PHONE || "0715151010";
     const adminPass  = env.ADMIN_PASS  || "Oury2933#";
     const salt       = env.PASS_SALT   || "imarika-salt";
@@ -149,20 +167,7 @@ async function handleApi(req, env) {
     return json({ ok:true, adminPhone, usersColumns: (cols.results||[]).map(c=>c.name) });
   }
 
-  // ---------- PUBLIC: get current user by phone (for dashboard refresh) ----------
-  if (url.pathname === "/api/user" && req.method === "GET") {
-    await ensureSchema();
-    const phone = url.searchParams.get("phone") || "";
-    if (!phone) return json({ ok:false, error:"phone required" }, { status:400 });
-    const u = await q(`
-      SELECT phone, full_name, id_number, account, wallet, invested, created_at
-      FROM users WHERE phone=?
-    `, phone).first();
-    if (!u) return json({ ok:false, error:"Not found" }, { status:404 });
-    return json({ ok:true, user: u });
-  }
-
-  // public: register & login
+  // --------- Public: register / login ----------
   if (url.pathname === "/api/register" && req.method === "POST") {
     await ensureSchema();
     const { full_name, id_number, phone, pin } = await req.json().catch(()=>({}));
@@ -204,21 +209,57 @@ async function handleApi(req, env) {
     return json({ ok:true, user:u });
   }
 
-  // public: create pending transaction
+  // --------- Public: user profile fetch ----------
+  if (url.pathname === "/api/user" && req.method === "GET") {
+    await ensureSchema();
+    const phone = url.searchParams.get("phone") || "";
+    if (!phone) return json({ ok:false, error:"phone required" }, { status:400 });
+    const u = await q(`SELECT phone, full_name, id_number, account, wallet, invested, created_at FROM users WHERE phone=?`, phone).first();
+    if (!u) return json({ ok:false, error:"Not found" }, { status:404 });
+    return json({ ok:true, user:u });
+  }
+
+  // --------- Public: transactions ----------
+  // Create a single tx
   if (url.pathname === "/api/tx" && req.method === "POST") {
     await ensureSchema();
     const { phone, type, amount, detail = "", status = "Pending" } = await req.json().catch(()=>({}));
     if (!phone || !type || !Number.isFinite(Number(amount)))
       return json({ ok:false, error:"phone/type/amount required" }, { status:400 });
+
     const id = crypto.randomUUID();
-    await q(`
-      INSERT INTO transactions (id, phone, type, amount, detail, status, ts)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `, id, phone, String(type), Math.abs(Number(amount)), detail, String(status), Date.now()).run();
-    return json({ ok:true, id, status: String(status) }, { status:201 });
+    const amt = Math.abs(Number(amount)); // store positive in DB
+
+    // Start a simple "transaction"
+    await env.DB.exec("BEGIN");
+    try {
+      // Insert the tx record
+      await q(`
+        INSERT INTO transactions (id, phone, type, amount, detail, status, ts)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `, id, phone, String(type), amt, detail, String(status), Date.now()).run();
+
+      // If it's a Withdrawal request, immediately HOLD funds (deduct now).
+      if (String(type) === "Withdrawal") {
+        // ensure sufficient balance
+        const u = await q(`SELECT wallet FROM users WHERE phone=?`, phone).first();
+        const bal = Number(u?.wallet || 0);
+        if (bal < amt) {
+          await env.DB.exec("ROLLBACK");
+          return json({ ok:false, error:"Insufficient wallet" }, { status:400 });
+        }
+        await q(`UPDATE users SET wallet = wallet - ? WHERE phone=?`, amt, phone).run();
+      }
+      await env.DB.exec("COMMIT");
+    } catch (e) {
+      await env.DB.exec("ROLLBACK");
+      return json({ ok:false, error:String(e) }, { status:500 });
+    }
+
+    return json({ ok:true, id, status:String(status) }, { status:201 });
   }
 
-  // public: get transactions for a phone
+  // List a user's tx
   if (url.pathname === "/api/tx" && req.method === "GET") {
     await ensureSchema();
     const phone = url.searchParams.get("phone") || "";
@@ -233,27 +274,46 @@ async function handleApi(req, env) {
     return json({ ok:true, tx: res.results || [] });
   }
 
-  // public: migrate old local tx list
+  // Migrate legacy local tx → server
   if (url.pathname === "/api/tx/migrate" && req.method === "POST") {
     await ensureSchema();
     const { phone, items = [] } = await req.json().catch(()=>({}));
-    if (!phone || !Array.isArray(items)) return json({ ok:false, error:"phone/items required" }, { status:400 });
+    if (!phone || !Array.isArray(items)) return json({ ok:false, error:"phone and items required" }, { status:400 });
 
-    const stmt = env.DB.prepare(`
-      INSERT INTO transactions (id, phone, type, amount, detail, status, ts)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-      ON CONFLICT(id) DO NOTHING
-    `);
+    await env.DB.exec("BEGIN");
+    try {
+      for (const it of items) {
+        const id  = it.id || crypto.randomUUID();
+        const typ = String(it.type || "");
+        const amt = Math.abs(Number(it.amount || 0));
+        const det = String(it.detail || "");
+        const st  = String(it.status || "Pending");
+        const ts  = Number(it.ts || Date.now());
 
-    const batch = items.map(t =>
-      stmt.bind(t.id || crypto.randomUUID(), phone, String(t.type), Math.abs(Number(t.amount || 0)), String(t.detail || ""), String(t.status || "Pending"), Number(t.ts || Date.now()))
-    );
+        // insert if not exists
+        await q(`
+          INSERT OR IGNORE INTO transactions (id, phone, type, amount, detail, status, ts)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
+        `, id, phone, typ, amt, det, st, ts).run();
 
-    if (batch.length) await env.DB.batch(batch);
-    return json({ ok:true, inserted: batch.length });
+        // If it's a Withdrawal and was previously requested, make sure wallet is held once.
+        if (typ === "Withdrawal") {
+          // Only deduct if this ID wasn't already present
+          const present = await q(`SELECT id FROM transactions WHERE id=?`, id).first();
+          if (present) {
+            // we can't detect old local deduction reliably; skip here (server will already reflect only server-created holds)
+          }
+        }
+      }
+      await env.DB.exec("COMMIT");
+    } catch (e) {
+      await env.DB.exec("ROLLBACK");
+      return json({ ok:false, error:String(e) }, { status:500 });
+    }
+    return json({ ok:true, migrated: items.length });
   }
 
-  // admin login
+  // --------- Admin auth / data ----------
   if (url.pathname === "/api/admin/login" && req.method === "POST") {
     await ensureSchema();
     const { phone = "", pass = "" } = await req.json().catch(()=>({}));
@@ -351,24 +411,26 @@ async function handleApi(req, env) {
     if (!t) return json({ ok:false, error:"Not found" }, { status:404 });
 
     const newStatus = action === "approve" ? "Approved" : "Rejected";
-    await q(`UPDATE transactions SET status=? WHERE id=?`, newStatus, id).run();
 
-    // --- WALLET SIDE-EFFECTS ---
-    if (t.phone) {
-      // Deposit approved -> add
-      if (t.type === "Deposit" && newStatus === "Approved") {
-        await q(`UPDATE users SET wallet = wallet + ? WHERE phone=?`, Math.abs(t.amount || 0), t.phone).run();
+    await env.DB.exec("BEGIN");
+    try {
+      await q(`UPDATE transactions SET status=? WHERE id=?`, newStatus, id).run();
+
+      if (t.phone) {
+        if (t.type === "Deposit" && newStatus === "Approved") {
+          // credit wallet on approved deposit
+          await q(`UPDATE users SET wallet = wallet + ? WHERE phone=?`, Math.abs(t.amount || 0), t.phone).run();
+        }
+        if (t.type === "Withdrawal" && newStatus === "Rejected") {
+          // refund wallet on rejected withdrawal
+          await q(`UPDATE users SET wallet = wallet + ? WHERE phone=?`, Math.abs(t.amount || 0), t.phone).run();
+        }
       }
-      // Withdrawal approved -> subtract  (NEW ✅)
-      if (t.type === "Withdrawal" && newStatus === "Approved") {
-        await q(`UPDATE users SET wallet = wallet - ? WHERE phone=?`, Math.abs(t.amount || 0), t.phone).run();
-      }
-      // Withdrawal rejected -> refund add-back (user had “held” it client-side)
-      if (t.type === "Withdrawal" && newStatus === "Rejected") {
-        await q(`UPDATE users SET wallet = wallet + ? WHERE phone=?`, Math.abs(t.amount || 0), t.phone).run();
-      }
+      await env.DB.exec("COMMIT");
+    } catch (e) {
+      await env.DB.exec("ROLLBACK");
+      return json({ ok:false, error:String(e) }, { status:500 });
     }
-
     return json({ ok:true, id, status:newStatus });
   }
 
