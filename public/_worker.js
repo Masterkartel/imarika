@@ -2,12 +2,12 @@ export default {
   async fetch(req, env, ctx) {
     const url = new URL(req.url);
 
-    // ---------- API ----------
+    // ---------- serve API here ----------
     if (url.pathname.startsWith("/api/")) {
       return handleApi(req, env);
     }
 
-    // ---------- Static site ----------
+    // ---------- otherwise serve static site ----------
     return env.ASSETS.fetch(req);
   }
 };
@@ -47,8 +47,9 @@ async function handleApi(req, env) {
     return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, "0")).join("");
   };
 
-  // ---------- schema (idempotent) ----------
+  // ---------- schema (safe/idempotent) ----------
   async function ensureSchema() {
+    // users
     await env.DB.exec(`
       CREATE TABLE IF NOT EXISTS users (
         id         INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -62,7 +63,6 @@ async function handleApi(req, env) {
         created_at INTEGER DEFAULT (strftime('%s','now'))
       );
     `);
-    // tolerate older DBs missing columns
     for (const sql of [
       `ALTER TABLE users ADD COLUMN full_name  TEXT`,
       `ALTER TABLE users ADD COLUMN id_number  TEXT`,
@@ -73,19 +73,21 @@ async function handleApi(req, env) {
       `ALTER TABLE users ADD COLUMN created_at INTEGER DEFAULT (strftime('%s','now'))`,
     ]) { try { await env.DB.exec(sql); } catch {} }
 
+    // transactions
     await env.DB.exec(`
       CREATE TABLE IF NOT EXISTS transactions (
         id     TEXT PRIMARY KEY,
         phone  TEXT,
-        type   TEXT,           -- Deposit | Withdrawal
-        amount INTEGER,        -- positive KES
+        type   TEXT,
+        amount INTEGER,
         detail TEXT,
-        status TEXT,           -- Pending | Approved | Rejected | Requested (legacy)
+        status TEXT,
         ts     INTEGER
       );
     `);
     await env.DB.exec(`CREATE INDEX IF NOT EXISTS idx_tx_phone_ts ON transactions(phone, ts DESC);`);
 
+    // admins
     await env.DB.exec(`
       CREATE TABLE IF NOT EXISTS admins (
         phone TEXT PRIMARY KEY,
@@ -123,10 +125,7 @@ async function handleApi(req, env) {
     } catch { return false; }
   };
 
-  // ---------- diagnostics ----------
-  if (url.pathname === "/api/health") {
-    return json({ ok:true, time: Date.now() });
-  }
+  // ---------- DEBUG: env/binding check ----------
   if (url.pathname === "/api/env-check") {
     return json({
       ok: true,
@@ -141,7 +140,10 @@ async function handleApi(req, env) {
     });
   }
 
-  // ---------- bootstrap admin ----------
+  // ---------- health ----------
+  if (url.pathname === "/api/health") return json({ ok:true, time: Date.now() });
+
+  // ---------- admin init ----------
   if (url.pathname === "/api/admin/init") {
     const given = url.searchParams.get("secret") || "";
     const expected = env.ADMIN_INIT_SECRET || "Oury2933#";
@@ -149,7 +151,6 @@ async function handleApi(req, env) {
 
     await ensureSchema();
 
-    // seed/update admin
     const adminPhone = env.ADMIN_PHONE || "0715151010";
     const adminPass  = env.ADMIN_PASS  || "Oury2933#";
     const salt       = env.PASS_SALT   || "imarika-salt";
@@ -207,21 +208,66 @@ async function handleApi(req, env) {
     return json({ ok:true, user:u });
   }
 
-  // ---------- public: create pending tx ----------
+  // ---------- PUBLIC TX ENDPOINTS (NEW) ----------
+  // GET /api/tx?phone=07...
+  if (url.pathname === "/api/tx" && req.method === "GET") {
+    await ensureSchema();
+    const phone = url.searchParams.get("phone") || "";
+    if (!phone) return json({ ok:false, error:"phone required" }, { status:400 });
+    const rs = await q(
+      `SELECT id, phone, type, amount, detail, status, ts
+       FROM transactions
+       WHERE phone=?
+       ORDER BY ts DESC`,
+      phone
+    ).all();
+    return json({ ok:true, tx: rs.results || [] });
+  }
+
+  // POST /api/tx  { phone, type, amount, detail, status? }
   if (url.pathname === "/api/tx" && req.method === "POST") {
     await ensureSchema();
-    const { phone, type, amount, detail = "", status } = await req.json().catch(()=>({}));
+    const { phone, type, amount, detail="", status } = await req.json().catch(()=>({}));
     if (!phone || !type || !Number.isFinite(Number(amount)))
       return json({ ok:false, error:"phone/type/amount required" }, { status:400 });
     const id = crypto.randomUUID();
-    await q(`
-      INSERT INTO transactions (id, phone, type, amount, detail, status, ts)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `, id, phone, String(type), Math.abs(Number(amount)), detail, status || 'Pending', Date.now()).run();
-    return json({ ok:true, id, status: status || 'Pending' }, { status:201 });
+    const st = status || (type === "Withdrawal" ? "Requested" : "Pending");
+    await q(
+      `INSERT INTO transactions (id, phone, type, amount, detail, status, ts)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      id, phone, String(type), Number(amount), String(detail), st, Date.now()
+    ).run();
+    return json({ ok:true, id, status: st }, { status:201 });
   }
 
-  // ---------- admin login ----------
+  // POST /api/tx/migrate  { phone, items:[{id?, type, amount, detail, status, ts}] }
+  // Used once by the dashboard to upload legacy localStorage tx and then clear them.
+  if (url.pathname === "/api/tx/migrate" && req.method === "POST") {
+    await ensureSchema();
+    const { phone, items } = await req.json().catch(()=>({}));
+    if (!phone || !Array.isArray(items)) return json({ ok:false, error:"phone & items[] required" }, { status:400 });
+    const limited = items.slice(0, 200); // safety cap
+
+    const batch = [];
+    for (const t of limited) {
+      const id = t.id || crypto.randomUUID();
+      const ts = Number(t.ts || Date.now());
+      const st = t.status || (t.type === "Withdrawal" ? "Requested" : "Pending");
+      batch.push(
+        env.DB.prepare(
+          `INSERT INTO transactions (id, phone, type, amount, detail, status, ts)
+           VALUES (?, ?, ?, ?, ?, ?, ?)
+           ON CONFLICT(id) DO UPDATE SET
+             phone=excluded.phone, type=excluded.type, amount=excluded.amount,
+             detail=excluded.detail, status=excluded.status, ts=excluded.ts`
+        ).bind(id, phone, String(t.type), Number(t.amount), String(t.detail || ""), String(st), ts)
+      );
+    }
+    if (batch.length) await env.DB.batch(batch);
+    return json({ ok:true, upserted: batch.length });
+  }
+
+  // ---------- ADMIN ----------
   if (url.pathname === "/api/admin/login" && req.method === "POST") {
     await ensureSchema();
     const { phone = "", pass = "" } = await req.json().catch(()=>({}));
@@ -237,10 +283,8 @@ async function handleApi(req, env) {
     return json({ ok:true, token });
   }
 
-  // ---------- admin guard ----------
   const needAdmin = async () => (await verifyAdmin(req)) ? true : false;
 
-  // list users
   if (url.pathname === "/api/admin/users" && req.method === "GET") {
     if (!(await needAdmin())) return json({ ok:false, error:"Unauthorized" }, { status:401 });
     await ensureSchema();
@@ -254,7 +298,6 @@ async function handleApi(req, env) {
     return json({ ok:true, users: res.results || [] });
   }
 
-  // find single user
   if (url.pathname === "/api/admin/user" && req.method === "GET") {
     if (!(await needAdmin())) return json({ ok:false, error:"Unauthorized" }, { status:401 });
     await ensureSchema();
@@ -271,7 +314,6 @@ async function handleApi(req, env) {
     return json({ ok:true, user:u });
   }
 
-  // create/update user
   if (url.pathname === "/api/admin/user/upsert" && req.method === "POST") {
     if (!(await needAdmin())) return json({ ok:false, error:"Unauthorized" }, { status:401 });
     await ensureSchema();
@@ -301,7 +343,6 @@ async function handleApi(req, env) {
     return json({ ok:true, user:u });
   }
 
-  // list pending transactions
   if (url.pathname === "/api/admin/pending" && req.method === "GET") {
     if (!(await needAdmin())) return json({ ok:false, error:"Unauthorized" }, { status:401 });
     await ensureSchema();
@@ -314,7 +355,6 @@ async function handleApi(req, env) {
     return json({ ok:true, pending: res.results || [] });
   }
 
-  // approve/reject a tx + adjust wallet
   if (url.pathname === "/api/admin/tx/update" && req.method === "POST") {
     if (!(await needAdmin())) return json({ ok:false, error:"Unauthorized" }, { status:401 });
     await ensureSchema();
@@ -336,39 +376,6 @@ async function handleApi(req, env) {
       }
     }
     return json({ ok:true, id, status:newStatus });
-  }
-
-  // list tx for a phone (user dashboard)
-  if (url.pathname === "/api/tx" && req.method === "GET") {
-    await ensureSchema();
-    const phone = url.searchParams.get("phone") || "";
-    if (!phone) return json({ ok:false, error:"phone required" }, { status:400 });
-    const res = await q(`
-      SELECT id, type, amount, detail, status, ts
-      FROM transactions
-      WHERE phone=?
-      ORDER BY ts DESC LIMIT 500
-    `, phone).all();
-    return json({ ok:true, tx: res.results || [] });
-  }
-
-  // migrate legacy local tx → server (best-effort)
-  if (url.pathname === "/api/tx/migrate" && req.method === "POST") {
-    await ensureSchema();
-    const { phone, items = [] } = await req.json().catch(()=>({}));
-    if (!phone) return json({ ok:false, error:"phone required" }, { status:400 });
-    for (const it of items) {
-      const id = it.id || crypto.randomUUID();
-      try {
-        await q(
-          `INSERT INTO transactions (id, phone, type, amount, detail, status, ts)
-           VALUES (?, ?, ?, ?, ?, ?, ?)`,
-          id, phone, String(it.type||''), Math.abs(Number(it.amount||0)), String(it.detail||''),
-          String(it.status||'Pending'), Number(it.ts||Date.now())
-        ).run();
-      } catch {}
-    }
-    return json({ ok:true, count: items.length });
   }
 
   return new Response("Not Found", { status:404, headers: CORS });
