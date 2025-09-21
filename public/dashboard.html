@@ -204,6 +204,7 @@
 
     // legacy local (will be migrated once)
     const TX_KEY='imarika_tx';
+    const LOAN_KEY='imarika_loan_tx';
     const getLocalTx = () => { try { return JSON.parse(localStorage.getItem(TX_KEY)||'[]'); } catch { return []; } };
     const clearLocalTx = () => localStorage.removeItem(TX_KEY);
 
@@ -214,9 +215,9 @@
 
     function showHeader(u){
       const name = (u.full || u.full_name || '').trim();
-      who.innerHTML = name
-        ? `Acct: <span class="mono"><strong>${u.account}</strong></span> — <strong>${name}</strong>`
-        : `Acct: <span class="mono"><strong>${u.account}</strong></span>`;
+      const label = name ? `Acct: <span class="mono"><strong>${u.account}</strong></span> — <strong>${name}</strong>` :
+                           `Acct: <span class="mono"><strong>${u.account}</strong></span>`;
+      who.innerHTML = label;
       walletEl.textContent = 'KES ' + fmt(u.wallet||0);
       sharesEl.textContent = 'KES ' + fmt(u.invested||0);
       stamp.textContent = 'Updated ' + new Date().toLocaleString();
@@ -274,7 +275,7 @@
           <td class="mono">${new Date(t.ts).toLocaleString()}</td>
           <td>${t.type}</td>
           <td>${t.detail||'-'}</td>
-          <td style="text-align:right">${fmt(t.amount||0)}</td>
+          <td style="text-align:right">${(t.amount<0?'-':'')}${fmt(Math.abs(t.amount||0))}</td>
           <td>${t.status||'-'}</td>
         </tr>
       `).join('') : `<tr><td colspan="5" class="muted" style="text-align:center">No transactions yet.</td></tr>`;
@@ -285,6 +286,7 @@
       const c = document.getElementById('withdrawCard');
       c.style.display = c.style.display==='none' ? 'block' : 'none';
     };
+
     document.getElementById('doWithdraw').onclick = async ()=>{
       const p = wPhone.value.trim(), a = Number(wAmt.value||0), h = wHint;
       const u = getUser() || {wallet:0};
@@ -295,13 +297,13 @@
       // Update local wallet instantly for UX (server wallet is updated by Admin action)
       u.wallet = (u.wallet||0) - a; saveUser(u); showHeader(u);
 
-      // Create server TX (positive amount; status Pending)
+      // Create server TX — IMPORTANT: amount must be POSITIVE and status 'Pending'
       const ok = await createServerTx({
         phone: u.phone,
         type: 'Withdrawal',
-        amount: Math.abs(a),
+        amount: Math.abs(a),           // <-- positive for Admin rules
         detail: `To ${p}`,
-        status: 'Pending'
+        status: 'Pending'              // <-- Admin lists Pending
       });
       h.textContent = ok ? 'Withdrawal request submitted.' : 'Failed to submit. Try again.';
       if(ok) wAmt.value='';
@@ -348,6 +350,7 @@
       if(!v){ e.preventDefault(); return; }
       const me = getUser();
 
+      // server pending deposit record
       await createServerTx({
         phone: me.phone,
         type: 'Deposit',
@@ -369,7 +372,9 @@
       window.location.replace('/account.html');
     } else {
       showHeader(user);
+      // 1) migrate old local tx once
       migrateLegacy().then(fetchServerTx);
+      // 2) fetch server tx
       fetchServerTx();
     }
   </script>
