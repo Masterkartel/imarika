@@ -166,6 +166,7 @@
     </div>
   </section>
 
+  <!-- Footer -->
   <footer>
     <div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:.6rem">
@@ -182,58 +183,53 @@
     </div>
   </footer>
 
+  <!-- Floating WhatsApp -->
   <div class="wa-float" style="position:fixed;right:16px;bottom:96px;z-index:50">
     <a class="wa-btn" href="https://wa.me/254701017246?text=Hello%20Imarika!" aria-label="Chat on WhatsApp" style="height:58px;width:58px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:#25D366;color:#fff;box-shadow:0 12px 30px rgba(16,185,129,.35)">
       <svg aria-hidden="true" viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
-        <path d="M20.52 3.48A11.94 11.94 0 0 0 12.06 0C5.52 0 .2 5.32.2 11.86c0 2.08.55 4.08 1.58 5.86L0 24l6.43-1.67a11.82 11.82 0 0 0 5.63 1.43h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.14-3.41-8.42zM12.06 21.3h-.01a9.5 9.5 0 0 1-4.85-1.31l-.35-.2-3.82 .99 1.02 -3.73 -.23 -.38 a9.46 9.46 0 0 1 -1.45 -5.01 c0 -5.23 4.26 -9.49 9.51 -9.49 2.54 0 4.93 .99 6.72 2.78 a9.43 9.43 0 0 1 2.78 6.71 c0 5.23 -4.26 9.49 -9.52 9.49 zm 5.47 -7.14 c -.3 -.15 -1.77 -.87 -2.04 -.97 -.27 -.1 -.47 -.15 -.66 .15 s -.76 .97 -.92 1.17 c -.17 .2 -.34 .22 -.63 .07 -.3 -.15 -1.26 -.46 -2.4 -1.47 -.89 -.79 -1.49 -1.77 -1.66 -2.07 -.17 -.3 -.02 -.46 .13 -.61 .13 -.13 .3 -.34 .45 -.51 .15 -.17 .2 -.3 .3 -.5 .1 -.2 .05 -.37 -.02 -.53 -.07 -.15 -.66 -1.6 -.91 -2.18 -.24 -.58 -.48 -.5 -.66 -.51 l -.56 -.01 c -.2 0 -.53 .08 -.8 .37 -.27 .3 -1.05 1.02 -1.05 2.49 s 1.08 2.89 1.24 3.09 c .15 .2 2.12 3.22 5.14 4.52 .72 .31 1.28 .5 1.72 .64 .72 .23 1.38 .2 1.9 .12 .58 -.09 1.77 -.72 2.02 -1.41 .25 -.69 .25 -1.28 .17 -1.41 -.08 -.13 -.28 -.21 -.58 -.36 z"/>
+        <path d="M20.52 3.48A11.94 11.94 0 0 0 12.06 0C5.52 0 .2 5.32.2 11.86c0 2.08.55 4.08 1.58 5.86L0 24l6.43-1.67a11.82 11.82 0 0 0 5.63 1.43h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.14-3.41-8.42zM12.06 21.3h-.01a9.5 9.5 0 0 1-4.85-1.31l-.35-.2-3.82.99 1.02-3.73-.23-.38a9.46 9.46 0 0 1-1.45-5.01c0-5.23 4.26-9.49 9.51-9.49 2.54 0 4.93.99 6.72 2.78a9.43 9.43 0 0 1 2.78 6.71c0 5.23-4.26 9.49-9.52 9.49zm5.47-7.14c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.66.15s-.76.97-.92 1.17c-.17.2-.34.22-.63.07-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46 .13-.61 .13-.13 .3-.34 .45-.51 .15-.17 .2-.3 .3-.5 .1-.2 .05-.37 -.02-.53 -.07-.15 -.66-1.6 -.91-2.18 -.24-.58 -.48-.5 -.66-.51 l-.56-.01 c-.2 0 -.53 .08 -.8 .37 -.27 .3 -1.05 1.02 -1.05 2.49 s 1.08 2.89 1.24 3.09 c .15 .2 2.12 3.22 5.14 4.52 .72 .31 1.28 .5 1.72 .64 .72 .23 1.38 .2 1.9 .12 .58 -.09 1.77 -.72 2.02 -1.41 .25 -.69 .25 -1.28 .17 -1.41 -.08 -.13 -.28 -.21 -.58 -.36 z"/>
       </svg>
     </a>
   </div>
 
   <script>
+    // Footer year
     const y = document.getElementById('y'); if (y) y.textContent = new Date().getFullYear();
 
+    // ===== Helpers / Storage =====
     const fmt = n => Number(n||0).toLocaleString('en-KE');
     const phoneOk = p => /^0(7|1)\d{8}$/.test(String(p||'').trim());
     const saveUser = u => localStorage.setItem('imarika_user', JSON.stringify(u));
     const getUser  = () => { try { return JSON.parse(localStorage.getItem('imarika_user')||'null'); } catch { return null; } };
 
+    // legacy local (will be migrated once)
     const TX_KEY='imarika_tx';
     const getLocalTx = () => { try { return JSON.parse(localStorage.getItem(TX_KEY)||'[]'); } catch { return []; } };
     const clearLocalTx = () => localStorage.removeItem(TX_KEY);
 
+    // ===== UI refs =====
     const dash = document.getElementById('dash'), who = document.getElementById('who');
     const walletEl = document.getElementById('wallet'), sharesEl = document.getElementById('shares'), stamp = document.getElementById('stamp');
     const txTable = document.getElementById('txTable').querySelector('tbody'), txCount = document.getElementById('txCount');
 
     function showHeader(u){
       const name = (u.full || u.full_name || '').trim();
-      const label = name ? `Acct: <span class="mono"><strong>${u.account}</strong></span> — <strong>${name}</strong>` :
-                           `Acct: <span class="mono"><strong>${u.account}</strong></span>`;
-      who.innerHTML = label;
+      who.innerHTML = name
+        ? `Acct: <span class="mono"><strong>${u.account}</strong></span> — <strong>${name}</strong>`
+        : `Acct: <span class="mono"><strong>${u.account}</strong></span>`;
       walletEl.textContent = 'KES ' + fmt(u.wallet||0);
       sharesEl.textContent = 'KES ' + fmt(u.invested||0);
       stamp.textContent = 'Updated ' + new Date().toLocaleString();
       dash.style.display='grid';
     }
 
+    // ===== Server TX =====
     let serverTx = [];
     async function fetchServerTx(){
       const u = getUser(); if(!u) return;
       const r = await fetch('/api/tx?phone=' + encodeURIComponent(u.phone));
       const j = await r.json().catch(()=>({ok:false}));
       if(j.ok){ serverTx = j.tx || []; renderTx(serverTx); }
-    }
-
-    async function refreshUserFromServer(){
-      const u = getUser(); if (!u) return;
-      const r = await fetch('/api/user?phone=' + encodeURIComponent(u.phone));
-      const j = await r.json().catch(()=>({ok:false}));
-      if (j.ok && j.user){
-        const merged = { ...u, ...j.user };
-        saveUser(merged);
-        showHeader(merged);
-      }
     }
 
     async function createServerTx(row){
@@ -243,12 +239,11 @@
         body: JSON.stringify(row)
       });
       const j = await r.json().catch(()=>({ok:false}));
-      if(j.ok){
-        fetchServerTx().then(refreshUserFromServer);
-      }
+      if(j.ok){ await fetchServerTx(); }
       return j.ok;
     }
 
+    // ===== Migrate legacy localStorage → server (one-time) =====
     async function migrateLegacy(){
       const u = getUser(); if(!u) return;
       const legacy = getLocalTx();
@@ -279,17 +274,17 @@
           <td class="mono">${new Date(t.ts).toLocaleString()}</td>
           <td>${t.type}</td>
           <td>${t.detail||'-'}</td>
-          <td style="text-align:right">${(t.amount<0?'-':'')}${fmt(Math.abs(t.amount||0))}</td>
+          <td style="text-align:right">${fmt(t.amount||0)}</td>
           <td>${t.status||'-'}</td>
         </tr>
       `).join('') : `<tr><td colspan="5" class="muted" style="text-align:center">No transactions yet.</td></tr>`;
     }
 
+    // ===== Withdraw (server-backed) =====
     document.getElementById('showWithdraw').onclick = ()=>{
       const c = document.getElementById('withdrawCard');
       c.style.display = c.style.display==='none' ? 'block' : 'none';
     };
-
     document.getElementById('doWithdraw').onclick = async ()=>{
       const p = wPhone.value.trim(), a = Number(wAmt.value||0), h = wHint;
       const u = getUser() || {wallet:0};
@@ -297,8 +292,10 @@
       if(a<=0){ h.textContent='Enter amount.'; return; }
       if(a > (u.wallet||0)){ h.textContent='Insufficient wallet balance.'; return; }
 
+      // Update local wallet instantly for UX (server wallet is updated by Admin action)
       u.wallet = (u.wallet||0) - a; saveUser(u); showHeader(u);
 
+      // Create server TX (positive amount; status Pending)
       const ok = await createServerTx({
         phone: u.phone,
         type: 'Withdrawal',
@@ -310,6 +307,7 @@
       if(ok) wAmt.value='';
     };
 
+    // ===== Calculator + start (server-backed pending deposit record) =====
     const planEl = document.getElementById('plan');
     const amtEl  = document.getElementById('amt');
     const out    = document.getElementById('out');
@@ -350,7 +348,7 @@
       if(!v){ e.preventDefault(); return; }
       const me = getUser();
 
-      createServerTx({
+      await createServerTx({
         phone: me.phone,
         type: 'Deposit',
         amount: v.amt,
@@ -359,23 +357,20 @@
       });
     });
 
+    // ===== Logout → Home =====
     document.getElementById('logoutBtn').onclick = ()=>{
       localStorage.removeItem('imarika_user');
       window.location.href = '/';
     };
 
-    // ---- Gate + boot (NO top-level await) ----
+    // ===== Gate + boot =====
     const user = getUser();
     if(!user){
       window.location.replace('/account.html');
     } else {
       showHeader(user);
-      // migrate then pull latest tx + user
-      migrateLegacy()
-        .catch(()=>{})
-        .finally(()=> { fetchServerTx().then(refreshUserFromServer); });
-      // initial fetch too
-      fetchServerTx().then(refreshUserFromServer);
+      migrateLegacy().then(fetchServerTx);
+      fetchServerTx();
     }
   </script>
 </body>
