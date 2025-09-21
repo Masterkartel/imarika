@@ -286,6 +286,7 @@
       const c = document.getElementById('withdrawCard');
       c.style.display = c.style.display==='none' ? 'block' : 'none';
     };
+
     document.getElementById('doWithdraw').onclick = async ()=>{
       const p = wPhone.value.trim(), a = Number(wAmt.value||0), h = wHint;
       const u = getUser() || {wallet:0};
@@ -296,13 +297,13 @@
       // Update local wallet instantly for UX (server wallet is updated by Admin action)
       u.wallet = (u.wallet||0) - a; saveUser(u); showHeader(u);
 
-      // Create server TX
+      // Create server TX — IMPORTANT: amount must be POSITIVE and status 'Pending'
       const ok = await createServerTx({
         phone: u.phone,
         type: 'Withdrawal',
-        amount: -Math.abs(a),
+        amount: Math.abs(a),           // <-- positive for Admin rules
         detail: `To ${p}`,
-        status: 'Requested'
+        status: 'Pending'              // <-- Admin lists Pending
       });
       h.textContent = ok ? 'Withdrawal request submitted.' : 'Failed to submit. Try again.';
       if(ok) wAmt.value='';
