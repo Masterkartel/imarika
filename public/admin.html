@@ -199,7 +199,14 @@
     const userCount=document.getElementById('userCount'),
           usersTableBody=document.querySelector('#usersTable tbody'),
           uSearch=document.getElementById('uSearch');
-    const humanTime = s => s ? new Date(s*1000).toLocaleString() : '-';
+
+    // UPDATED: robust seconds/ms handler
+    function humanTime(v){
+      const n = Number(v);
+      if(!Number.isFinite(n) || n <= 0) return '—';
+      const ms = n > 1e12 ? n : n * 1000; // treat >1e12 as ms, else seconds
+      try { return new Date(ms).toLocaleString(); } catch { return '—'; }
+    }
 
     async function renderUsers(){
       const q=(uSearch.value||'').trim();
