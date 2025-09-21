@@ -32,11 +32,9 @@ export default {
         return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, "0")).join("");
       };
       const db = env.DB;
-
       const q = (sql, ...args) => db.prepare(sql).bind(...args);
 
       async function ensureSchema() {
-        // tables (idempotent)
         await db.prepare(`
           CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -200,6 +198,23 @@ export default {
           FROM users WHERE phone=? AND pass_hash=?`, phone, pass_hash).first();
 
         if (!u) return json({ ok:false, error:"Invalid credentials" }, 401);
+        return json({ ok:true, user:u });
+      }
+
+      // ---------- PUBLIC: USER GET (for balance refresh) ----------
+      if (url.pathname === "/api/user" && req.method === "GET") {
+        if (!db) return json({ ok:false, error:"DB binding missing" }, 500);
+        await ensureSchema();
+
+        const phone = url.searchParams.get("phone") || "";
+        if (!phone) return json({ ok:false, error:"phone required" }, 400);
+
+        const u = await q(`
+          SELECT full_name, phone, id_number, account, wallet, invested, created_at
+          FROM users WHERE phone=?
+        `, phone).first();
+
+        if (!u) return json({ ok:false, error:"Not found" }, 404);
         return json({ ok:true, user:u });
       }
 
@@ -380,19 +395,23 @@ export default {
         await q(`UPDATE transactions SET status=? WHERE id=?`, newStatus, id).run();
 
         if (t.phone) {
+          const amt = Math.abs(Number(t.amount || 0));
+          // Deposits credit wallet on approval
           if (t.type === "Deposit" && newStatus === "Approved") {
-            await q(`UPDATE users SET wallet = wallet + ? WHERE phone=?`, Math.abs(t.amount || 0), t.phone).run();
+            await q(`UPDATE users SET wallet = wallet + ? WHERE phone=?`, amt, t.phone).run();
           }
-          if (t.type === "Withdrawal" && newStatus === "Rejected") {
-            await q(`UPDATE users SET wallet = wallet + ? WHERE phone=?`, Math.abs(t.amount || 0), t.phone).run();
+          // Withdrawals deduct wallet on approval
+          if (t.type === "Withdrawal" && newStatus === "Approved") {
+            await q(`UPDATE users SET wallet = wallet - ? WHERE phone=?`, amt, t.phone).run();
           }
+          // No wallet change on rejection (we never held server-side)
         }
+
         return json({ ok:true, id, status:newStatus });
       }
 
       return new Response("Not found", { status: 404, headers: CORS });
     } catch (err) {
-      // last-resort JSON error (prevents opaque "Network error" on client)
       return new Response(JSON.stringify({ ok:false, error:String(err && err.message || err) }), {
         status: 500,
         headers: { "content-type": "application/json", "Access-Control-Allow-Origin": "*" }
