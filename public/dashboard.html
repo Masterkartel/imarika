@@ -233,6 +233,18 @@
       if(j.ok){ serverTx = j.tx || []; renderTx(serverTx); }
     }
 
+    // NEW: refresh user record from server (wallet/invested become authoritative)
+    async function refreshUserFromServer(){
+      const u = getUser(); if (!u) return;
+      const r = await fetch('/api/user?phone=' + encodeURIComponent(u.phone));
+      const j = await r.json().catch(()=>({ok:false}));
+      if (j.ok && j.user){
+        const merged = { ...u, ...j.user };
+        saveUser(merged);
+        showHeader(merged);
+      }
+    }
+
     async function createServerTx(row){
       const r = await fetch('/api/tx', {
         method:'POST',
@@ -240,7 +252,10 @@
         body: JSON.stringify(row)
       });
       const j = await r.json().catch(()=>({ok:false}));
-      if(j.ok){ await fetchServerTx(); }
+      if(j.ok){
+        await fetchServerTx();
+        await refreshUserFromServer();   // NEW
+      }
       return j.ok;
     }
 
@@ -301,9 +316,9 @@
       const ok = await createServerTx({
         phone: u.phone,
         type: 'Withdrawal',
-        amount: Math.abs(a),           // <-- positive for Admin rules
+        amount: Math.abs(a),
         detail: `To ${p}`,
-        status: 'Pending'              // <-- Admin lists Pending
+        status: 'Pending'
       });
       h.textContent = ok ? 'Withdrawal request submitted.' : 'Failed to submit. Try again.';
       if(ok) wAmt.value='';
@@ -350,7 +365,6 @@
       if(!v){ e.preventDefault(); return; }
       const me = getUser();
 
-      // server pending deposit record
       await createServerTx({
         phone: me.phone,
         type: 'Deposit',
@@ -372,10 +386,12 @@
       window.location.replace('/account.html');
     } else {
       showHeader(user);
-      // 1) migrate old local tx once
-      migrateLegacy().then(fetchServerTx);
-      // 2) fetch server tx
-      fetchServerTx();
+      migrateLegacy().then(async ()=>{
+        await fetchServerTx();
+        await refreshUserFromServer();   // NEW on load
+      });
+      await fetchServerTx();
+      await refreshUserFromServer();     // NEW on load
     }
   </script>
 </body>
