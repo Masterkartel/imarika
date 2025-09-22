@@ -39,6 +39,7 @@
   }
   .amount{font-weight:800;font-size:clamp(1.4rem,2.6vw,1.8rem);line-height:1;text-align:right;overflow-wrap:anywhere;word-break:break-word;max-width:100%;display:block}
   footer{border-top:1px solid var(--line);padding:2.2rem 0;color:#475569;margin-top:2rem}
+  .ok-strong{color:var(--ok);font-weight:800}
 </style>
 
 <body>
@@ -57,6 +58,7 @@
       <div class="muted" id="who"></div>
 
       <div id="dash" class="grid grid2" style="margin-top:1rem;display:none">
+        <!-- LEFT COLUMN -->
         <div class="grid">
           <!-- WALLET -->
           <div class="card">
@@ -101,13 +103,24 @@
             </div>
           </div>
 
-          <!-- TRANSACTIONS -->
-          <!-- (MOVED OUT OF LEFT COLUMN — now placed below Quick Calculator on the right) -->
+          <!-- (Transactions & Loan History moved to RIGHT column, below Quick Calculator) -->
         </div>
 
-        <!-- RIGHT -->
+        <!-- RIGHT COLUMN -->
         <div class="grid">
-          <!-- Quick Calculator -->
+          <!-- Loan Eligibility (3× Shares) — first -->
+          <div class="card" id="loanEligCard">
+            <strong>Loan Eligibility (3× Shares)</strong>
+            <div class="muted">Minimum loan: <strong>KES 20,000</strong>. Example: shares <strong>KES 8,000</strong> → qualifies <span class="ok-strong">KES 24,000</span> within 24h; repay over 3 months at 10% interest (~KES <strong>8,800</strong>/month).</div>
+            <div style="display:grid;gap:.6rem;margin-top:.6rem">
+              <label class="muted" for="eligShares">Your Shares (KES)</label>
+              <input id="eligShares" type="number" min="0" placeholder="Enter your current shares">
+              <div id="eligOut" class="muted"></div>
+              <a class="btn btn-slim" href="/deposit.html">Deposit Shares</a>
+            </div>
+          </div>
+
+          <!-- Quick Investment Calculator — second -->
           <div class="card">
             <strong>Quick Calculator</strong>
             <div class="muted">Preview 24h payout & start</div>
@@ -124,7 +137,7 @@
             </div>
           </div>
 
-          <!-- TRANSACTIONS — moved here to be after Quick Calculator -->
+          <!-- Transactions — third (moved here) -->
           <div class="card">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
               <strong>Transactions — Investments & Wallet</strong>
@@ -144,7 +157,7 @@
             </div>
           </div>
 
-          <!-- Loan History -->
+          <!-- Loan History — fourth (moved here) -->
           <div class="card">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
               <strong>Loan History</strong>
@@ -250,6 +263,12 @@
           // Merge fresh server fields into local user
           saveUser({ ...u, ...j.user });
           showHeader(getUser());
+          // Prefill eligibility shares if field exists
+          const es = document.getElementById('eligShares');
+          if (es && typeof j.user.invested !== 'undefined') {
+            es.value = Number(j.user.invested||0);
+            computeEligibility();
+          }
         }
       }catch(_){}
     }
@@ -344,7 +363,36 @@
       }
     };
 
-    // ===== Calculator + start (server-backed pending deposit record) =====
+    // ===== NEW: Loan Eligibility calculator (3× shares, min loan 20k, 10%/3mo) =====
+    const eligInput = document.getElementById('eligShares');
+    const eligOut   = document.getElementById('eligOut');
+
+    function computeEligibility(){
+      const shares = Number(eligInput.value || 0);
+      const eligible = Math.floor(shares * 3); // 3× shares
+      const MIN = 20000;
+      if (!shares){
+        eligOut.innerHTML = 'Enter your current Shares to see eligibility.';
+        return;
+      }
+      if (eligible < MIN){
+        const need = MIN - eligible;
+        eligOut.innerHTML = `Below minimum. Add <strong>KES ${fmt(need)}</strong> more in Shares to qualify for <span class="ok-strong">KES ${fmt(MIN)}</span>.`;
+        return;
+      }
+      const totalRepay = Math.round(eligible * 1.10); // +10% over 3 months
+      const monthly = Math.ceil(totalRepay / 3);
+      eligOut.innerHTML = `
+        Eligible amount: <span class="ok-strong">KES ${fmt(eligible)}</span><br>
+        Total repay (3 months @10%): <strong>KES ${fmt(totalRepay)}</strong><br>
+        Monthly installment (~3x): <strong>KES ${fmt(monthly)}</strong>
+      `;
+    }
+    if (eligInput){
+      eligInput.addEventListener('input', computeEligibility);
+    }
+
+    // ===== Quick Investment Calculator (unchanged) =====
     const planEl = document.getElementById('plan');
     const amtEl  = document.getElementById('amt');
     const out    = document.getElementById('out');
@@ -406,6 +454,10 @@
       window.location.replace('/account.html');
     } else {
       showHeader(user);
+      // Prefill eligibility with local shares immediately
+      const es = document.getElementById('eligShares');
+      if (es) { es.value = Number(user.invested||0); computeEligibility(); }
+
       migrateLegacy().then(async ()=>{
         await fetchServerTx();
         await fetchUser();
