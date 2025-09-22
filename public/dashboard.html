@@ -1,100 +1,74 @@
 <!doctype html>
 <html lang="en">
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Dashboard | Imarika</title>
 <link rel="icon" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#fff;--text:#0f172a;--muted:#475569;--line:#e5e7eb;--card:#fff;
-    --brand:#f59e0b;--ok:#16a34a;--danger:#ef4444;--ring:rgba(245,158,11,.35);
-    --tab-h:64px; /* bottom tab height */
-    --head-h:56px; /* compact header for phones */
+    --brand:#f59e0b;--ok:#16a34a;--danger:#ef4444;--ring:rgba(245,158,11,.35)
   }
   *{box-sizing:border-box}
-  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
   a{text-decoration:none;color:inherit}
-
-  /* Header */
-  header{position:fixed;top:0;left:0;right:0;height:var(--head-h);
-    background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:40}
-  .header-inner{max-width:1120px;margin:0 auto;padding:0 .9rem;height:100%;
-    display:flex;align-items:center;justify-content:space-between;gap:.6rem}
-  .brand{display:flex;align-items:center;gap:.55rem;min-width:0}
-  .logo{height:28px;width:28px;border-radius:8px}
-  .btn{display:inline-flex;align-items:center;justify-content:center;padding:.6rem .9rem;border-radius:12px;font-weight:700;background:var(--brand);color:#111827;border:0;cursor:pointer;box-shadow:0 10px 20px rgba(245,158,11,.18)}
+  .container{max-width:1120px;margin:0 auto;padding:0 1rem}
+  header{position:sticky;top:0;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:40}
+  .brand{display:flex;align-items:center;gap:.55rem;height:64px}
+  .logo{height:32px;width:32px;border-radius:10px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;padding:.72rem 1rem;border-radius:14px;font-weight:700;background:var(--brand);color:#111827;border:0;cursor:pointer;box-shadow:0 10px 30px rgba(245,158,11,.25)}
   .btn-outline{background:#fff;border:1px solid var(--line)}
-  .btn-slim{padding:.5rem .75rem;border-radius:12px}
-
-  /* App frame */
-  .app{position:fixed;inset:var(--head-h) 0 calc(var(--tab-h) + env(safe-area-inset-bottom,0px)) 0; height:calc(100svh - var(--head-h) - var(--tab-h) - env(safe-area-inset-bottom,0px));}
-  .screen{height:100%;max-width:1120px;margin:0 auto;padding:.9rem;display:none}
-  .screen.active{display:block}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:1rem;box-shadow:0 10px 24px rgba(2,8,23,.06)}
-  .muted{color:var(--muted)}
-  .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
-  .amount{font-weight:800;font-size:1.6rem;line-height:1;text-align:right;overflow-wrap:anywhere;word-break:break-word}
-
+  .btn-slim{padding:.55rem .75rem;border-radius:12px}
+  .grid{display:grid;gap:1rem}
+  .grid2{grid-template-columns:1fr}
+  @media(min-width:768px){.grid2{grid-template-columns:2fr 1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:1.15rem;box-shadow:0 10px 30px rgba(2,8,23,.06)}
   input,select,textarea{width:100%;padding:.85rem;border:1px solid var(--line);border-radius:14px;outline:none}
   input:focus,select:focus,textarea:focus{border-color:#cbd5e1;box-shadow:0 0 0 4px var(--ring)}
-
-  /* Tables (kept, but trimmed for mobile) */
-  .table{width:100%;border-collapse:collapse;font-size:.95rem}
-  .table th,.table td{border:1px solid var(--line);padding:.55rem}
+  .muted{color:var(--muted)}
+  .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+  .table{width:100%;border-collapse:collapse}
+  .table th,.table td{border:1px solid var(--line);padding:.6rem .7rem}
   .table th{background:#fff7ed}
   .badge{padding:.18rem .5rem;border-radius:999px;background:#fef3c7;color:#78350f;font-weight:800}
-
-  /* Bottom tabs */
-  .tabs{position:fixed;left:0;right:0;bottom:0;height:calc(var(--tab-h) + env(safe-area-inset-bottom,0px));
-    padding-bottom:env(safe-area-inset-bottom,0px);
-    background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);z-index:50}
-  .tab-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:.78rem;color:#475569}
-  .tab-btn.active{color:#0f172a;font-weight:700}
-  .tab-ico{width:22px;height:22px;display:grid;place-items:center;border-radius:8px;border:1px solid transparent}
-  .tab-btn.active .tab-ico{border-color:#fde68a;background:#fffbeb}
-
-  /* Desktop: show dual columns inside each screen */
-  @media(min-width:920px){
-    .screen-inner{display:grid;grid-template-columns:2fr 1fr;gap:1rem;height:100%}
-    .stack{display:grid;gap:1rem;overflow:auto;padding-right:.2rem}
+  #logoutBtn{position:static}
+  @media(max-width:900px){
+    header .container{padding-right:120px}
+    #logoutBtn{position:fixed;top:10px;right:10px;z-index:100}
   }
-
-  /* Utility for green strong */
+  .amount{font-weight:800;font-size:clamp(1.4rem,2.6vw,1.8rem);line-height:1;text-align:right;overflow-wrap:anywhere;word-break:break-word;max-width:100%;display:block}
+  footer{border-top:1px solid var(--line);padding:2.2rem 0;color:#475569;margin-top:2rem}
   .ok-strong{color:var(--ok);font-weight:800}
-
-  /* Footer (kept but not used in app frame; hidden on phones) */
-  footer{display:none}
-  @media(min-width:920px){ footer{display:block;border-top:1px solid var(--line);padding:2rem 0;color:#475569;margin-top:2rem} }
 </style>
 
 <body>
-  <!-- Header -->
   <header>
-    <div class="header-inner">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between">
       <a class="brand" href="/"><img src="/favicon.svg" class="logo" alt=""><strong>Imarika</strong></a>
-      <button class="btn btn-outline" id="logoutBtn" title="Sign out">Logout</button>
+      <div style="display:flex;gap:.6rem">
+        <button class="btn btn-outline" id="logoutBtn" title="Sign out">Logout</button>
+      </div>
     </div>
   </header>
 
-  <!-- App screens -->
-  <main class="app">
-    <!-- Home / Wallet screen -->
-    <section id="screen-home" class="screen active" aria-label="Wallet">
-      <div class="screen-inner">
-        <div class="stack">
-          <h1 style="margin:0 0 .25rem">Dashboard</h1>
-          <div class="muted" id="who"></div>
+  <section>
+    <div class="container">
+      <h1 style="margin:1rem 0 .25rem">Dashboard</h1>
+      <div class="muted" id="who"></div>
 
-          <!-- Wallet -->
+      <div id="dash" class="grid grid2" style="margin-top:1rem;display:none">
+        <!-- LEFT COLUMN -->
+        <div class="grid">
+          <!-- WALLET -->
           <div class="card">
             <div id="stamp" class="muted mono" style="font-size:.85rem;margin-bottom:.25rem"></div>
             <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:.8rem;flex-wrap:wrap">
-              <div>
+              <div style="min-width:220px">
                 <div style="font-weight:800">Wallet Balance</div>
                 <div class="muted">Available to invest/withdraw</div>
               </div>
-              <div style="text-align:right;min-width:160px">
+              <div style="text-align:right;min-width:180px;flex:1 1 auto">
                 <div id="wallet" class="amount">KES 0</div>
               </div>
             </div>
@@ -105,20 +79,20 @@
             </div>
           </div>
 
-          <!-- Shares -->
+          <!-- SHARES -->
           <div class="card">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap">
-              <div>
+              <div style="min-width:220px">
                 <strong>Investments (Shares)</strong>
                 <div class="muted">Active amount in plans</div>
               </div>
-              <div style="text-align:right;min-width:160px">
-                <div id="shares" class="amount" style="font-size:1.4rem">KES 0</div>
+              <div style="text-align:right;min-width:180px;flex:1 1 auto">
+                <div id="shares" class="amount" style="font-size:clamp(1.2rem,2.4vw,1.5rem)">KES 0</div>
               </div>
             </div>
           </div>
 
-          <!-- Withdraw -->
+          <!-- WITHDRAW -->
           <div class="card" id="withdrawCard" style="display:none">
             <strong>Withdraw to M-Pesa</strong>
             <div style="display:grid;gap:.6rem;margin-top:.6rem">
@@ -128,20 +102,13 @@
               <div class="muted" id="wHint"></div>
             </div>
           </div>
+
+          <!-- (Transactions & Loan History moved to RIGHT column, below Quick Calculator) -->
         </div>
 
-        <!-- Right column (desktop only visual; on phones each screen is single column) -->
-        <div class="stack" aria-hidden="true"></div>
-      </div>
-    </section>
-
-    <!-- Invest screen -->
-    <section id="screen-invest" class="screen" aria-label="Invest">
-      <div class="screen-inner">
-        <div class="stack">
-          <h2 style="margin:0 0 .5rem">Invest</h2>
-
-          <!-- Loan Eligibility (3× Shares) -->
+        <!-- RIGHT COLUMN -->
+        <div class="grid">
+          <!-- Loan Eligibility (3× Shares) — first -->
           <div class="card" id="loanEligCard">
             <strong>Loan Eligibility (3× Shares)</strong>
             <div class="muted">Minimum loan: <strong>KES 20,000</strong>. Example: shares <strong>KES 8,000</strong> → qualifies <span class="ok-strong">KES 24,000</span> within 24h; repay over 3 months at 10% interest (~KES <strong>8,800</strong>/month).</div>
@@ -153,7 +120,7 @@
             </div>
           </div>
 
-          <!-- Quick Investment Calculator -->
+          <!-- Quick Investment Calculator — second -->
           <div class="card">
             <strong>Quick Calculator</strong>
             <div class="muted">Preview 24h payout & start</div>
@@ -169,19 +136,8 @@
               <a class="btn btn-slim" id="startBtn" href="/deposit.html">Start & Deposit</a>
             </div>
           </div>
-        </div>
 
-        <div class="stack" aria-hidden="true"></div>
-      </div>
-    </section>
-
-    <!-- Activity screen -->
-    <section id="screen-activity" class="screen" aria-label="Activity">
-      <div class="screen-inner">
-        <div class="stack">
-          <h2 style="margin:0 0 .5rem">Activity</h2>
-
-          <!-- Transactions -->
+          <!-- Transactions — third (moved here) -->
           <div class="card">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
               <strong>Transactions — Investments & Wallet</strong>
@@ -191,8 +147,7 @@
               <table class="table" id="txTable">
                 <thead>
                   <tr>
-                    <th>Date</th><th>Type</th><th>Details</th>
-                    <th style="text-align:right">Amount (KES)</th><th>Status</th>
+                    <th>Date</th><th>Type</th><th>Details</th><th style="text-align:right">Amount (KES)</th><th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -202,7 +157,7 @@
             </div>
           </div>
 
-          <!-- Loan History -->
+          <!-- Loan History — fourth (moved here) -->
           <div class="card">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
               <strong>Loan History</strong>
@@ -212,8 +167,7 @@
               <table class="table" id="loanTable">
                 <thead>
                   <tr>
-                    <th>Date</th><th>Product</th><th>Tenor</th>
-                    <th style="text-align:right">Amount (KES)</th><th>Status</th>
+                    <th>Date</th><th>Product</th><th>Tenor</th><th style="text-align:right">Amount (KES)</th><th>Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -226,50 +180,13 @@
             </div>
           </div>
         </div>
-
-        <div class="stack" aria-hidden="true"></div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Profile / Support (optional space; reusing footer info for desktop only) -->
-    <section id="screen-more" class="screen" aria-label="More">
-      <div class="screen-inner">
-        <div class="stack">
-          <h2 style="margin:0 0 .5rem">More</h2>
-          <div class="card">
-            <p class="muted">For payments we accept:</p>
-            <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
-              <img src="/mpesa.png" alt="M-Pesa" style="height:50px;width:auto;vertical-align:middle">
-              <span class="muted">·</span>
-              <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#334155" d="M3 10.5 12 5l9 5.5v7A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z"/><path fill="#94a3b8" d="M12 7.2 5 11v6.5h14V11z"/></svg>
-              <strong>Bank Transfer</strong>
-            </div>
-          </div>
-        </div>
-        <div class="stack" aria-hidden="true"></div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Bottom Tab Bar -->
-  <nav class="tabs" role="tablist" aria-label="Main navigation">
-    <button class="tab-btn active" data-target="home" aria-selected="true">
-      <span class="tab-ico">🏠</span><span>Home</span>
-    </button>
-    <button class="tab-btn" data-target="invest" aria-selected="false">
-      <span class="tab-ico">📈</span><span>Invest</span>
-    </button>
-    <button class="tab-btn" data-target="activity" aria-selected="false">
-      <span class="tab-ico">🧾</span><span>Activity</span>
-    </button>
-    <button class="tab-btn" data-target="more" aria-selected="false">
-      <span class="tab-ico">⋯</span><span>More</span>
-    </button>
-  </nav>
-
-  <!-- (Desktop footer retained if needed) -->
+  <!-- Footer -->
   <footer>
-    <div class="header-inner" style="height:auto;justify-content:space-between;padding:.9rem 0">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:.6rem">
         <img src="/favicon.svg" class="logo" alt="">
         <span>© <span id="y"></span> Imarika — <a class="muted" href="https://imarika.net">imarika.net</a></span>
@@ -284,6 +201,15 @@
     </div>
   </footer>
 
+  <!-- Floating WhatsApp -->
+  <div class="wa-float" style="position:fixed;right:16px;bottom:96px;z-index:50">
+    <a class="wa-btn" href="https://wa.me/254701017246?text=Hello%20Imarika!" aria-label="Chat on WhatsApp" style="height:58px;width:58px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:#25D366;color:#fff;box-shadow:0 12px 30px rgba(16,185,129,.35)">
+      <svg aria-hidden="true" viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
+        <path d="M20.52 3.48A11.94 11.94 0 0 0 12.06 0C5.52 0 .2 5.32.2 11.86c0 2.08.55 4.08 1.58 5.86L0 24l6.43-1.67a11.82 11.82 0 0 0 5.63 1.43h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.14-3.41-8.42zM12.06 21.3h-.01a9.5 9.5 0 0 1-4.85-1.31l-.35-.2-3.82.99 1.02-3.73-.23-.38a9.46 9.46 0 0 1-1.45-5.01c0-5.23 4.26-9.49 9.51-9.49 2.54 0 4.93 .99 6.72 2.78a9.43 9.43 0 0 1 2.78 6.71c0 5.23-4.26 9.49-9.52 9.49zm5.47-7.14c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.66 .15 s-.76 .97 -.92 1.17 c -.17 .2 -.34 .22 -.63 .07 -.3 -.15 -1.26 -.46 -2.4 -1.47 -.89 -.79 -1.49 -1.77 -1.66 -2.07 -.17 -.3 -.02 -.46 .13 -.61 .13 -.13 .3 -.34 .45 -.51 .15 -.17 .2 -.3 .3 -.5 .1 -.2 .05 -.37 -.02 -.53 -.07 -.15 -.66 -1.6 -.91 -2.18 -.24 -.58 -.48 -.5 -.66 -.51 l -.56 -.01 c -.2 0 -.53 .08 -.8 .37 -.27 .3 -1.05 1.02 -1.05 2.49 s 1.08 2.89 1.24 3.09 c .15 .2 2.12 3.22 5.14 4.52 .72 .31 1.28 .5 1.72 .64 .72 .23 1.38 .2 1.9 .12 .58 -.09 1.77 -.72 2.02 -1.41 .25 -.69 .25 -1.28 .17 -1.41 -.08 -.13 -.28 -.21 -.58 -.36 z"/>
+      </svg>
+    </a>
+  </div>
+
   <script>
     // Footer year
     const y = document.getElementById('y'); if (y) y.textContent = new Date().getFullYear();
@@ -294,14 +220,14 @@
     const saveUser = u => localStorage.setItem('imarika_user', JSON.stringify(u));
     const getUser  = () => { try { return JSON.parse(localStorage.getItem('imarika_user')||'null'); } catch { return null; } };
 
-    // legacy local (kept for migration completeness)
+    // legacy local (will be migrated once)
     const TX_KEY='imarika_tx';
     const LOAN_KEY='imarika_loan_tx';
     const getLocalTx = () => { try { return JSON.parse(localStorage.getItem(TX_KEY)||'[]'); } catch { return []; } };
     const clearLocalTx = () => localStorage.removeItem(TX_KEY);
 
     // ===== UI refs =====
-    const who = document.getElementById('who');
+    const dash = document.getElementById('dash'), who = document.getElementById('who');
     const walletEl = document.getElementById('wallet'), sharesEl = document.getElementById('shares'), stamp = document.getElementById('stamp');
     const txTable = document.getElementById('txTable').querySelector('tbody'), txCount = document.getElementById('txCount');
 
@@ -313,6 +239,7 @@
       walletEl.textContent = 'KES ' + fmt(u.wallet||0);
       sharesEl.textContent = 'KES ' + fmt(u.invested||0);
       stamp.textContent = 'Updated ' + new Date().toLocaleString();
+      dash.style.display='grid';
     }
 
     // ===== Server helpers =====
@@ -373,7 +300,7 @@
       const items = legacy.map(t => ({
         id: t.id || undefined,
         type: t.type,
-        amount: Math.abs(Number(t.amount||0)),
+        amount: Math.abs(Number(t.amount||0)),   // ensure positive
         detail: t.detail || '',
         status: t.status || (t.type==='Withdrawal' ? 'Requested' : 'Pending'),
         ts: Number(t.ts || Date.now())
@@ -419,6 +346,7 @@
       if(a<=0){ h.textContent='Enter amount.'; return; }
       if(a > (u.wallet||0)){ h.textContent='Insufficient wallet balance.'; return; }
 
+      // Create server TX (no local wallet change)
       const ok = await createServerTx({
         phone: u.phone,
         type: 'Withdrawal',
@@ -435,16 +363,14 @@
       }
     };
 
-    // ===== Loan Eligibility calculator (3× shares, min loan 20k, 10%/3mo) =====
+    // ===== NEW: Loan Eligibility calculator (3× shares, min loan 20k, 10%/3mo) =====
     const eligInput = document.getElementById('eligShares');
     const eligOut   = document.getElementById('eligOut');
 
     function computeEligibility(){
-      const shares = Number(eligInput?.value || 0);
-      const eligible = Math.floor(shares * 3);
+      const shares = Number(eligInput.value || 0);
+      const eligible = Math.floor(shares * 3); // 3× shares
       const MIN = 20000;
-      if (!eligInput) return;
-
       if (!shares){
         eligOut.innerHTML = 'Enter your current Shares to see eligibility.';
         return;
@@ -454,7 +380,7 @@
         eligOut.innerHTML = `Below minimum. Add <strong>KES ${fmt(need)}</strong> more in Shares to qualify for <span class="ok-strong">KES ${fmt(MIN)}</span>.`;
         return;
       }
-      const totalRepay = Math.round(eligible * 1.10);
+      const totalRepay = Math.round(eligible * 1.10); // +10% over 3 months
       const monthly = Math.ceil(totalRepay / 3);
       eligOut.innerHTML = `
         Eligible amount: <span class="ok-strong">KES ${fmt(eligible)}</span><br>
@@ -462,9 +388,11 @@
         Monthly installment (~3x): <strong>KES ${fmt(monthly)}</strong>
       `;
     }
-    if (eligInput){ eligInput.addEventListener('input', computeEligibility); }
+    if (eligInput){
+      eligInput.addEventListener('input', computeEligibility);
+    }
 
-    // ===== Quick Investment Calculator =====
+    // ===== Quick Investment Calculator (unchanged) =====
     const planEl = document.getElementById('plan');
     const amtEl  = document.getElementById('amt');
     const out    = document.getElementById('out');
@@ -477,14 +405,13 @@
     };
 
     function syncPlanUI(){
-      if(!planEl || !amtEl) return;
       const p = PLANS[planEl.value];
       amtEl.min = p.min;
       if (isFinite(p.max)) { amtEl.max = p.max; } else { amtEl.removeAttribute('max'); }
       amtEl.placeholder = `Enter amount (${p.min.toLocaleString('en-KE')}${isFinite(p.max)?' – '+p.max.toLocaleString('en-KE'): ' and above'})`;
-      if(out) out.textContent = '';
+      out.textContent = '';
     }
-    planEl?.addEventListener('change', syncPlanUI);
+    planEl.addEventListener('change', syncPlanUI);
     syncPlanUI();
 
     function validateAmount(){
@@ -495,13 +422,13 @@
       return {plan:p, amt};
     }
 
-    document.getElementById('calc')?.addEventListener('click', ()=>{
+    document.getElementById('calc').onclick = ()=>{
       const v = validateAmount(); if(!v) return;
       const earn = Math.round(v.amt * v.plan.pct / 100);
       out.innerHTML = `Projected earnings in 24h: <strong style="color:var(--ok)">KES ${fmt(earn)}</strong> • Total: <strong>KES ${fmt(v.amt+earn)}</strong>`;
-    });
+    };
 
-    startBtn?.addEventListener('click', async (e)=>{
+    startBtn.addEventListener('click', async (e)=>{
       const v = validateAmount();
       if(!v){ e.preventDefault(); return; }
       const me = getUser();
@@ -524,7 +451,6 @@
     // ===== Gate + boot =====
     const user = getUser();
     if(!user){
-      // Keep same behavior — require account first
       window.location.replace('/account.html');
     } else {
       showHeader(user);
@@ -532,30 +458,13 @@
       const es = document.getElementById('eligShares');
       if (es) { es.value = Number(user.invested||0); computeEligibility(); }
 
-      // Migrate + refresh
-      (async ()=>{
-        await migrateLegacy();
+      migrateLegacy().then(async ()=>{
         await fetchServerTx();
         await fetchUser();
-      })();
+      });
+      fetchServerTx();
+      fetchUser();
     }
-
-    // ===== Tabs =====
-    const btns = Array.from(document.querySelectorAll('.tab-btn'));
-    const screens = {
-      home: document.getElementById('screen-home'),
-      invest: document.getElementById('screen-invest'),
-      activity: document.getElementById('screen-activity'),
-      more: document.getElementById('screen-more')
-    };
-    function activate(which){
-      Object.values(screens).forEach(el=> el.classList.remove('active'));
-      btns.forEach(b=> b.classList.remove('active'));
-      screens[which].classList.add('active');
-      const btn = btns.find(b=>b.dataset.target===which);
-      btn?.classList.add('active');
-    }
-    btns.forEach(b=> b.addEventListener('click', ()=> activate(b.dataset.target)));
   </script>
 </body>
 </html>
