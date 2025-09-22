@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 <title>Dashboard | Imarika</title>
 <link rel="icon" href="/favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -11,34 +11,49 @@
     --brand:#f59e0b;--ok:#16a34a;--danger:#ef4444;--ring:rgba(245,158,11,.35)
   }
   *{box-sizing:border-box}
+  html,body{height:100%}
   body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
   a{text-decoration:none;color:inherit}
-  .container{max-width:1120px;margin:0 auto;padding:0 1rem}
-  header{position:sticky;top:0;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);z-index:40}
-  .brand{display:flex;align-items:center;gap:.55rem;height:64px}
-  .logo{height:32px;width:32px;border-radius:10px}
-  .btn{display:inline-flex;align-items:center;justify-content:center;padding:.72rem 1rem;border-radius:14px;font-weight:700;background:var(--brand);color:#111827;border:0;cursor:pointer;box-shadow:0 10px 30px rgba(245,158,11,.25)}
+
+  /* Mobile-first container */
+  .container{max-width:480px;margin:0 auto;padding:0 .75rem}
+
+  /* Compact, sticky header for mobile */
+  header{position:sticky;top:0;background:rgba(255,255,255,.95);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);z-index:40}
+  .brand{display:flex;align-items:center;gap:.55rem;height:56px}
+  .logo{height:28px;width:28px;border-radius:8px}
+
+  /* Buttons */
+  .btn{display:inline-flex;align-items:center;justify-content:center;padding:.65rem .9rem;border-radius:12px;font-weight:700;background:var(--brand);color:#111827;border:0;cursor:pointer}
   .btn-outline{background:#fff;border:1px solid var(--line)}
-  .btn-slim{padding:.55rem .75rem;border-radius:12px}
-  .grid{display:grid;gap:1rem}
-  .grid2{grid-template-columns:1fr}
-  @media(min-width:768px){.grid2{grid-template-columns:2fr 1fr}}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:1.15rem;box-shadow:0 10px 30px rgba(2,8,23,.06)}
-  input,select,textarea{width:100%;padding:.85rem;border:1px solid var(--line);border-radius:14px;outline:none}
-  input:focus,select:focus,textarea:focus{border-color:#cbd5e1;box-shadow:0 0 0 4px var(--ring)}
+  .btn-slim{padding:.5rem .7rem;border-radius:10px}
+
+  /* Cards / grid */
+  .grid{display:grid;gap:.9rem}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1rem;box-shadow:0 4px 14px rgba(2,8,23,.05)}
+
+  /* Inputs */
+  input,select,textarea{width:100%;padding:.75rem;border:1px solid var(--line);border-radius:12px;outline:none}
+  input:focus,select:focus,textarea:focus{border-color:#cbd5e1;box-shadow:0 0 0 3px var(--ring)}
+
   .muted{color:var(--muted)}
   .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
-  .table{width:100%;border-collapse:collapse}
-  .table th,.table td{border:1px solid var(--line);padding:.6rem .7rem}
-  .table th{background:#fff7ed}
-  .badge{padding:.18rem .5rem;border-radius:999px;background:#fef3c7;color:#78350f;font-weight:800}
-  #logoutBtn{position:static}
-  @media(max-width:900px){
-    header .container{padding-right:120px}
-    #logoutBtn{position:fixed;top:10px;right:10px;z-index:100}
-  }
-  .amount{font-weight:800;font-size:clamp(1.4rem,2.6vw,1.8rem);line-height:1;text-align:right;overflow-wrap:anywhere;word-break:break-word;max-width:100%;display:block}
-  footer{border-top:1px solid var(--line);padding:2.2rem 0;color:#475569;margin-top:2rem}
+
+  /* Tables become horizontally scrollable if needed (no page scroll) */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:12px}
+  table{border-collapse:collapse;width:100%;min-width:520px}
+  th,td{border-bottom:1px solid var(--line);padding:.5rem;text-align:left;font-size:.9rem}
+  thead th{background:#fff7ed;position:sticky;top:0}
+
+  .badge{padding:.15rem .45rem;border-radius:999px;background:#fef3c7;color:#78350f;font-weight:700;font-size:.8rem}
+
+  /* Logout button floats for easy thumb reach */
+  #logoutBtn{position:fixed;top:10px;right:10px;z-index:100}
+
+  /* Amount typography tuned for mobile */
+  .amount{font-weight:800;font-size:1.4rem;line-height:1.2;text-align:right}
+
+  footer{border-top:1px solid var(--line);padding:1.2rem 0;color:#475569;margin-top:1.2rem;font-size:.85rem}
   .ok-strong{color:var(--ok);font-weight:800}
 </style>
 
@@ -46,162 +61,145 @@
   <header>
     <div class="container" style="display:flex;align-items:center;justify-content:space-between">
       <a class="brand" href="/"><img src="/favicon.svg" class="logo" alt=""><strong>Imarika</strong></a>
-      <div style="display:flex;gap:.6rem">
-        <button class="btn btn-outline" id="logoutBtn" title="Sign out">Logout</button>
-      </div>
+      <button class="btn btn-outline" id="logoutBtn" title="Sign out">Logout</button>
     </div>
   </header>
 
   <section>
     <div class="container">
-      <h1 style="margin:1rem 0 .25rem">Dashboard</h1>
+      <h1 style="margin:1rem 0 .25rem;font-size:1.2rem">Dashboard</h1>
       <div class="muted" id="who"></div>
 
-      <div id="dash" class="grid grid2" style="margin-top:1rem;display:none">
-        <!-- LEFT COLUMN -->
-        <div class="grid">
-          <!-- WALLET -->
-          <div class="card">
-            <div id="stamp" class="muted mono" style="font-size:.85rem;margin-bottom:.25rem"></div>
-            <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:.8rem;flex-wrap:wrap">
-              <div style="min-width:220px">
-                <div style="font-weight:800">Wallet Balance</div>
-                <div class="muted">Available to invest/withdraw</div>
-              </div>
-              <div style="text-align:right;min-width:180px;flex:1 1 auto">
-                <div id="wallet" class="amount">KES 0</div>
-              </div>
-            </div>
+      <!-- Single-column mobile stack -->
+      <div id="dash" class="grid" style="margin-top:1rem;display:none">
 
-            <div style="margin-top:.8rem;display:flex;gap:.6rem;flex-wrap:wrap">
-              <a class="btn btn-slim" href="/deposit.html">Deposit</a>
-              <button class="btn btn-outline btn-slim" id="showWithdraw">Withdraw</button>
+        <!-- Wallet -->
+        <div class="card">
+          <div id="stamp" class="muted mono" style="font-size:.8rem;margin-bottom:.25rem"></div>
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
+            <div>
+              <div style="font-weight:800">Wallet Balance</div>
+              <div class="muted">Available to invest/withdraw</div>
             </div>
+            <div id="wallet" class="amount">KES 0</div>
           </div>
-
-          <!-- SHARES -->
-          <div class="card">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap">
-              <div style="min-width:220px">
-                <strong>Investments (Shares)</strong>
-                <div class="muted">Active amount in plans</div>
-              </div>
-              <div style="text-align:right;min-width:180px;flex:1 1 auto">
-                <div id="shares" class="amount" style="font-size:clamp(1.2rem,2.4vw,1.5rem)">KES 0</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- WITHDRAW -->
-          <div class="card" id="withdrawCard" style="display:none">
-            <strong>Withdraw to M-Pesa</strong>
-            <div style="display:grid;gap:.6rem;margin-top:.6rem">
-              <input id="wPhone" inputmode="tel" placeholder="M-Pesa number (07/01… 10 digits)">
-              <input id="wAmt" type="number" placeholder="Amount (KES)">
-              <button class="btn btn-slim" id="doWithdraw">Request Withdraw</button>
-              <div class="muted" id="wHint"></div>
-            </div>
-          </div>
-
-          <!-- (Transactions & Loan History moved to RIGHT column, below Quick Calculator) -->
-        </div>
-
-        <!-- RIGHT COLUMN -->
-        <div class="grid">
-          <!-- Loan Eligibility (3× Shares) — first -->
-          <div class="card" id="loanEligCard">
-            <strong>Loan Eligibility (3× Shares)</strong>
-            <div class="muted">Minimum loan: <strong>KES 20,000</strong>. Example: shares <strong>KES 8,000</strong> → qualifies <span class="ok-strong">KES 24,000</span> within 24h; repay over 3 months at 10% interest (~KES <strong>8,800</strong>/month).</div>
-            <div style="display:grid;gap:.6rem;margin-top:.6rem">
-              <label class="muted" for="eligShares">Your Shares (KES)</label>
-              <input id="eligShares" type="number" min="0" placeholder="Enter your current shares">
-              <div id="eligOut" class="muted"></div>
-              <a class="btn btn-slim" href="/deposit.html">Deposit Shares</a>
-            </div>
-          </div>
-
-          <!-- Quick Investment Calculator — second -->
-          <div class="card">
-            <strong>Quick Calculator</strong>
-            <div class="muted">Preview 24h payout & start</div>
-            <div style="display:grid;gap:.6rem;margin-top:.6rem">
-              <select id="plan">
-                <option value="std">Standard (30%)</option>
-                <option value="gold">Gold (50%)</option>
-                <option value="plat">Platinum (70%)</option>
-              </select>
-              <input id="amt" type="number" min="1000" placeholder="Enter amount">
-              <button class="btn btn-slim" id="calc">Calculate</button>
-              <div class="muted" id="out"></div>
-              <a class="btn btn-slim" id="startBtn" href="/deposit.html">Start & Deposit</a>
-            </div>
-          </div>
-
-          <!-- Transactions — third (moved here) -->
-          <div class="card">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
-              <strong>Transactions — Investments & Wallet</strong>
-              <span class="badge" id="txCount">0</span>
-            </div>
-            <div style="overflow:auto;margin-top:.6rem">
-              <table class="table" id="txTable">
-                <thead>
-                  <tr>
-                    <th>Date</th><th>Type</th><th>Details</th><th style="text-align:right">Amount (KES)</th><th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr><td colspan="5" class="muted" style="text-align:center">No transactions yet.</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Loan History — fourth (moved here) -->
-          <div class="card">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
-              <strong>Loan History</strong>
-              <span class="badge" id="loanCount">0</span>
-            </div>
-            <div style="overflow:auto;margin-top:.6rem">
-              <table class="table" id="loanTable">
-                <thead>
-                  <tr>
-                    <th>Date</th><th>Product</th><th>Tenor</th><th style="text-align:right">Amount (KES)</th><th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr><td colspan="5" class="muted" style="text-align:center">No loan activity yet.</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="muted" style="margin-top:.6rem">
-              Need a working-capital loan? <a href="https://wa.me/254701017246?text=Hello%20Imarika%2C%20I%20want%20a%20working-capital%20loan." target="_blank">Request on WhatsApp</a>.
-            </div>
+          <div style="margin-top:.7rem;display:flex;gap:.5rem;flex-wrap:wrap">
+            <a class="btn btn-slim" href="/deposit.html">Deposit</a>
+            <button class="btn btn-outline btn-slim" id="showWithdraw">Withdraw</button>
           </div>
         </div>
+
+        <!-- Shares -->
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <strong>Investments (Shares)</strong>
+              <div class="muted">Active amount in plans</div>
+            </div>
+            <div id="shares" class="amount" style="font-size:1.2rem">KES 0</div>
+          </div>
+        </div>
+
+        <!-- Withdraw -->
+        <div class="card" id="withdrawCard" style="display:none">
+          <strong>Withdraw to M-Pesa</strong>
+          <div style="display:grid;gap:.6rem;margin-top:.6rem">
+            <input id="wPhone" inputmode="tel" placeholder="M-Pesa number (07/01… 10 digits)">
+            <input id="wAmt" type="number" placeholder="Amount (KES)">
+            <button class="btn btn-slim" id="doWithdraw">Request Withdraw</button>
+            <div class="muted" id="wHint"></div>
+          </div>
+        </div>
+
+        <!-- Loan Eligibility (3× Shares) -->
+        <div class="card" id="loanEligCard">
+          <strong>Loan Eligibility (3× Shares)</strong>
+          <div class="muted" style="font-size:.85rem;margin-top:.2rem">
+            Minimum loan: <strong>KES 20,000</strong>. Example: shares <strong>KES 8,000</strong> → qualifies
+            <span class="ok-strong">KES 24,000</span>, repay 3 months @10% (~KES <strong>8,800</strong>/month).
+          </div>
+          <div style="display:grid;gap:.5rem;margin-top:.5rem">
+            <input id="eligShares" type="number" min="0" placeholder="Enter your shares">
+            <div id="eligOut" class="muted"></div>
+            <a class="btn btn-slim" href="/deposit.html">Deposit Shares</a>
+          </div>
+        </div>
+
+        <!-- Quick Investment Calculator -->
+        <div class="card">
+          <strong>Quick Calculator</strong>
+          <div class="muted" style="font-size:.85rem">Preview 24h payout & start</div>
+          <div style="display:grid;gap:.5rem;margin-top:.5rem">
+            <select id="plan">
+              <option value="std">Standard (30%)</option>
+              <option value="gold">Gold (50%)</option>
+              <option value="plat">Platinum (70%)</option>
+            </select>
+            <input id="amt" type="number" min="1000" placeholder="Enter amount">
+            <button class="btn btn-slim" id="calc">Calculate</button>
+            <div class="muted" id="out"></div>
+            <a class="btn btn-slim" id="startBtn" href="/deposit.html">Start & Deposit</a>
+          </div>
+        </div>
+
+        <!-- Transactions -->
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <strong>Transactions — Investments & Wallet</strong>
+            <span class="badge" id="txCount">0</span>
+          </div>
+          <div class="table-wrap" style="margin-top:.5rem">
+            <table id="txTable">
+              <thead>
+                <tr>
+                  <th>Date</th><th>Type</th><th>Details</th><th style="text-align:right">Amount (KES)</th><th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td colspan="5" class="muted" style="text-align:center">No transactions yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Loan History -->
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <strong>Loan History</strong>
+            <span class="badge" id="loanCount">0</span>
+          </div>
+          <div class="table-wrap" style="margin-top:.5rem">
+            <table id="loanTable">
+              <thead>
+                <tr>
+                  <th>Date</th><th>Product</th><th>Tenor</th><th style="text-align:right">Amount (KES)</th><th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td colspan="5" class="muted" style="text-align:center">No loan activity yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="muted" style="margin-top:.6rem">
+            Need a working-capital loan? <a href="https://wa.me/254701017246?text=Hello%20Imarika%2C%20I%20want%20a%20working-capital%20loan." target="_blank">Request on WhatsApp</a>.
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
 
-  <!-- Footer -->
   <footer>
-    <div class="container" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:.6rem">
-        <img src="/favicon.svg" class="logo" alt="">
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem">
+      <div style="display:flex;align-items:center;gap:.5rem">
+        <img src="/favicon.svg" class="logo" alt="" style="height:20px;width:20px">
         <span>© <span id="y"></span> Imarika — <a class="muted" href="https://imarika.net">imarika.net</a></span>
       </div>
-      <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
-        <span class="muted">Payments Accepted:&nbsp;</span>
-        <img src="/mpesa.png" alt="M-Pesa" style="height:60px;width:auto;vertical-align:middle">
-        <span class="muted">·</span>
-        <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#334155" d="M3 10.5 12 5l9 5.5v7A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z"/><path fill="#94a3b8" d="M12 7.2 5 11v6.5h14V11z"/></svg>
-        <strong>Bank Transfer</strong>
-      </div>
+      <div class="muted">Payments: <img src="/mpesa.png" alt="M-Pesa" style="height:20px;vertical-align:middle"> · Bank Transfer</div>
     </div>
   </footer>
 
-  <!-- Floating WhatsApp -->
+  <!-- Floating WhatsApp (unchanged) -->
   <div class="wa-float" style="position:fixed;right:16px;bottom:96px;z-index:50">
     <a class="wa-btn" href="https://wa.me/254701017246?text=Hello%20Imarika!" aria-label="Chat on WhatsApp" style="height:58px;width:58px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:#25D366;color:#fff;box-shadow:0 12px 30px rgba(16,185,129,.35)">
       <svg aria-hidden="true" viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
@@ -363,7 +361,7 @@
       }
     };
 
-    // ===== NEW: Loan Eligibility calculator (3× shares, min loan 20k, 10%/3mo) =====
+    // ===== Loan Eligibility calculator (3× shares, min loan 20k, 10%/3mo) =====
     const eligInput = document.getElementById('eligShares');
     const eligOut   = document.getElementById('eligOut');
 
