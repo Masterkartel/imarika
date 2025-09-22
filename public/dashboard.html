@@ -124,6 +124,24 @@
 
         <!-- RIGHT -->
         <div class="grid">
+
+          <!-- NEW: LOAN ELIGIBILITY (3× Shares) -->
+          <div class="card">
+            <strong>Loan Eligibility (3× Shares)</strong>
+            <div class="muted">Minimum loan amount is <strong>KES 20,000</strong>.</div>
+            <div style="display:grid;gap:.6rem;margin-top:.6rem">
+              <label class="muted" for="loanShares">Shares amount (KES)</label>
+              <input id="loanShares" type="number" min="0" placeholder="Enter shares amount">
+              <button class="btn btn-slim" id="checkLoan">Check Eligibility</button>
+              <div id="loanOut" class="muted"></div>
+              <a class="btn btn-slim" href="/deposit.html">Deposit Shares</a>
+              <div class="muted" style="font-size:.9rem">
+                Example: <span class="mono">8,000</span> in shares ⇒ qualifies <strong style="color:var(--ok)">KES 24,000</strong>.
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Calculator -->
           <div class="card">
             <strong>Quick Calculator</strong>
             <div class="muted">Preview 24h payout & start</div>
@@ -187,7 +205,7 @@
   <div class="wa-float" style="position:fixed;right:16px;bottom:96px;z-index:50">
     <a class="wa-btn" href="https://wa.me/254701017246?text=Hello%20Imarika!" aria-label="Chat on WhatsApp" style="height:58px;width:58px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:#25D366;color:#fff;box-shadow:0 12px 30px rgba(16,185,129,.35)">
       <svg aria-hidden="true" viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
-        <path d="M20.52 3.48A11.94 11.94 0 0 0 12.06 0C5.52 0 .2 5.32.2 11.86c0 2.08.55 4.08 1.58 5.86L0 24l6.43-1.67a11.82 11.82 0 0 0 5.63 1.43h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.14-3.41-8.42zM12.06 21.3h-.01a9.5 9.5 0 0 1-4.85-1.31l-.35-.2-3.82.99 1.02-3.73-.23-.38a9.46 9.46 0 0 1-1.45-5.01c0-5.23 4.26-9.49 9.51-9.49 2.54 0 4.93 .99 6.72 2.78a9.43 9.43 0 0 1 2.78 6.71c0 5.23-4.26 9.49-9.52 9.49zm5.47-7.14c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.66 .15 s-.76 .97 -.92 1.17 c -.17 .2 -.34 .22 -.63 .07 -.3 -.15 -1.26 -.46 -2.4 -1.47 -.89 -.79 -1.49 -1.77 -1.66 -2.07 -.17 -.3 -.02 -.46 .13 -.61 .13 -.13 .3 -.34 .45 -.51 .15 -.17 .2 -.3 .3 -.5 .1 -.2 .05 -.37 -.02 -.53 -.07 -.15 -.66 -1.6 -.91 -2.18 -.24 -.58 -.48 -.5 -.66 -.51 l -.56 -.01 c -.2 0 -.53 .08 -.8 .37 -.27 .3 -1.05 1.02 -1.05 2.49 s 1.08 2.89 1.24 3.09 c .15 .2 2.12 3.22 5.14 4.52 .72 .31 1.28 .5 1.72 .64 .72 .23 1.38 .2 1.9 .12 .58 -.09 1.77 -.72 2.02 -1.41 .25 -.69 .25 -1.28 .17 -1.41 -.08 -.13 -.28 -.21 -.58 -.36 z"/>
+        <path d="M20.52 3.48A11.94 11.94 0 0 0 12.06 0C5.52 0 .2 5.32.2 11.86c0 2.08.55 4.08 1.58 5.86L0 24l6.43-1.67a11.82 11.82 0 0 0 5.63 1.43h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.14-3.41-8.42zM12.06 21.3h-.01a9.5 9.5 0 0 1-4.85-1.31l-.35-.2-3.82 .99 1.02 -3.73 -.23 -.38 a9.46 9.46 0 0 1 -1.45 -5.01 c0 -5.23 4.26 -9.49 9.51 -9.49 2.54 0 4.93 .99 6.72 2.78 a9.43 9.43 0 0 1 2.78 6.71 c0 5.23 -4.26 9.49 -9.52 9.49 zm 5.47 -7.14 c -.3 -.15 -1.77 -.87 -2.04 -.97 -.27 -.1 -.47 -.15 -.66 .15 s -.76 .97 -.92 1.17 c -.17 .2 -.34 .22 -.63 .07 -.3 -.15 -1.26 -.46 -2.4 -1.47 -.89 -.79 -1.49 -1.77 -1.66 -2.07 -.17 -.3 -.02 -.46 .13 -.61 .13 -.13 .3 -.34 .45 -.51 .15 -.17 .2 -.3 .3 -.5 .1 -.2 .05 -.37 -.02 -.53 -.07 -.15 -.66 -1.6 -.91 -2.18 -.24 -.58 -.48 -.5 -.66 -.51 l -.56 -.01 c -.2 0 -.53 .08 -.8 .37 -.27 .3 -1.05 1.02 -1.05 2.49 s 1.08 2.89 1.24 3.09 c .15 .2 2.12 3.22 5.14 4.52 .72 .31 1.28 .5 1.72 .64 .72 .23 1.38 .2 1.9 .12 .58 -.09 1.77 -.72 2.02 -1.41 .25 -.69 .25 -1.28 .17 -1.41 -.08 -.13 -.28 -.21 -.58 -.36 z"/>
       </svg>
     </a>
   </div>
@@ -222,6 +240,10 @@
       sharesEl.textContent = 'KES ' + fmt(u.invested||0);
       stamp.textContent = 'Updated ' + new Date().toLocaleString();
       dash.style.display='grid';
+
+      // Prefill loan calculator with current shares
+      const ls = document.getElementById('loanShares');
+      if (ls) { ls.value = Number(u.invested||0); calcLoanEligibility(); }
     }
 
     // ===== Server helpers =====
@@ -339,7 +361,7 @@
       }
     };
 
-    // ===== Calculator + start (server-backed pending deposit record) =====
+    // ===== Quick Investment Calculator (existing) =====
     const planEl = document.getElementById('plan');
     const amtEl  = document.getElementById('amt');
     const out    = document.getElementById('out');
@@ -388,6 +410,24 @@
         status: 'Pending'
       });
     });
+
+    // ===== NEW: Loan Eligibility logic =====
+    const MIN_LOAN = 20000;
+    function calcLoanEligibility(){
+      const input = document.getElementById('loanShares');
+      const out = document.getElementById('loanOut');
+      if(!input || !out) return;
+      const shares = Math.max(0, Number(input.value||0));
+      const eligible = Math.floor(shares * 3);
+
+      if(eligible < MIN_LOAN){
+        out.innerHTML = `Qualified: <strong style="color:var(--danger)">Below minimum (KES ${fmt(MIN_LOAN)})</strong>`;
+      }else{
+        out.innerHTML = `Qualified loan amount: <strong style="color:var(--ok)">KES ${fmt(eligible)}</strong>`;
+      }
+    }
+    document.getElementById('checkLoan')?.addEventListener('click', calcLoanEligibility);
+    document.getElementById('loanShares')?.addEventListener('input', ()=>{ /* live feedback */ });
 
     // ===== Logout → Home =====
     document.getElementById('logoutBtn').onclick = ()=>{
