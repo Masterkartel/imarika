@@ -1,468 +1,370 @@
 <!doctype html>
 <html lang="en">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<title>Dashboard | Imarika</title>
-<link rel="icon" href="/favicon.svg">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#fff;--text:#0f172a;--muted:#475569;--line:#e5e7eb;--card:#fff;
-    --brand:#f59e0b;--ok:#16a34a;--danger:#ef4444;--ring:rgba(245,158,11,.35)
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-  a{text-decoration:none;color:inherit}
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cyrptonvest — AI-Powered Investing</title>
+  <meta name="description" content="Cyrptonvest uses algorithmic strategies and 24/7 AI trading bots to grow your capital. Choose a plan, deposit crypto, and track results in real time." />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  /* Mobile-first container */
-  .container{max-width:480px;margin:0 auto;padding:0 .75rem}
+  <style>
+    :root{
+      --bg:#0b0f19;--panel:#0f1629;--panel-2:#0c1428;--muted:#9aa4b2;--text:#e6edf3;--line:#1d2640;
+      --brand:#f59e0b;--ok:#22c55e;--ring:rgba(245,158,11,.3);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.6 Inter,system-ui,Segoe UI,Arial,sans-serif}
+    a{color:var(--brand);text-decoration:none}
+    .content{max-width:1200px;margin:0 auto;padding:0 16px}
 
-  /* Compact, sticky header for mobile */
-  header{position:sticky;top:0;background:rgba(255,255,255,.95);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);z-index:40}
-  .brand{display:flex;align-items:center;gap:.55rem;height:56px}
-  .logo{height:28px;width:28px;border-radius:8px}
+    /* Top bar */
+    .topbar{position:sticky;top:0;z-index:40;background:linear-gradient(180deg,#0e152f,transparent);
+      border-bottom:1px solid var(--line)}
+    .tb-inner{display:flex;align-items:center;justify-content:space-between;padding:12px 16px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:800}
+    .brand img{width:22px;height:22px}
+    .pill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#121a33;
+      padding:.35rem .6rem;border-radius:999px;color:#d1d5db}
+    .tb-cta{display:flex;gap:10px;align-items:center}
+    .btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:999px;padding:10px 14px;
+      font-weight:700;cursor:pointer}
+    .btn-primary{background:linear-gradient(180deg,#fbbf24,#f59e0b);color:#111827}
+    .btn-ghost{background:#121a33;border:1px solid var(--line);color:#d1d5db}
+    .btn-ghost:hover{background:#162044}
+    /* Make Login/Sign up pills same height as UTC pill */
+    .tb-cta .btn{padding:.35rem .6rem}
 
-  /* Buttons */
-  .btn{display:inline-flex;align-items:center;justify-content:center;padding:.65rem .9rem;border-radius:12px;font-weight:700;background:var(--brand);color:#111827;border:0;cursor:pointer}
-  .btn-outline{background:#fff;border:1px solid var(--line)}
-  .btn-slim{padding:.5rem .7rem;border-radius:10px}
+    /* Ticker strip */
+    .ticker-wrap{border-bottom:1px solid var(--line)}
 
-  /* Cards / grid */
-  .grid{display:grid;gap:.9rem}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:1rem;box-shadow:0 4px 14px rgba(2,8,23,.05)}
+    /* Sections / cards */
+    .section{padding:24px 0}
+    .hero{background:
+      radial-gradient(900px 500px at -10% -40%, rgba(245,158,11,.22), transparent 55%),
+      radial-gradient(900px 600px at 120% 0%,   rgba(34,197,94,.18), transparent 55%),
+      linear-gradient(180deg,#101934,#0c1226);
+      border:1px solid #27335a;border-radius:18px;padding:22px;position:relative;
+      box-shadow:0 20px 60px rgba(0,0,0,.28)}
+    .hero h1{margin:0 0 10px;font-size:34px;line-height:1.15}
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #2a3a66;background:#0f1a36;border-radius:999px;font-size:13px}
+    .hero-actions{display:flex;gap:10px;flex-wrap:wrap}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+    .muted{color:var(--muted)}
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    @media (max-width:900px){ .grid-3{grid-template-columns:1fr 1fr} }
+    @media (max-width:640px){ .grid-3,.grid-2{grid-template-columns:1fr} .hero h1{font-size:28px} }
 
-  /* Inputs */
-  input,select,textarea{width:100%;padding:.75rem;border:1px solid var(--line);border-radius:12px;outline:none}
-  input:focus,select:focus,textarea:focus{border-color:#cbd5e1;box-shadow:0 0 0 3px var(--ring)}
+    .feat{display:flex;gap:12px}
+    .feat .ic{width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:#101a34;display:grid;place-items:center;font-size:20px}
 
-  .muted{color:var(--muted)}
-  .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+    /* Plan cards + soft calculators */
+    .plan{border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:10px}
+    .plan h3{margin:0}
+    input,select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0a1122;color:#e6edf3;outline:none}
+    input:focus{box-shadow:0 0 0 3px var(--ring)}
+    .field-warn{color:#fca5a5;font-size:12px;margin-top:6px}
+    .ok{color:#22c55e} /* green profit */
 
-  /* Tables become horizontally scrollable if needed (no page scroll) */
-  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:12px}
-  table{border-collapse:collapse;width:100%;min-width:520px}
-  th,td{border-bottom:1px solid var(--line);padding:.5rem;text-align:left;font-size:.9rem}
-  thead th{background:#fff7ed;position:sticky;top:0}
+    /* FAQ */
+    details{border:1px solid var(--line);border-radius:12px;padding:10px;background:#0f1629}
+    summary{cursor:pointer;font-weight:700}
+    details + details{margin-top:10px}
 
-  .badge{padding:.15rem .45rem;border-radius:999px;background:#fef3c7;color:#78350f;font-weight:700;font-size:.8rem}
+    /* Footer */
+    footer{padding:24px 0;border-top:1px solid var(--line);color:#aab3c2}
+    .links{display:flex;gap:14px;flex-wrap:wrap}
 
-  /* Logout button floats for easy thumb reach */
-  #logoutBtn{position:fixed;top:10px;right:10px;z-index:100}
-
-  /* Amount typography tuned for mobile */
-  .amount{font-weight:800;font-size:1.4rem;line-height:1.2;text-align:right}
-
-  footer{border-top:1px solid var(--line);padding:1.2rem 0;color:#475569;margin-top:1.2rem;font-size:.85rem}
-  .ok-strong{color:var(--ok);font-weight:800}
-</style>
-
+    /* Reveal Animations (scroll-triggered) */
+    @media (prefers-reduced-motion: no-preference){
+      .reveal{opacity:0;transform:translateY(12px);will-change:transform,opacity;animation:none!important}
+      .reveal.in{
+        opacity:1;transform:translateY(0);
+        transition:
+          transform .6s cubic-bezier(.16,1,.3,1),
+          opacity  .6s ease-out;
+        transition-delay: var(--reveal-delay, 0s);
+      }
+      .card:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(0,0,0,.28)}
+    }
+  </style>
+</head>
 <body>
-  <header>
-    <div class="container" style="display:flex;align-items:center;justify-content:space-between">
-      <a class="brand" href="/"><img src="/favicon.svg" class="logo" alt=""><strong>Imarika</strong></a>
-      <button class="btn btn-outline" id="logoutBtn" title="Sign out">Logout</button>
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="content tb-inner">
+      <div class="brand"><img src="/assets/logo.svg" alt="logo"> Cyrptonvest</div>
+      <div class="tb-cta">
+        <span class="pill">UTC <span id="clock" style="margin-left:6px">--:--:--</span></span>
+        <a class="btn btn-ghost" href="/login.html">Log in</a>
+        <a class="btn btn-primary" href="/signup.html">Sign up</a>
+      </div>
     </div>
-  </header>
+  </div>
 
-  <section>
-    <div class="container">
-      <h1 style="margin:1rem 0 .25rem;font-size:1.2rem">Dashboard</h1>
-      <div class="muted" id="who"></div>
+  <!-- Ticker -->
+  <div class="ticker-wrap">
+    <div class="content">
+      <div class="tradingview-widget-container" style="height:44px">
+        <div class="tradingview-widget-container__widget"></div>
+        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js" async>
+        {
+          "symbols": [
+            {"proName": "BITSTAMP:BTCUSD", "title": "BTC/USD"},
+            {"proName": "BITSTAMP:ETHUSD", "title": "ETH/USD"},
+            {"proName": "OANDA:XAUUSD",   "title": "Gold"},
+            {"proName": "OANDA:XAGUSD",   "title": "Silver"},
+            {"proName": "TVC:USOIL",      "title": "Oil"},
+            {"proName": "FX:EURUSD",      "title": "EUR/USD"},
+            {"proName": "FX:USDJPY",      "title": "USD/JPY"},
+            {"proName": "FX:GBPUSD",      "title": "GBP/USD"},
+            {"proName": "FX:AUDUSD",      "title": "AUD/USD"}
+          ],
+          "showSymbolLogo": true,
+          "isTransparent": true,
+          "displayMode": "adaptive",
+          "colorTheme": "dark",
+          "locale": "en"
+        }
+        </script>
+      </div>
+    </div>
+  </div>
 
-      <!-- Single-column mobile stack -->
-      <div id="dash" class="grid" style="margin-top:1rem;display:none">
-
-        <!-- Wallet -->
-        <div class="card">
-          <div id="stamp" class="muted mono" style="font-size:.8rem;margin-bottom:.25rem"></div>
-          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
-            <div>
-              <div style="font-weight:800">Wallet Balance</div>
-              <div class="muted">Available to invest/withdraw</div>
-            </div>
-            <div id="wallet" class="amount">KES 0</div>
-          </div>
-          <div style="margin-top:.7rem;display:flex;gap:.5rem;flex-wrap:wrap">
-            <a class="btn btn-slim" href="/deposit.html">Deposit</a>
-            <button class="btn btn-outline btn-slim" id="showWithdraw">Withdraw</button>
-          </div>
+  <!-- Hero -->
+  <section class="section">
+    <div class="content">
+      <div class="hero">
+        <h1>AI-powered trading. Smart bots. Real results.</h1>
+        <div class="chips">
+          <span class="chip">🤖 AI Bots</span>
+          <span class="chip">📊 Auto-Execution</span>
+          <span class="chip">⚙️ 24/7</span>
         </div>
-
-        <!-- Shares -->
-        <div class="card">
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <div>
-              <strong>Investments (Shares)</strong>
-              <div class="muted">Active amount in plans</div>
-            </div>
-            <div id="shares" class="amount" style="font-size:1.2rem">KES 0</div>
-          </div>
+        <p class="muted">
+          Put your money to work while you sleep. Our algorithmic strategies scan crypto, forex, and commodities
+          24/7 to capture high-probability moves. Choose a plan, deposit crypto, and track your growth in real time.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="/dashboard/#plans">Get started</a>
+          <!-- Removed the 'How it works' pill from here -->
         </div>
-
-        <!-- Withdraw -->
-        <div class="card" id="withdrawCard" style="display:none">
-          <strong>Withdraw to M-Pesa</strong>
-          <div style="display:grid;gap:.6rem;margin-top:.6rem">
-            <input id="wPhone" inputmode="tel" placeholder="M-Pesa number (07/01… 10 digits)">
-            <input id="wAmt" type="number" placeholder="Amount (KES)">
-            <button class="btn btn-slim" id="doWithdraw">Request Withdraw</button>
-            <div class="muted" id="wHint"></div>
-          </div>
-        </div>
-
-        <!-- Loan Eligibility (3× Shares) -->
-        <div class="card" id="loanEligCard">
-          <strong>Loan Eligibility (3× Shares)</strong>
-          <div class="muted" style="font-size:.85rem;margin-top:.2rem">
-            Minimum loan: <strong>KES 20,000</strong>. Example: shares <strong>KES 8,000</strong> → qualifies
-            <span class="ok-strong">KES 24,000</span>, repay 3 months @10% (~KES <strong>8,800</strong>/month).
-          </div>
-          <div style="display:grid;gap:.5rem;margin-top:.5rem">
-            <input id="eligShares" type="number" min="0" placeholder="Enter your shares">
-            <div id="eligOut" class="muted"></div>
-            <a class="btn btn-slim" href="/deposit.html">Deposit Shares</a>
-          </div>
-        </div>
-
-        <!-- Quick Investment Calculator -->
-        <div class="card">
-          <strong>Quick Calculator</strong>
-          <div class="muted" style="font-size:.85rem">Preview 24h payout & start</div>
-          <div style="display:grid;gap:.5rem;margin-top:.5rem">
-            <select id="plan">
-              <option value="std">Standard (30%)</option>
-              <option value="gold">Gold (50%)</option>
-              <option value="plat">Platinum (70%)</option>
-            </select>
-            <input id="amt" type="number" min="1000" placeholder="Enter amount">
-            <button class="btn btn-slim" id="calc">Calculate</button>
-            <div class="muted" id="out"></div>
-            <a class="btn btn-slim" id="startBtn" href="/deposit.html">Start & Deposit</a>
-          </div>
-        </div>
-
-        <!-- Transactions -->
-        <div class="card">
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <strong>Transactions — Investments & Wallet</strong>
-            <span class="badge" id="txCount">0</span>
-          </div>
-          <div class="table-wrap" style="margin-top:.5rem">
-            <table id="txTable">
-              <thead>
-                <tr>
-                  <th>Date</th><th>Type</th><th>Details</th><th style="text-align:right">Amount (KES)</th><th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td colspan="5" class="muted" style="text-align:center">No transactions yet.</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Loan History -->
-        <div class="card">
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <strong>Loan History</strong>
-            <span class="badge" id="loanCount">0</span>
-          </div>
-          <div class="table-wrap" style="margin-top:.5rem">
-            <table id="loanTable">
-              <thead>
-                <tr>
-                  <th>Date</th><th>Product</th><th>Tenor</th><th style="text-align:right">Amount (KES)</th><th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td colspan="5" class="muted" style="text-align:center">No loan activity yet.</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="muted" style="margin-top:.6rem">
-            Need a working-capital loan? <a href="https://wa.me/254701017246?text=Hello%20Imarika%2C%20I%20want%20a%20working-capital%20loan." target="_blank">Request on WhatsApp</a>.
-          </div>
-        </div>
-
       </div>
     </div>
   </section>
 
-  <footer>
-    <div class="container" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem">
-      <div style="display:flex;align-items:center;gap:.5rem">
-        <img src="/favicon.svg" class="logo" alt="" style="height:20px;width:20px">
-        <span>© <span id="y"></span> Imarika — <a class="muted" href="https://imarika.net">imarika.net</a></span>
+  <!-- How it works (as a hero-toned card with mini cards inside) -->
+  <section id="how" class="section">
+    <div class="content">
+      <div class="hero" style="padding:20px">
+        <h2 style="margin:0 0 12px">How it works</h2>
+        <div class="grid-3">
+          <div class="card feat">
+            <div class="ic">🧭</div>
+            <div>
+              <h3 style="margin:0 0 6px">Pick a plan</h3>
+              <p class="muted">Starter, Growth, or Professional — each with a defined range and timeframe.</p>
+            </div>
+          </div>
+          <div class="card feat">
+            <div class="ic">💸</div>
+            <div>
+              <h3 style="margin:0 0 6px">Deposit crypto</h3>
+              <p class="muted">Send BTC, USDT-TRC20, or ETH. Funds are credited after network confirmations.</p>
+            </div>
+          </div>
+          <div class="card feat">
+            <div class="ic">📈</div>
+            <div>
+              <h3 style="margin:0 0 6px">Track & withdraw</h3>
+              <p class="muted">Watch performance in your dashboard and withdraw securely when ready.</p>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="muted">Payments: <img src="/mpesa.png" alt="M-Pesa" style="height:20px;vertical-align:middle"> · Bank Transfer</div>
+    </div>
+  </section>
+
+  <!-- Plans (with mini calculators) -->
+  <section class="section">
+    <div class="content">
+      <h2 style="margin:0 0 12px">Plans</h2>
+      <div class="grid-3">
+        <div class="card plan" id="p-starter">
+          <h3>Starter</h3>
+          <div class="muted">Range: $5–$10 • Profit: <strong>60%</strong> in 3h</div>
+          <label class="muted">Enter amount (USD)</label>
+          <input id="st-amt" type="number" step="0.01" placeholder="5" />
+          <div id="st-warn" class="field-warn" style="display:none"></div>
+          <div class="muted">Estimated return: <span id="st-out">—</span></div>
+          <a class="btn btn-primary" href="/dashboard/#plans" onclick="prefill( 'st-amt', 5,10,0.60 )">Start</a>
+        </div>
+
+        <div class="card plan" id="p-growth">
+          <h3>Growth</h3>
+          <div class="muted">Range: $50–$400 • Profit: <strong>140%</strong> in 6h</div>
+          <label class="muted">Enter amount (USD)</label>
+          <input id="gr-amt" type="number" step="0.01" placeholder="50" />
+          <div id="gr-warn" class="field-warn" style="display:none"></div>
+          <div class="muted">Estimated return: <span id="gr-out">—</span></div>
+          <a class="btn btn-primary" href="/dashboard/#plans" onclick="prefill( 'gr-amt', 50,400,1.40 )">Start</a>
+        </div>
+
+        <div class="card plan" id="p-pro">
+          <h3>Professional</h3>
+          <div class="muted">Range: $500–$10,000 • Profit: <strong>200%</strong> in 24h</div>
+          <label class="muted">Enter amount (USD)</label>
+          <input id="pr-amt" type="number" step="0.01" placeholder="500" />
+          <div id="pr-warn" class="field-warn" style="display:none"></div>
+          <div class="muted">Estimated return: <span id="pr-out">—</span></div>
+          <a class="btn btn-primary" href="/dashboard/#plans" onclick="prefill( 'pr-amt', 500,10000,2.00 )">Start</a>
+        </div>
+      </div>
+      <p class="muted" style="margin-top:10px">Calculator is illustrative; ranges are enforced inside the dashboard when you fund a plan.</p>
+    </div>
+  </section>
+
+  <!-- Why section -->
+  <section class="section">
+    <div class="content">
+      <h2 style="margin:0 0 12px">Why Cyrptonvest</h2>
+      <div class="grid-3">
+        <div class="card"><strong>Institutional-style risk controls</strong><p class="muted">Position sizing, stop logic, and venue selection built into strategies.</p></div>
+        <div class="card"><strong>Global edge</strong><p class="muted">We monitor crypto, FX, and commodities around the clock.</p></div>
+        <div class="card"><strong>Fast, secure payouts</strong><p class="muted">Withdraw to BTC, USDT-TRC20, or ETH with clear status tracking.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section">
+    <div class="content">
+      <h2 style="margin:0 0 12px">FAQ</h2>
+      <div class="grid-2">
+        <div>
+          <details open>
+            <summary>How quickly are deposits credited?</summary>
+            <p class="muted">After required network confirmations and an automated review, you'll see it in your wallet balance.</p>
+          </details>
+          <details>
+            <summary>Which assets do you support?</summary>
+            <p class="muted">Deposits: BTC, USDT-TRC20, ETH. We also track XAUUSD, XAGUSD, Oil and major FX pairs in the dashboard.</p>
+          </details>
+        </div>
+        <div>
+          <details>
+            <summary>Can I withdraw anytime?</summary>
+            <p class="muted">You can request withdrawals from your wallet balance at any time. Plan-locked funds become available after the plan completes.</p>
+          </details>
+          <details>
+            <summary>Where can I read the policies?</summary>
+            <p class="muted"><a href="/policies/terms.html">Terms</a> • <a href="/policies/privacy.html">Privacy</a> • <a href="/policies/risk.html">Risk Disclosure</a></p>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="section">
+    <div class="content">
+      <div class="card" style="display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center">
+        <div>
+          <h3 style="margin:0 0 6px">Need help?</h3>
+          <p class="muted" style="margin:0">
+            Email us at <a href="mailto:support@cyrptonvest.com">support@cyrptonvest.com</a>
+            <!-- Small WhatsApp icon → +1 (603) 722-7904 -->
+            <a href="https://wa.me/16037227904" target="_blank" rel="noopener"
+               aria-label="WhatsApp chat +1 (603) 722-7904"
+               style="margin-left:8px;display:inline-block;vertical-align:-3px;line-height:0;color:#25D366">
+              <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M20.52 3.48A11.94 11.94 0 0 0 12.06 0C5.52 0 .2 5.32.2 11.86c0 2.08.55 4.08 1.58 5.86L0 24l6.43-1.67a11.82 11.82 0 0 0 5.63 1.43h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.14-3.41-8.42zM12.06 21.3h-.01a9.5 9.5 0 0 1-4.85-1.31l-.35-.2-3.82.99 1.02-3.73-.23-.38a9.46 9.46 0 0 1-1.45-5.01c0-5.23 4.26-9.49 9.51-9.49 2.54 0 4.93 .99 6.72 2.78a9.43 9.43 0 0 1 2.78 6.71c0 5.23-4.26 9.49-9.52 9.49zm5.47-7.14c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.66 .15 s-.76 .97 -.92 1.17 c -.17 .2 -.34 .22 -.63 .07 -.3 -.15 -1.26 -.46 -2.4 -1.47 -.89 -.79 -1.49 -1.77 -1.66 -2.07 -.17 -.3 -.02 -.46 .13 -.61 .13 -.13 .3 -.34 .45 -.51 .15 -.17 .2 -.3 .3 -.5 .1 -.2 .05 -.37 -.02 -.53 -.07 -.15 -.66 -1.6 -.91 -2.18 -.24 -.58 -.48 -.5 -.66 -.51 l -.56 -.01 c -.2 0 -.53 .08 -.8 .37 -.27 .3 -1.05 1.02 -1.05 2.49 s 1.08 2.89 1.24 3.09 c .15 .2 2.12 3.22 5.14 4.52 .72 .31 1.28 .5 1.72 .64 .72 .23 1.38 .2 1.9 .12 .58 -.09 1.77 -.72 2.02 -1.41 .25 -.69 .25 -1.28 .17 -1.41 -.08 -.13 -.28 -.21 -.58 -.36 z"/>
+              </svg>
+            </a>
+          </p>
+        </div>
+        <div>
+          <a class="btn btn-ghost" href="/login.html">Log in</a>
+          <a class="btn btn-primary" href="/signup.html">Create account</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="content" style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap">
+      <div>© <span id="yr"></span> Cyrptonvest. All rights reserved.</div>
+      <div class="links">
+        <a href="/policies/terms.html">Terms</a>
+        <a href="/policies/privacy.html">Privacy</a>
+        <a href="/policies/risk.html">Risk</a>
+      </div>
     </div>
   </footer>
 
-  <!-- Floating WhatsApp (unchanged) -->
-  <div class="wa-float" style="position:fixed;right:16px;bottom:96px;z-index:50">
-    <a class="wa-btn" href="https://wa.me/254701017246?text=Hello%20Imarika!" aria-label="Chat on WhatsApp" style="height:58px;width:58px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:#25D366;color:#fff;box-shadow:0 12px 30px rgba(16,185,129,.35)">
-      <svg aria-hidden="true" viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
-        <path d="M20.52 3.48A11.94 11.94 0 0 0 12.06 0C5.52 0 .2 5.32.2 11.86c0 2.08.55 4.08 1.58 5.86L0 24l6.43-1.67a11.82 11.82 0 0 0 5.63 1.43h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.14-3.41-8.42zM12.06 21.3h-.01a9.5 9.5 0 0 1-4.85-1.31l-.35-.2-3.82.99 1.02-3.73-.23-.38a9.46 9.46 0 0 1-1.45-5.01c0-5.23 4.26-9.49 9.51-9.49 2.54 0 4.93 .99 6.72 2.78a9.43 9.43 0 0 1 2.78 6.71c0 5.23-4.26 9.49-9.52 9.49zm5.47-7.14c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.66 .15 s-.76 .97 -.92 1.17 c -.17 .2 -.34 .22 -.63 .07 -.3 -.15 -1.26 -.46 -2.4 -1.47 -.89 -.79 -1.49 -1.77 -1.66 -2.07 -.17 -.3 -.02 -.46 .13 -.61 .13 -.13 .3 -.34 .45 -.51 .15 -.17 .2 -.3 .3 -.5 .1 -.2 .05 -.37 -.02 -.53 -.07 -.15 -.66 -1.6 -.91 -2.18 -.24 -.58 -.48 -.5 -.66 -.51 l -.56 -.01 c -.2 0 -.53 .08 -.8 .37 -.27 .3 -1.05 1.02 -1.05 2.49 s 1.08 2.89 1.24 3.09 c .15 .2 2.12 3.22 5.14 4.52 .72 .31 1.28 .5 1.72 .64 .72 .23 1.38 .2 1.9 .12 .58 -.09 1.77 -.72 2.02 -1.41 .25 -.69 .25 -1.28 .17 -1.41 -.08 -.13 -.28 -.21 -.58 -.36 z"/>
-      </svg>
-    </a>
-  </div>
+  <!-- Floating WhatsApp button → +1 (603) 722-7904 -->
+  <a href="https://wa.me/16037227904" target="_blank" rel="noopener"
+     aria-label="Chat on WhatsApp +1 (603) 722-7904"
+     style="position:fixed;right:18px;bottom:18px;width:56px;height:56px;border-radius:50%;
+            display:grid;place-items:center;background:#25D366;color:#fff;
+            border:1px solid #1aa851;box-shadow:0 10px 24px rgba(0,0,0,.28);z-index:9999">
+    <svg aria-hidden="true" viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
+      <path d="M20.52 3.48A11.94 11.94 0 0 0 12.06 0C5.52 0 .2 5.32.2 11.86c0 2.08.55 4.08 1.58 5.86L0 24l6.43-1.67a11.82 11.82 0 0 0 5.63 1.43h.01c6.54 0 11.86-5.32 11.86-11.86 0-3.17-1.23-6.14-3.41-8.42zM12.06 21.3h-.01a9.5 9.5 0 0 1-4.85-1.31l-.35-.2-3.82.99 1.02-3.73-.23-.38a9.46 9.46 0 0 1-1.45-5.01c0-5.23 4.26-9.49 9.51-9.49 2.54 0 4.93 .99 6.72 2.78a9.43 9.43 0 0 1 2.78 6.71c0 5.23-4.26 9.49-9.52 9.49zm5.47-7.14c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.66 .15 s-.76 .97 -.92 1.17 c -.17 .2 -.34 .22 -.63 .07 -.3 -.15 -1.26 -.46 -2.4 -1.47 -.89 -.79 -1.49 -1.77 -1.66 -2.07 -.17 -.3 -.02 -.46 .13 -.61 .13 -.13 .3 -.34 .45 -.51 .15 -.17 .2 -.3 .3 -.5 .1 -.2 .05 -.37 -.02 -.53 -.07 -.15 -.66 -1.6 -.91 -2.18 -.24 -.58 -.48 -.5 -.66 -.51 l -.56 -.01 c -.2 0 -.53 .08 -.8 .37 -.27 .3 -1.05 1.02 -1.05 2.49 s 1.08 2.89 1.24 3.09 c .15 .2 2.12 3.22 5.14 4.52 .72 .31 1.28 .5 1.72 .64 .72 .23 1.38 .2 1.9 .12 .58 -.09 1.77 -.72 2.02 -1.41 .25 -.69 .25 -1.28 .17 -1.41 -.08 -.13 -.28 -.21 -.58 -.36 z"/>
+    </svg>
+  </a>
 
   <script>
-    // Footer year
-    const y = document.getElementById('y'); if (y) y.textContent = new Date().getFullYear();
+    // UTC clock
+    setInterval(()=>{ const d=new Date(); document.getElementById('clock').textContent=d.toISOString().slice(11,19); },1000);
+    document.getElementById('yr').textContent = new Date().getFullYear();
 
-    // ===== Helpers / Storage =====
-    const fmt = n => Number(n||0).toLocaleString('en-KE');
-    const phoneOk = p => /^0(7|1)\d{8}$/.test(String(p||'').trim());
-    const saveUser = u => localStorage.setItem('imarika_user', JSON.stringify(u));
-    const getUser  = () => { try { return JSON.parse(localStorage.getItem('imarika_user')||'null'); } catch { return null; } };
+    // Soft calculators (green profit)
+    function attachCalcSoft(inpId, outId, warnId, rate, min, max){
+      const amt=document.getElementById(inpId), out=document.getElementById(outId), warn=document.getElementById(warnId);
+      const update=()=>{
+        const raw=amt.value.trim(); const v=parseFloat(raw);
+        if(!raw){ warn.style.display='block'; warn.textContent='Enter an amount'; out.textContent='—'; return; }
+        if(isNaN(v)){ warn.style.display='block'; warn.textContent='Not a number'; out.textContent='—'; return; }
+        if(v<min){ warn.style.display='block'; warn.textContent=`Minimum is $${min}`; out.textContent='—'; return; }
+        if(v>max){ warn.style.display='block'; warn.textContent=`Maximum is $${max}`; out.textContent='—'; return; }
+        warn.style.display='none';
+        const profit=v*rate, total=v+profit;
+        out.innerHTML=`$${total.toFixed(2)} total (<span class="ok">$${profit.toFixed(2)}</span> profit)`;
+      };
+      amt.addEventListener('input', update); update();
+    }
+    attachCalcSoft('st-amt','st-out','st-warn',0.60,5,10);
+    attachCalcSoft('gr-amt','gr-out','gr-warn',1.40,50,400);
+    attachCalcSoft('pr-amt','pr-out','pr-warn',2.00,500,10000);
 
-    // legacy local (will be migrated once)
-    const TX_KEY='imarika_tx';
-    const LOAN_KEY='imarika_loan_tx';
-    const getLocalTx = () => { try { return JSON.parse(localStorage.getItem(TX_KEY)||'[]'); } catch { return []; } };
-    const clearLocalTx = () => localStorage.removeItem(TX_KEY);
-
-    // ===== UI refs =====
-    const dash = document.getElementById('dash'), who = document.getElementById('who');
-    const walletEl = document.getElementById('wallet'), sharesEl = document.getElementById('shares'), stamp = document.getElementById('stamp');
-    const txTable = document.getElementById('txTable').querySelector('tbody'), txCount = document.getElementById('txCount');
-
-    function showHeader(u){
-      const name = (u.full || u.full_name || '').trim();
-      const label = name ? `Acct: <span class="mono"><strong>${u.account}</strong></span> — <strong>${name}</strong>` :
-                           `Acct: <span class="mono"><strong>${u.account}</strong></span>`;
-      who.innerHTML = label;
-      walletEl.textContent = 'KES ' + fmt(u.wallet||0);
-      sharesEl.textContent = 'KES ' + fmt(u.invested||0);
-      stamp.textContent = 'Updated ' + new Date().toLocaleString();
-      dash.style.display='grid';
+    function prefill(id,min,max,rate){
+      const v = parseFloat((document.getElementById(id)?.value||'').trim());
+      if(!(v>=min && v<=max)) return;
+      try{ localStorage.setItem('cv_prefill_amount', String(v)); }catch{}
     }
 
-    // ===== Server helpers =====
-    let serverTx = [];
-
-    async function fetchServerTx(){
-      const u = getUser(); if(!u) return;
-      try{
-        const r = await fetch('/api/tx?phone=' + encodeURIComponent(u.phone));
-        const j = await r.json().catch(()=>({ok:false}));
-        if(j.ok){ serverTx = j.tx || []; renderTx(serverTx); }
-      }catch(_){}
-    }
-
-    async function fetchUser(){
-      const u = getUser(); if(!u) return;
-      try{
-        const r = await fetch('/api/user?phone=' + encodeURIComponent(u.phone));
-        const j = await r.json().catch(()=>({ok:false}));
-        if(j.ok && j.user){
-          // Merge fresh server fields into local user
-          saveUser({ ...u, ...j.user });
-          showHeader(getUser());
-          // Prefill eligibility shares if field exists
-          const es = document.getElementById('eligShares');
-          if (es && typeof j.user.invested !== 'undefined') {
-            es.value = Number(j.user.invested||0);
-            computeEligibility();
+    // Scroll-triggered reveal animations (robust on mobile)
+    (function(){
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const els = Array.from(document.querySelectorAll('.hero, .card'));
+      els.forEach((el, i) => {
+        el.classList.add('reveal');
+        const delay = (i % 6) * 0.06; // subtle stagger
+        el.style.setProperty('--reveal-delay', delay + 's');
+      });
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{
+          if(e.isIntersecting){
+            e.target.classList.add('in');
+            io.unobserve(e.target);
           }
-        }
-      }catch(_){}
-    }
-
-    async function createServerTx(row){
-      try{
-        const r = await fetch('/api/tx', {
-          method:'POST',
-          headers:{'content-type':'application/json'},
-          body: JSON.stringify(row)
         });
-        const j = await r.json().catch(()=>({ok:false}));
-        if(j.ok){
-          await fetchServerTx();
-          await fetchUser();
-        }
-        return !!j.ok;
-      }catch(e){
-        return false;
-      }
-    }
-
-    // ===== Migrate legacy localStorage → server (one-time) =====
-    async function migrateLegacy(){
-      const u = getUser(); if(!u) return;
-      const legacy = getLocalTx();
-      if(!legacy.length) return;
-
-      const items = legacy.map(t => ({
-        id: t.id || undefined,
-        type: t.type,
-        amount: Math.abs(Number(t.amount||0)),   // ensure positive
-        detail: t.detail || '',
-        status: t.status || (t.type==='Withdrawal' ? 'Requested' : 'Pending'),
-        ts: Number(t.ts || Date.now())
-      }));
-
-      try{
-        const r = await fetch('/api/tx/migrate', {
-          method:'POST',
-          headers:{'content-type':'application/json'},
-          body: JSON.stringify({ phone: u.phone, items })
-        });
-        const j = await r.json().catch(()=>({ok:false}));
-        if(j.ok){ clearLocalTx(); }
-      }catch(_){}
-    }
-
-    function renderTx(list){
-      txCount.textContent = list.length;
-      txTable.innerHTML = list.length ? list.map(t => {
-        const amt = Math.abs(Number(t.amount||0));
-        const signed = t.type === 'Withdrawal' ? `-${fmt(amt)}` : fmt(amt);
-        return `
-          <tr>
-            <td class="mono">${new Date(t.ts).toLocaleString()}</td>
-            <td>${t.type}</td>
-            <td>${t.detail||'-'}</td>
-            <td style="text-align:right">${signed}</td>
-            <td>${t.status||'-'}</td>
-          </tr>`;
-      }).join('') : `<tr><td colspan="5" class="muted" style="text-align:center">No transactions yet.</td></tr>`;
-    }
-
-    // ===== Withdraw (post first; no client-side deduction) =====
-    document.getElementById('showWithdraw').onclick = ()=>{
-      const c = document.getElementById('withdrawCard');
-      c.style.display = c.style.display==='none' ? 'block' : 'none';
-    };
-
-    document.getElementById('doWithdraw').onclick = async ()=>{
-      const p = wPhone.value.trim(), a = Number(wAmt.value||0), h = wHint;
-      const u = getUser() || {wallet:0};
-      if(!phoneOk(p)){ h.textContent='Enter a valid M-Pesa number.'; return; }
-      if(a<=0){ h.textContent='Enter amount.'; return; }
-      if(a > (u.wallet||0)){ h.textContent='Insufficient wallet balance.'; return; }
-
-      // Create server TX (no local wallet change)
-      const ok = await createServerTx({
-        phone: u.phone,
-        type: 'Withdrawal',
-        amount: Math.abs(a),
-        detail: `To ${p}`,
-        status: 'Pending'
-      });
-
-      if(ok){
-        h.textContent='Withdrawal request submitted.';
-        wAmt.value='';
-      }else{
-        h.textContent='Failed to submit. Try again.';
-      }
-    };
-
-    // ===== Loan Eligibility calculator (3× shares, min loan 20k, 10%/3mo) =====
-    const eligInput = document.getElementById('eligShares');
-    const eligOut   = document.getElementById('eligOut');
-
-    function computeEligibility(){
-      const shares = Number(eligInput.value || 0);
-      const eligible = Math.floor(shares * 3); // 3× shares
-      const MIN = 20000;
-      if (!shares){
-        eligOut.innerHTML = 'Enter your current Shares to see eligibility.';
-        return;
-      }
-      if (eligible < MIN){
-        const need = MIN - eligible;
-        eligOut.innerHTML = `Below minimum. Add <strong>KES ${fmt(need)}</strong> more in Shares to qualify for <span class="ok-strong">KES ${fmt(MIN)}</span>.`;
-        return;
-      }
-      const totalRepay = Math.round(eligible * 1.10); // +10% over 3 months
-      const monthly = Math.ceil(totalRepay / 3);
-      eligOut.innerHTML = `
-        Eligible amount: <span class="ok-strong">KES ${fmt(eligible)}</span><br>
-        Total repay (3 months @10%): <strong>KES ${fmt(totalRepay)}</strong><br>
-        Monthly installment (~3x): <strong>KES ${fmt(monthly)}</strong>
-      `;
-    }
-    if (eligInput){
-      eligInput.addEventListener('input', computeEligibility);
-    }
-
-    // ===== Quick Investment Calculator (unchanged) =====
-    const planEl = document.getElementById('plan');
-    const amtEl  = document.getElementById('amt');
-    const out    = document.getElementById('out');
-    const startBtn = document.getElementById('startBtn');
-
-    const PLANS = {
-      std:  { name:'Standard',  pct:30, min:1000,   max:70000 },
-      gold: { name:'Gold',      pct:50, min:70001,  max:140000 },
-      plat: { name:'Platinum',  pct:70, min:140001, max:Infinity }
-    };
-
-    function syncPlanUI(){
-      const p = PLANS[planEl.value];
-      amtEl.min = p.min;
-      if (isFinite(p.max)) { amtEl.max = p.max; } else { amtEl.removeAttribute('max'); }
-      amtEl.placeholder = `Enter amount (${p.min.toLocaleString('en-KE')}${isFinite(p.max)?' – '+p.max.toLocaleString('en-KE'): ' and above'})`;
-      out.textContent = '';
-    }
-    planEl.addEventListener('change', syncPlanUI);
-    syncPlanUI();
-
-    function validateAmount(){
-      const p = PLANS[planEl.value];
-      const amt = Number(amtEl.value || 0);
-      if(!amt || amt < p.min) { out.textContent = `Minimum for ${p.name} is KES ${p.min.toLocaleString('en-KE')}.`; return null; }
-      if(isFinite(p.max) && amt > p.max){ out.textContent = `Maximum for ${p.name} is KES ${p.max.toLocaleString('en-KE')}.`; return null; }
-      return {plan:p, amt};
-    }
-
-    document.getElementById('calc').onclick = ()=>{
-      const v = validateAmount(); if(!v) return;
-      const earn = Math.round(v.amt * v.plan.pct / 100);
-      out.innerHTML = `Projected earnings in 24h: <strong style="color:var(--ok)">KES ${fmt(earn)}</strong> • Total: <strong>KES ${fmt(v.amt+earn)}</strong>`;
-    };
-
-    startBtn.addEventListener('click', async (e)=>{
-      const v = validateAmount();
-      if(!v){ e.preventDefault(); return; }
-      const me = getUser();
-
-      await createServerTx({
-        phone: me.phone,
-        type: 'Deposit',
-        amount: v.amt,
-        detail: `Start ${v.plan.name} (${v.plan.pct}% in 24h) — user heading to /deposit.html`,
-        status: 'Pending'
-      });
-    });
-
-    // ===== Logout → Home =====
-    document.getElementById('logoutBtn').onclick = ()=>{
-      localStorage.removeItem('imarika_user');
-      window.location.href = '/';
-    };
-
-    // ===== Gate + boot =====
-    const user = getUser();
-    if(!user){
-      window.location.replace('/account.html');
-    } else {
-      showHeader(user);
-      // Prefill eligibility with local shares immediately
-      const es = document.getElementById('eligShares');
-      if (es) { es.value = Number(user.invested||0); computeEligibility(); }
-
-      migrateLegacy().then(async ()=>{
-        await fetchServerTx();
-        await fetchUser();
-      });
-      fetchServerTx();
-      fetchUser();
-    }
+      }, {threshold: 0.12, rootMargin: '0px 0px -40px 0px'});
+      els.forEach(el=>io.observe(el));
+    })();
   </script>
 </body>
 </html>
